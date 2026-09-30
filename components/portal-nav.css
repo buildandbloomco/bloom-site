@@ -1,3 +1,0 @@
-/* Keeps the portal menu on one line on laptop screens */
-@media (min-width: 1181px) { .topnav { gap: 14px; } .topnav a { letter-spacing: 0.08em; font-size: 0.86rem; } }
-@media (min-width: 1181px) { .topbar:has(.topnav) .brandmark span { display: none; } }

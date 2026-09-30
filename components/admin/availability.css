@@ -1,3 +1,0 @@
-.avail-row { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 12px; align-items: start; padding: 8px 0; border-top: 1px solid var(--line); }
-.avail-day { padding-top: 8px; }
-.avail-row input[type="time"] { width: 100%; font: 400 1.05rem var(--serif); color: var(--ink); background: var(--ivory); border: 1.5px solid var(--tan); border-radius: 10px; padding: 11px 14px; min-height: 48px; }
