@@ -1,0 +1,200 @@
+import type { Catalog, Service, Settings } from "./types";
+
+export const DEFAULT_SETTINGS: Settings = {
+  brandName: "Build & Bloom Collective",
+  tagline: "Organizational wellness and strategy, rooted in the Psychology of Care.",
+  email: "info@buildandbloomcollective.com",
+  phone: "",
+  website: "https://www.buildandbloomcollective.com",
+  instagram: "https://www.instagram.com/buildbloom.co",
+  location: "Atlanta, GA",
+  bookingUrl: "https://www.buildandbloomcollective.com/booking-calendar/brand-consulting",
+  bookingEmbed: false,
+  beforeYouBook: [
+    "Your retainer reserves your start date and begins the work.",
+    "Add-ons can be added at any point. We will update your plan and invoice together.",
+    "Have a question first? Book a free consult or email us anytime.",
+  ],
+  booking: {
+    enabled: true,
+    hours: [1, 2, 3, 4].map((day) => ({ day, start: "10:00", end: "16:00" })),
+    consultMinutes: 30,
+    sessionMinutes: 60,
+    bufferMinutes: 15,
+    noticeHours: 24,
+    daysAhead: 30,
+    maxPerDay: 0,
+    consultTitle: "Free 30-minute consult",
+    consultIntro: "A relaxed conversation about where you are, what you need, and whether we are a good fit. No prep required.",
+    meetingLink: "",
+    location: "Video call",
+    blockedDates: [],
+  },
+  defaultNextSteps: [
+    "Review your package and choose any add-ons",
+    "Book your kickoff call",
+    "Pay your retainer to reserve your start date",
+    "Kickoff: we map priorities, roles, and timeline together",
+    "Ongoing support, check-ins, and resources right here in your portal",
+  ],
+};
+
+// Added for the organizational wellness lane
+export const NEW_ORG_SERVICES: Service[] = [
+  {
+    id: "masterclass",
+    name: "The Sustained Healer Masterclass",
+    kind: "core",
+    description:
+      "A 3-part program for mental health and helping teams: the systemic roots of burnout, shared transition and decompression practices, and identity-conscious operations for leadership.",
+    price: null,
+    unit: "3-session team program",
+    active: true,
+    showOnSite: true,
+    lane: "orgs",
+  },
+  {
+    id: "org-assessment",
+    name: "Organizational Wellness Assessment",
+    kind: "core",
+    description:
+      "A structured review of workloads, scheduling, team support, and workflows to find where your operations are wearing your people down, with a prioritized action plan.",
+    price: null,
+    unit: "project",
+    active: true,
+    showOnSite: true,
+    lane: "orgs",
+  },
+];
+
+// Core services come straight from the website. Add-on prices are SAMPLES: change them in Admin > Services.
+export const DEFAULT_CATALOG: Catalog = {
+  services: [
+    {
+      id: "strategy",
+      name: "Strategy & Capacity Consulting",
+      kind: "core",
+      description:
+        "Assessment, strategic planning, offer design, and psychology-informed leadership support for entrepreneurs, small orgs, and community-based teams seeking clarity, structure, and sustainable growth.",
+      price: null,
+      unit: "project or 3 to 6 month retainer",
+      active: true,
+    },
+    {
+      id: "operations",
+      name: "Administrative Organizing & Operations",
+      kind: "core",
+      description:
+        "Systems, documentation, coordination, and ongoing admin support that treat infrastructure as care and reduce burnout.",
+      price: null,
+      unit: "monthly retainer",
+      active: true,
+    },
+    {
+      id: "workshops",
+      name: "Workshops & Trainings",
+      kind: "core",
+      description:
+        "Custom workshop design, trauma-aware facilitation, interactive learning, and practical tools for universities, nonprofits, collectives, and mission-driven orgs.",
+      price: null,
+      unit: "single session or multi-part series",
+      active: true,
+    },
+    {
+      id: "events",
+      name: "Event Planning & Experiential Design",
+      kind: "core",
+      description:
+        "From concept to day-of coordination and facilitation, events designed as intentional experiences, not just logistics.",
+      price: null,
+      unit: "project based",
+      active: true,
+    },
+    {
+      id: "integrated",
+      name: "Integrated Support Package",
+      kind: "core",
+      description:
+        "Blended support that weaves consulting, admin organizing, workshops, and event design into one cohesive plan, built collaboratively to meet your context.",
+      price: null,
+      unit: "custom",
+      active: true,
+    },
+    {
+      id: "addon-intensive",
+      name: "Strategy Intensive",
+      kind: "addon",
+      description: "A focused 90-minute working session on one priority: a launch, a pivot, or a stuck decision.",
+      price: 350,
+      unit: "per session",
+      active: true,
+    },
+    {
+      id: "addon-sops",
+      name: "SOP & Systems Documentation Build",
+      kind: "addon",
+      description: "We document how your work actually runs so it can grow past one person.",
+      price: 600,
+      unit: "one time",
+      active: true,
+    },
+    {
+      id: "addon-offer",
+      name: "Offer & Pricing Design Session",
+      kind: "addon",
+      description: "Clarify what you sell, who it serves, and how it is priced so it sustains you.",
+      price: 300,
+      unit: "per session",
+      active: true,
+    },
+    {
+      id: "addon-team-workshop",
+      name: "Team Workshop",
+      kind: "addon",
+      description: "A custom, trauma-aware training for your team on communication, conflict, or capacity.",
+      price: 750,
+      unit: "per session",
+      active: true,
+    },
+    {
+      id: "addon-checkin",
+      name: "Monthly Strategy Check-in",
+      kind: "addon",
+      description: "A standing monthly call to review progress, adjust priorities, and stay accountable.",
+      price: 200,
+      unit: "per month",
+      active: true,
+    },
+    {
+      id: "addon-dayof",
+      name: "Event Day-of Coordination",
+      kind: "addon",
+      description: "On-site coordination and facilitation so you can be present at your own event.",
+      price: 500,
+      unit: "per event",
+      active: true,
+    },
+  ],
+  library: [
+    {
+      id: "lib-shop",
+      title: "Digital Products Shop",
+      kind: "product",
+      description: "Templates, guides, and tools to build with intention. Replace with your individual products in Admin > Library.",
+      url: "https://www.buildandbloomcollective.com/category/all-products",
+      priceLabel: "Varies",
+      audience: "all",
+      active: true,
+    },
+    {
+      id: "lib-events",
+      title: "Upcoming Workshops & Events",
+      kind: "workshop",
+      description: "Community conversations, trainings, and gatherings. Replace with individual workshop links in Admin > Library.",
+      url: "https://www.buildandbloomcollective.com/event-list",
+      priceLabel: "See event",
+      audience: "all",
+      active: true,
+    },
+  ],
+};

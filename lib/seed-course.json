@@ -1,0 +1,804 @@
+{
+ "welcome": "Dear friend,\n\nWhatever you've already built, a business, a career, a steady foundation, is a reflection of intention, care, and choices made on purpose. As you look toward what's next, this guide is designed to help you do what you already do so well: grow something meaningful, one grounded decision at a time.\n\nA river is fed by many sources. Rain, springs, runoff, underground currents, all of it moving toward the same current. Multiple streams of income work the same way. No single source has to carry everything; each one feeds the whole, and together they create resilience, sustainability, and room to breathe.\n\nThis workbook will help you map out what new streams could look like: for the business or career you've already built, for the ideas that have been sitting in the back of your mind, and for anything you're building alongside an existing commitment, a day job, a household, another venture.\n\nThere's no pressure to have it all figured out by the last page. This is a living document, come back to it, write in pencil, change your mind. Clarity is built in layers, not all at once.\n\nWe translate values into structure, vision into action, and ideas into impact, and that's exactly what this workbook is built to help you do.\n\nRooted in you,\n\nBuild & Bloom Collective\n\nIf you're working through this with a business partner, co-founder, or spouse, we'd recommend sitting down together, even though some sections are written for individual reflection first. Multiple income streams work best when everyone involved understands the whole picture, not just their own piece of it.",
+ "pace": "one part per week, over six weeks, with a follow-up strategy session at the end.",
+ "affirmations": [
+  "Growth doesn't have to come at the cost of my peace.",
+  "I am allowed to build at a pace that honors my capacity.",
+  "My work is more sustainable when it's rooted in my values.",
+  "I don't need to have it all figured out to take the next right step.",
+  "Multiple streams of income are an act of care for my future self.",
+  "I trust the pace of my own becoming.",
+  "Structure is how I protect what I love.",
+  "My story and my strategy can coexist."
+ ],
+ "modules": [
+  {
+   "id": "m1",
+   "title": "Rooted in You",
+   "summary": "Your narrative of self, and a personal mission and vision that everything else grows from. Every mission statement, every offer, every income stream eventually traces back to a person. Before we plan the business, we're going to spend a little time with you, your story, what you value, and what you actually want your life to look like. The business mission and vision we build later will grow out of this, not the other way around.",
+   "lessons": [
+    {
+     "id": "l2",
+     "title": "Your Narrative of Self",
+     "intro": "Take your time with these. There's no performance here, just honesty.",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "",
+     "prompts": [
+      {
+       "id": "p3",
+       "type": "long",
+       "label": "What experiences, relationships, or turning points have most shaped who you are today?",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "p4",
+       "type": "long",
+       "label": "What do you value most, not what you think you should say, but what actually guides your decisions?",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "p5",
+       "type": "long",
+       "label": "What are you known for, in the best sense of that phrase? What do people come to you for?",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "p6",
+       "type": "long",
+       "label": "What's a strength you've had to grow into, or a struggle that shaped your voice?",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 25
+    },
+    {
+     "id": "l7",
+     "title": "Your Personal Mission Statement",
+     "intro": "A personal mission statement is about who you are and how you move through the world, it has nothing to do with your business yet.\n\nDraft your personal mission statement:",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "",
+     "prompts": [
+      {
+       "id": "p8",
+       "type": "long",
+       "label": "Complete the statement in your own words",
+       "help": "“I am someone who [core purpose/action], because I value [core value(s)], so that [the impact or feeling you want to create].”",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 10
+    },
+    {
+     "id": "l9",
+     "title": "Your Personal Vision Statement",
+     "intro": "If your personal mission is about purpose, your personal vision is about direction, who you're becoming, and what your life looks like when you're living in alignment.\n\nDraft your personal vision statement:",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "",
+     "prompts": [
+      {
+       "id": "p10",
+       "type": "long",
+       "label": "In 5–10 years, what does your day-to-day life actually look like, your time, your relationships, your environment?",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 10
+    },
+    {
+     "id": "l11",
+     "title": "From Personal to Business: Your Mission & Vision",
+     "intro": "Now we translate. Your business mission and vision should feel like a natural extension of the personal statements you just wrote, not a separate, more “professional” version of you.\n\nDraft your business mission statement:\n\nDraft your business vision statement (where this is headed, 1–5 years out):\n\nKeep these two sets of statements, personal and business, somewhere visible. When a decision gets complicated later in this workbook, this is the page to come back to.",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "",
+     "prompts": [
+      {
+       "id": "p12",
+       "type": "long",
+       "label": "Complete the statement in your own words",
+       "help": "“Because I am rooted in [personal mission], my business exists to [business mission], so that [the transformation you provide].”",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "p13",
+       "type": "long",
+       "label": "Where in your life have you let your business self and your personal self drift apart? What would it look like to let them share the same roots again?",
+       "help": "Journal: Rooted in You",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 15
+    }
+   ]
+  },
+  {
+   "id": "m14",
+   "title": "Where You Are Now",
+   "summary": "A clear-eyed snapshot of what you're already building and anything running alongside it. Before adding anything new, it helps to see clearly what's already here, what's working, what it costs in time and energy, and what capacity actually exists for something more.",
+   "lessons": [
+    {
+     "id": "l15",
+     "title": "Business Snapshot, Your Current Business",
+     "intro": "",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "",
+     "prompts": [
+      {
+       "id": "p16",
+       "type": "table",
+       "label": "Fill in the details",
+       "help": "",
+       "columns": [
+        "",
+        "Your answer"
+       ],
+       "rows": [
+        "",
+        "Business name",
+        "Founded / launched",
+        "Type of business",
+        "Brief description (1–2 sentences)",
+        "Who you serve",
+        "Core mission"
+       ],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "p17",
+       "type": "long",
+       "label": "What's working best about your business right now?",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "p18",
+       "type": "long",
+       "label": "What currently takes the most time or energy relative to what it earns?",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 20
+    },
+    {
+     "id": "l19",
+     "title": "Business Snapshot, Day Job & the Idea",
+     "intro": "If you're building alongside a full-time job (or another commitment), use this section to map it alongside the idea (or ideas) for what comes next, before any leap is made. If not applicable, skip ahead.",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "",
+     "prompts": [
+      {
+       "id": "p20",
+       "type": "table",
+       "label": "Fill in the details",
+       "help": "",
+       "columns": [
+        "",
+        "Your answer"
+       ],
+       "rows": [
+        "",
+        "Current role / field",
+        "What energizes you about it",
+        "What's missing or limiting",
+        "The idea you keep coming back to",
+        "Why this idea, why now"
+       ],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "p21",
+       "type": "long",
+       "label": "What skills from the 9-to-5 could transfer directly into this idea?",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "p22",
+       "type": "long",
+       "label": "What would need to be true for this to become real within the next 12 months?",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 20
+    },
+    {
+     "id": "l23",
+     "title": "Why Multiple Streams?",
+     "intro": "Take a moment individually, then compare notes.",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "“Each stream we build is rooted in the same purpose, it doesn't have to compete with what's already growing.”",
+     "prompts": [
+      {
+       "id": "p24",
+       "type": "long",
+       "label": "What does financial resilience look like for your household, concretely, not abstractly?",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "p25",
+       "type": "long",
+       "label": "What's the real reason you want more than one stream of income, freedom, security, creative outlet, legacy, something else?",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "p26",
+       "type": "long",
+       "label": "What does it feel like to look at your business (and your bandwidth) honestly, without editing it to sound more impressive than it is? Write freely.",
+       "help": "Journal: Where You Are Now",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 20
+    }
+   ]
+  },
+  {
+   "id": "m27",
+   "title": "Mapping Your Tributaries",
+   "summary": "Brainstorming and evaluating potential new income streams. A tributary is a smaller stream that feeds into a larger body of water. Some of the ideas below may feed directly into your existing business; others may be entirely their own current. Both are valid.",
+   "lessons": [
+    {
+     "id": "l28",
+     "title": "Streams Brainstorm",
+     "intro": "List every income idea you can think of, no editing yet. Include the obvious, the wild, and the half-formed.",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "",
+     "prompts": [
+      {
+       "id": "p29",
+       "type": "table",
+       "label": "Fill in the table",
+       "help": "",
+       "columns": [
+        "Idea",
+        "Lead (you / collaborator / shared)",
+        "Connected to existing business?"
+       ],
+       "rows": [],
+       "blankRows": 5,
+       "options": []
+      }
+     ],
+     "minutes": 10
+    },
+    {
+     "id": "l30",
+     "title": "Skills, Assets & Interests Inventory",
+     "intro": "New income streams are almost always built from what already exists, skills, relationships, licenses, equipment, and reputation you've already earned.",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "",
+     "prompts": [
+      {
+       "id": "p31",
+       "type": "short",
+       "label": "Licenses / certifications you hold",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "p32",
+       "type": "short",
+       "label": "Industry relationships or networks",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "p33",
+       "type": "short",
+       "label": "Equipment, property, or assets you could leverage",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "p34",
+       "type": "short",
+       "label": "Skills people already come to you for",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "p35",
+       "type": "short",
+       "label": "Content, audience, or reputation already built",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 30
+    },
+    {
+     "id": "l36",
+     "title": "The Stream Evaluation Matrix",
+     "intro": "Take your top 3–5 ideas from the brainstorm and score each on a scale of 1–5 (5 = most favorable).\n\nLower scores aren't disqualifying, they're information. An idea with high passion but low capital-readiness might just need a longer runway; one with high income potential but low alignment might not be worth the trade-off.",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "",
+     "prompts": [
+      {
+       "id": "p37",
+       "type": "table",
+       "label": "Fill in the table",
+       "help": "",
+       "columns": [
+        "Idea",
+        "Time to launch",
+        "Capital needed",
+        "Energy / passion",
+        "Income potential",
+        "Alignment with values"
+       ],
+       "rows": [],
+       "blankRows": 4,
+       "options": []
+      },
+      {
+       "id": "p38",
+       "type": "long",
+       "label": "Based on the matrix, which 1–2 streams deserve focus in the next 90 days?",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "p39",
+       "type": "long",
+       "label": "Which idea keeps showing up, even when you try to talk yourself out of it? What is it about that idea that won't let go, and what's actually stopping you from starting?",
+       "help": "Journal: Mapping Your Streams",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 20
+    }
+   ]
+  },
+  {
+   "id": "m40",
+   "title": "Brand & Positioning",
+   "summary": "Making sure each stream is clear about who it serves and why. Every new stream needs its own clarity, even if it lives under an existing brand. This section adapts our Brand Clarity framework for each new income stream you're moving forward with.",
+   "lessons": [
+    {
+     "id": "l41",
+     "title": "Brand Voice & Personality",
+     "intro": "",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "",
+     "prompts": [
+      {
+       "id": "p42",
+       "type": "short",
+       "label": "Describe this stream in 3 words",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "p43",
+       "type": "short",
+       "label": "How should people feel when they interact with it?",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "p44",
+       "type": "short",
+       "label": "What should it never sound or feel like?",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 20
+    },
+    {
+     "id": "l45",
+     "title": "Positioning Statement",
+     "intro": "Fill in the template below for each priority stream.\n\nStream 1 positioning statement:\n\nStream 2 positioning statement:",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "",
+     "prompts": [
+      {
+       "id": "p46",
+       "type": "long",
+       "label": "Complete the statement in your own words",
+       "help": "“We help [ideal client] with [core solution], so they can [transformation].”",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 10
+    },
+    {
+     "id": "l47",
+     "title": "Ideal Client / Customer Profile",
+     "intro": "",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "",
+     "prompts": [
+      {
+       "id": "p48",
+       "type": "table",
+       "label": "Fill in the table",
+       "help": "",
+       "columns": [
+        "Question",
+        "Stream 1",
+        "Stream 2"
+       ],
+       "rows": [
+        "Who are they?",
+        "What do they struggle with?",
+        "Where do you find them?",
+        "What makes you different?"
+       ],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "p49",
+       "type": "long",
+       "label": "Is there a version of this new stream that feels smaller or more “palatable” than what you actually want to build? What would it look like to stop shrinking it?",
+       "help": "Journal: Brand & Positioning",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 15
+    }
+   ]
+  },
+  {
+   "id": "m50",
+   "title": "Structure & Systems",
+   "summary": "The unglamorous but essential scaffolding that keeps growth sustainable. Structure is what turns a good idea into something sustainable, especially when it's being built alongside a full-time job and an existing business.",
+   "lessons": [
+    {
+     "id": "l51",
+     "title": "Business Structure Checklist",
+     "intro": "",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "",
+     "prompts": [
+      {
+       "id": "p52",
+       "type": "checklist",
+       "label": "Check off what you have in place",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": [
+        "Legal structure identified (LLC, sole prop, DBA under existing entity, etc.)",
+        "Separate business bank account / bookkeeping system",
+        "Contracts or agreements templated",
+        "Scheduling, payments, and email systems chosen",
+        "Clear boundary between 9-to-5 hours and new-venture hours",
+        "A designated “CEO day” or weekly planning block for the new stream"
+       ]
+      }
+     ],
+     "minutes": 10
+    },
+    {
+     "id": "l53",
+     "title": "Time & Capacity Audit",
+     "intro": "Be honest here. Overcommitting is the fastest way to burn out a promising idea.\n\nWhere do your available hours overlap? That overlap is your built-in strategy time, protect it.",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "",
+     "prompts": [
+      {
+       "id": "p54",
+       "type": "table",
+       "label": "Fill in the table",
+       "help": "",
+       "columns": [
+        "",
+        "Hours available per week",
+        "Best days / times",
+        "What has to give to make room"
+       ],
+       "rows": [
+        "You",
+        "Collaborator (optional)"
+       ],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "p55",
+       "type": "long",
+       "label": "Where have you resisted structure in the past because it felt too rigid or corporate? What would a version of structure that actually feels like care look like for you?",
+       "help": "Journal: Structure & Systems",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 15
+    }
+   ]
+  },
+  {
+   "id": "m56",
+   "title": "The Action Plan",
+   "summary": "Turning all of it into a 90-day roadmap with real, attainable steps. This is where the ideas become dates on a calendar.",
+   "lessons": [
+    {
+     "id": "l57",
+     "title": "One-Year Vision",
+     "intro": "",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "",
+     "prompts": [
+      {
+       "id": "p58",
+       "type": "long",
+       "label": "Where do you want each stream to be in 12 months?",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "p59",
+       "type": "long",
+       "label": "What does your day-to-day look like once this is running?",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 15
+    },
+    {
+     "id": "l60",
+     "title": "SMART Goals",
+     "intro": "Specific, Measurable, Achievable, Relevant, Time-based.",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "",
+     "prompts": [
+      {
+       "id": "p61",
+       "type": "table",
+       "label": "Fill in the table",
+       "help": "",
+       "columns": [
+        "Goal",
+        "Timeline",
+        "Why it matters"
+       ],
+       "rows": [],
+       "blankRows": 3,
+       "options": []
+      }
+     ],
+     "minutes": 10
+    },
+    {
+     "id": "l62",
+     "title": "The 90-Day Roadmap",
+     "intro": "",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "",
+     "prompts": [
+      {
+       "id": "p63",
+       "type": "table",
+       "label": "Fill in the table",
+       "help": "",
+       "columns": [
+        "Month",
+        "Focus",
+        "Key milestones"
+       ],
+       "rows": [
+        "Month 1",
+        "Month 2",
+        "Month 3"
+       ],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 10
+    },
+    {
+     "id": "l64",
+     "title": "Monthly Action Plan, Next 30 Days",
+     "intro": "",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "",
+     "prompts": [
+      {
+       "id": "p65",
+       "type": "table",
+       "label": "Fill in the table",
+       "help": "",
+       "columns": [
+        "Week",
+        "Focus area",
+        "Tasks",
+        "Notes"
+       ],
+       "rows": [
+        "1",
+        "2",
+        "3",
+        "4"
+       ],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "p66",
+       "type": "long",
+       "label": "If this plan works exactly as you hope, what does your life look like in a year, not just your business? Who are you when this is running well?",
+       "help": "Journal: The Action Plan",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 15
+    }
+   ]
+  },
+  {
+   "id": "m67",
+   "title": "Closing & Next Steps",
+   "summary": "Pull it together and plan your next step.",
+   "lessons": [
+    {
+     "id": "l68",
+     "title": "Closing Reflection",
+     "intro": "You don't have to build every stream at once. You don't even have to build them in the order you first imagined. What matters is that each one is rooted in the same intention that built what you already have, clarity, care, and a willingness to grow at a sustainable pace.",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "“What we're building has room for both of us, and for the life we actually want on the other side of it.”",
+     "prompts": [
+      {
+       "id": "p69",
+       "type": "long",
+       "label": "What does having multiple, sustainable streams of income actually feel like to you now?",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 10
+    }
+   ]
+  }
+ ],
+ "closing": ""
+}

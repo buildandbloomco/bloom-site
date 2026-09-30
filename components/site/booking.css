@@ -1,0 +1,19 @@
+/* Booking page (kept next to the component so it always ships with it) */
+.book-grid { display: grid; grid-template-columns: minmax(0, 400px) minmax(0, 1fr); gap: 24px; align-items: start; }
+.book-cal { position: sticky; top: 100px; }
+.book-month { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.book-wd { font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); text-align: center; padding-bottom: 4px; }
+.book-day { aspect-ratio: 1; border-radius: 999px; border: 1px solid transparent; background: transparent; color: var(--on-dark-3); font: inherit; font-size: 1rem; cursor: default; }
+.book-day.open { color: var(--espresso); background: var(--cream); border-color: var(--line); cursor: pointer; font-weight: 600; position: relative; }
+.book-day.open::after { content: ""; position: absolute; left: 50%; bottom: 14%; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: var(--gold); }
+.book-day.open:hover { border-color: var(--rust); }
+.book-day.on { background: var(--rust); color: var(--ivory); border-color: var(--rust); }
+.book-day.on::after { background: var(--ivory); }
+.book-day:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.book-times { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; }
+.book-summary { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; background: var(--cream); border-radius: 12px; border-left: 4px solid var(--gold); }
+@media (max-width: 860px) {
+  .book-grid { grid-template-columns: minmax(0, 1fr); }
+  .book-cal { position: static; }
+}
+input[type="tel"] { width: 100%; font: 400 1.05rem var(--serif); color: var(--ink); background: var(--ivory); border: 1.5px solid var(--tan); border-radius: 10px; padding: 11px 14px; min-height: 48px; }
