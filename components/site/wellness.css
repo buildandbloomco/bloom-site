@@ -1,0 +1,15 @@
+/* Wellness Library page */
+.wl-inside { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+.wl-num { font-family: var(--display); font-weight: 700; font-size: 1.6rem; color: var(--gold); line-height: 1; }
+.wl-plans { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: stretch; }
+.wl-plans > * { min-width: 0; }
+.wl-list { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.wl-list.light li { color: var(--on-dark-2); }
+.wl-list li::marker { color: var(--gold); }
+.wl-privacy { margin: 28px 0 0; padding: 16px 20px; border-left: 4px solid var(--gold); background: var(--ivory); border-radius: 10px; max-width: 760px; }
+.wl-toggle { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.wl-band { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 32px; align-items: center; }
+@media (max-width: 1000px) { .wl-inside { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 720px) {
+  .wl-inside, .wl-plans, .wl-toggle, .wl-band { grid-template-columns: minmax(0, 1fr); }
+}
