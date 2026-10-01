@@ -85,12 +85,12 @@ export default function PieceEditor({ initial, collections }: { initial: Library
         <p className="small muted" style={{ margin: 0 }}>{p.type === "soundscape" ? "Upload the soundscape video. It loops for members until they stop it." : "Optional. Add a video to any piece, like a welcome message or a guided practice."}</p>
         <Uploader accept="video/mp4,video/quicktime,video/webm" label={p.videoUrl ? "Replace video" : "Upload video (MP4)"} onDone={(url) => up((d) => { d.videoUrl = url; if (/^Upload .*Video section/.test(d.adminNote)) d.adminNote = ""; })} />
         <label>Or paste a link <span className="hint">a direct MP4 link</span><input type="url" placeholder="https://..." value={p.videoUrl ?? ""} onChange={(e) => up((d) => void (d.videoUrl = e.target.value))} /></label>
+        <label style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          <input type="checkbox" checked={p.videoLoop ?? p.type === "soundscape"} onChange={(e) => up((d) => void (d.videoLoop = e.target.checked))} />
+          Play on a loop <span className="hint">the video repeats until the member stops it</span>
+        </label>
         {p.videoUrl && (
           <>
-            <label style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-              <input type="checkbox" checked={p.videoLoop ?? p.type === "soundscape"} onChange={(e) => up((d) => void (d.videoLoop = e.target.checked))} />
-              Play on a loop <span className="hint">it repeats until the member stops it</span>
-            </label>
             <video controls preload="metadata" loop={p.videoLoop ?? p.type === "soundscape"} src={p.videoUrl} style={{ width: "100%", maxHeight: 360, borderRadius: 12, background: "#000" }} />
             <button type="button" className="linkbtn danger small" style={{ alignSelf: "flex-start" }} onClick={() => up((d) => void (d.videoUrl = ""))}>Remove video</button>
           </>
