@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { canSee, getAnswers, getDone, getPieceBySlug, libraryViewer, listPieces } from "@/lib/library";
 import { typeLabel } from "@/lib/wellness-types";
-import { playableAudio } from "@/lib/wellness-sanitize";
+import { loops, playableAudio } from "@/lib/wellness-sanitize";
 import Md from "@/components/library/Md";
 import PieceActions from "@/components/library/PieceActions";
 import PrintButton from "@/components/course/PrintButton";
@@ -36,8 +36,8 @@ export default async function PiecePage({ params }: { params: Promise<{ slug: st
 
         {piece.videoUrl ? (
           <div className="lib-video no-print">
-            <video controls playsInline preload="metadata" loop={piece.type === "soundscape"} src={piece.videoUrl} />
-            {piece.type === "soundscape" && <p className="tiny muted" style={{ margin: "8px 0 0" }}>This plays on a loop. Stop it whenever you&rsquo;re ready.</p>}
+            <video controls playsInline preload="metadata" loop={loops(piece)} src={piece.videoUrl} />
+            {loops(piece) && <p className="tiny muted" style={{ margin: "8px 0 0" }}>This plays on a loop. Stop it whenever you&rsquo;re ready.</p>}
           </div>
         ) : piece.type === "soundscape" ? (
           <p className="lib-note no-print">The video for this soundscape is on its way.</p>

@@ -9,6 +9,9 @@ const TYPES: PieceType[] = ["audio", "soundscape", "journal", "tool", "reading",
 const PTYPES: PromptType[] = ["short", "long", "checklist", "scale"];
 const rid = () => Math.random().toString(36).slice(2, 10);
 
+/** Whether a piece's video plays on repeat */
+export const loops = (p: Pick<LibraryPiece, "videoLoop" | "type">) => p.videoLoop ?? p.type === "soundscape";
+
 export function sanitizePiece(b: Partial<LibraryPiece>, saved: LibraryPiece): LibraryPiece {
   return {
     ...saved,
@@ -31,6 +34,7 @@ export function sanitizePiece(b: Partial<LibraryPiece>, saved: LibraryPiece): Li
     })).filter((p) => p.label.trim()),
     audioUrl: /^https?:\/\//.test(str(b.audioUrl)) ? str(b.audioUrl, 1000) : "",
     videoUrl: /^https?:\/\//.test(str(b.videoUrl)) ? str(b.videoUrl, 1000) : "",
+    videoLoop: typeof b.videoLoop === "boolean" ? b.videoLoop : saved.videoLoop,
     adminNote: str(b.adminNote, 1000),
     teamOnly: !!b.teamOnly,
     collection: str(b.collection, 120) || "Starter library",

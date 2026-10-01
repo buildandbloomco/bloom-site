@@ -29,8 +29,10 @@ export interface LibraryPiece {
   prompts: Prompt[];
   /** Audio: a link to the recording (MP3, Dropbox, or Google Drive share link) */
   audioUrl: string;
-  /** Video: an uploaded file or a link (MP4). Soundscapes loop automatically. */
+  /** Video: an uploaded file or a link (MP4). Loops when videoLoop is on. */
   videoUrl: string;
+  /** Play the video on repeat. When not set, soundscapes loop and other pieces don't. */
+  videoLoop?: boolean;
   /** Admin-only note, e.g. "Script approved, waiting on narrator" */
   adminNote: string;
   teamOnly: boolean;
