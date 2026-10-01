@@ -1,5 +1,7 @@
 "use client";
 
+import "./content.css";
+
 import { useMemo, useState } from "react";
 import type { CalItem } from "@/lib/calendar";
 import { shortDate } from "@/lib/format";
@@ -14,6 +16,7 @@ const KIND: Record<CalItem["kind"], { label: string; cls: string }> = {
   deliverable: { label: "Deliverable due", cls: "k-due" },
   workshop: { label: "Workshop", cls: "k-class" },
   payment: { label: "Payment due", cls: "k-pay" },
+  content: { label: "Content", cls: "k-content" },
 };
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const pad = (n: number) => String(n).padStart(2, "0");

@@ -10,6 +10,7 @@ const LINKS = [
   ["/admin/wellness", "Wellness Library"],
   ["/admin/waitlist", "Waitlist"],
   ["/admin/calendar", "Calendar"],
+  ["/admin/content", "Content"],
   ["/admin/services", "Services & add-ons"],
   ["/admin/library", "Library"],
   ["/admin/settings", "Settings"],

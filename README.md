@@ -146,6 +146,18 @@ Everyone gets a confirmation page with **Add to my calendar**, **Reschedule**, a
 
 Bookings don't read your Google Calendar. Subscribe to this calendar on your phone (below) so bookings show up there, and add personal commitments here to keep those times closed.
 
+## Content calendar
+
+**Admin > Content** holds your Instagram and YouTube plan. It comes loaded with six weeks of posts starting Monday, October 5, 2026, plus a set of unscheduled ideas. Every post already has its graphic or video, caption, hashtags and keywords.
+
+- **Schedule** lists posts week by week. **Month** shows them on a calendar. **Ideas** holds posts with no date yet.
+- Open a post to **Save** its files and **Copy** its caption. On a phone, tap Save, or open the file and press and hold it to save it to Photos.
+- Change a post's status to **Posted** once it's up. Posted posts drop off your main Calendar.
+- **Move dates** shifts every post that isn't posted yet, from a date onward. Use it if a launch moves or you take a week off.
+- **+ New post** adds your own. Upload images or videos right on the post (this uses the same Blob storage as the Wellness Library).
+- Dashed posts are **face content** slots, saved for you on camera.
+- The graphics and reels that come with the site live in `public/content`.
+
 ## Wellness Library
 **Admin > Wellness Library** holds every piece: guided audio, soundscapes, journaling, coping tools, readings, and team tools.
 

@@ -2,6 +2,8 @@ import "server-only";
 import { listAppointments, listCourses, listEnrollments } from "./courses";
 import { getCatalog, listClients } from "./data";
 import { nextPayment } from "./course-logic";
+import { listContent } from "./content";
+import { contentTypeLabel } from "./content-types";
 
 export interface CalItem {
   id: string;
@@ -9,7 +11,7 @@ export interface CalItem {
   start: string;
   end: string;
   title: string;
-  kind: "session" | "consult" | "event" | "other" | "class" | "milestone" | "deliverable" | "workshop" | "payment";
+  kind: "session" | "consult" | "event" | "other" | "class" | "milestone" | "deliverable" | "workshop" | "payment" | "content";
   detail: string;
   href: string;
   apptId: string;
@@ -38,6 +40,10 @@ export async function calendarItems(): Promise<CalItem[]> {
     const np = nextPayment(e);
     const c = courses.find((x) => x.id === e.courseId);
     if (np && c) items.push({ id: `p-${e.id}`, date: np.due, start: "", end: "", title: `${e.learnerName}: payment due`, kind: "payment", detail: `${c.title} · $${np.amount}`, href: `/admin/courses/${c.id}/learners/${e.id}`, apptId: "", link: "" });
+  }
+  for (const p of await listContent()) {
+    if (!p.date || p.status === "posted") continue;
+    items.push({ id: `c-${p.id}`, date: p.date, start: "", end: "", title: /^(youtube|face slot|story|reel)/i.test(p.title) ? p.title : `${contentTypeLabel(p.type)}: ${p.title}`, kind: "content", detail: p.type === "face" ? "Face content: plan and record" : `Status: ${p.status}`, href: `/admin/content/${p.id}`, apptId: "", link: "" });
   }
   return items.filter((i) => i.date).sort((a, b) => (a.date + (a.start || "00")).localeCompare(b.date + (b.start || "00")));
 }
