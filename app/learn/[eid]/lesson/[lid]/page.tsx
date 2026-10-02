@@ -18,6 +18,9 @@ export default async function LessonPage({ params }: { params: Promise<{ eid: st
   const next = list[idx + 1]?.lesson;
   const prog = courseProgress(course, e);
   const video = l.videoUrl ? embedUrl(l.videoUrl) : null;
+  // A file you uploaded (or any direct media link) plays right on the page
+  const file = l.videoUrl.split("?")[0].toLowerCase();
+  const direct = video ? null : /\.(mp4|webm|mov|m4v)$/.test(file) ? "video" : /\.(mp3|m4a|wav|aac)$/.test(file) ? "audio" : null;
   const inModule = course.modules[moduleIndex].lessons.findIndex((x) => x.id === l.id) + 1;
   const answers: Record<string, unknown> = {};
   for (const p of l.prompts) if (e.answers[p.id] !== undefined) answers[p.id] = e.answers[p.id];
@@ -43,7 +46,9 @@ export default async function LessonPage({ params }: { params: Promise<{ eid: st
             <iframe src={video} title={l.title} allow="autoplay; fullscreen" allowFullScreen style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: 0 }} />
           </div>
         )}
-        {l.videoUrl && !video && <a className="btn btn-dark" href={l.videoUrl} target="_blank" rel="noopener noreferrer">Watch the lesson video</a>}
+        {direct === "video" && <video controls playsInline preload="metadata" src={l.videoUrl} style={{ width: "100%", borderRadius: 14, background: "var(--espresso)" }} />}
+        {direct === "audio" && <audio controls preload="metadata" src={l.videoUrl} style={{ width: "100%" }} />}
+        {l.videoUrl && !video && !direct && <a className="btn btn-dark" href={l.videoUrl} target="_blank" rel="noopener noreferrer">Watch the lesson video</a>}
         {l.intro && <div style={{ fontSize: "1.12rem" }}><RichText text={l.intro} /></div>}
         {l.callout && (
           <blockquote className="dark-card" style={{ margin: 0 }}>

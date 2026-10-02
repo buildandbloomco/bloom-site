@@ -19,7 +19,7 @@ export default function Guides() {
         <div className="wrap grid-2" style={{ gap: 24 }}>
           {guides.map((g) => (
             <div className="panel" key={g.slug}>
-              <span className="tag gold" style={{ alignSelf: "flex-start" }}>{guidePrice(g)} · {g.pages} pages</span>
+              <span className="tag gold" style={{ alignSelf: "flex-start" }}>{guidePrice(g)} · {g.pages} page{g.pages === 1 ? "" : "s"}</span>
               <h3>{g.title}</h3>
               <p style={{ margin: 0 }}>{g.tagline}</p>
               <Link className="btn btn-primary" style={{ alignSelf: "flex-start" }} href={`/guides/${g.slug}`}>Get the guide</Link>

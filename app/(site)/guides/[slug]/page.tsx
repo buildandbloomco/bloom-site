@@ -42,7 +42,7 @@ export default async function GuidePage({ params, searchParams }: { params: Prom
     <>
       <section className="page-hero">
         <div className="wrap">
-          <p className="eyebrow">{guidePrice(g)} guidebook · {g.pages} pages</p>
+          <p className="eyebrow">{guidePrice(g)} guidebook · {g.pages} page{g.pages === 1 ? "" : "s"}</p>
           <h1 style={{ marginTop: 16 }}>{g.title}</h1>
           <span className="rule" aria-hidden="true" />
           <p className="lede">{g.tagline}</p>
