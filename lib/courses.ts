@@ -4,6 +4,7 @@ import { newId } from "./crypto";
 import { slugify } from "./data";
 import type { Appointment, Course, Enrollment } from "./course-types";
 import seed from "./seed-course.json";
+import conflict from "./seed-conflict.json";
 
 const K = { courses: "bb:courses", enrollments: "bb:enrollments", appts: "bb:appts", mig: "bb:mig:courses1" };
 
@@ -135,13 +136,59 @@ function ensureCourseSeed() {
   return seeding;
 }
 
+/** One-time: add the conflict workshop as a draft course */
+let conflictSeeding: Promise<void> | null = null;
+function ensureConflictSeed() {
+  if (!conflictSeeding) {
+    conflictSeeding = (async () => {
+      if (await kv().get("bb:mig:course-conflict1")) return;
+      const c = blankCourse(conflict.title);
+      c.slug = "hard-conversations";
+      c.subtitle = conflict.subtitle;
+      c.description = conflict.description;
+      c.format = "hybrid";
+      c.status = "draft";
+      c.showOnSite = false;
+      c.pace = conflict.pace;
+      c.welcome = conflict.welcome;
+      c.affirmations = conflict.affirmations;
+      c.closing = conflict.closing;
+      c.modules = conflict.modules as Course["modules"];
+      c.packages = [
+        {
+          id: "participant",
+          name: "Workshop participant",
+          description: "For team members whose organization booked the workshop. The workbook is included.",
+          includes: ["The full online workbook", "Your answers saved as you go", "Printable workbook", "Certificate of completion"],
+          price: 0,
+          monthly: false,
+          sessions: 0,
+          sessionMinutes: 0,
+          format: "Live workshop + workbook",
+          planIds: [],
+          featured: true,
+          active: true,
+        },
+      ];
+      await kv().hset(K.courses, c.id, c);
+      await kv().set("bb:mig:course-conflict1", true);
+    })().catch((e) => {
+      conflictSeeding = null;
+      throw e;
+    });
+  }
+  return conflictSeeding;
+}
+
 export async function listCourses(): Promise<Course[]> {
   await ensureCourseSeed();
+  await ensureConflictSeed();
   const all = await kv().hgetall<Course>(K.courses);
   return Object.values(all).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }
 export async function getCourse(id: string): Promise<Course | null> {
   await ensureCourseSeed();
+  await ensureConflictSeed();
   return kv().hget<Course>(K.courses, id);
 }
 export async function getCourseBySlug(slug: string): Promise<Course | null> {

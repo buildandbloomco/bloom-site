@@ -2,6 +2,7 @@ import "server-only";
 import { kv } from "./kv";
 import { newId } from "./crypto";
 import seed from "./content-seed.json";
+import seed2 from "./content-seed-2.json";
 import { CONTENT_STATUSES, CONTENT_TYPES, type ContentMedia, type ContentPost } from "./content-types";
 
 const K = { posts: "bb:content:posts", mig: "bb:mig:content1" };
@@ -18,7 +19,17 @@ function ensureSeed() {
         await kv().hset(K.posts, p.id, p);
       }
       await kv().set(K.mig, now);
-    })().catch((e) => {
+    })().then(async () => {
+      // Second batch: the Hard Conversations workshop campaign. Face slots start as ideas; everything else comes with its graphics.
+      if (await kv().get("bb:mig:content2")) return;
+      const now = new Date().toISOString();
+      for (const s of seed2 as Omit<ContentPost, "id" | "status" | "createdAt" | "updatedAt">[]) {
+        const p: ContentPost = { ...s, id: newId(), status: s.type === "face" ? "idea" : s.media.length ? "ready" : "draft", createdAt: now, updatedAt: now } as ContentPost;
+        delete (p as unknown as Record<string, unknown>).key;
+        await kv().hset(K.posts, p.id, p);
+      }
+      await kv().set("bb:mig:content2", now);
+    }).catch((e) => {
       seeding = null;
       throw e;
     });

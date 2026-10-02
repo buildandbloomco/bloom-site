@@ -222,3 +222,11 @@ Role breakdowns are hidden for any group with fewer than 3 responses. Team comme
 - "Use as their proposal" copies the services, line items, and total to the client page. Review it there before you send their code.
 - "Show this starting price in the summary they see" adds it to the consult summary in their portal.
 - The client type on the client page decides which a la carte prices they see and pay in their portal.
+
+## The conflict workshop (Hard Conversations, Handled with Care)
+
+- It loads once as a **draft course** in Admin > Courses. It has 8 parts and 18 lessons, each with teaching text, a room activity, a solo version, discussion questions, and workbook exercises.
+- To give someone the workbook: open the course, go to Learners, and enroll them with the "Workshop participant" package (free). If they are a client, it shows in their portal under Courses. Their answers save as they type, and you can read them from the learner's page.
+- To sell it on its own, add a priced package and set the course to Published and "Show on website".
+- **Media on any lesson:** paste a YouTube, Vimeo, Loom, or Drive link, or use "Upload a video or audio file". Uploaded files play right on the lesson page. "Upload a download" attaches a PDF or image.
+- The workshop's Instagram campaign (12 posts, November 16 to December 4) loads into Admin > Content with its graphics attached. The free Hard Conversation Planner is at `/guides/conversation-planner`.

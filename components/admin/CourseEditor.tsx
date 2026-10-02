@@ -1,5 +1,6 @@
 "use client";
 
+import Uploader from "./Uploader";
 import { useEffect, useState } from "react";
 import type { Course, Lesson, Prompt, PromptType } from "@/lib/course-types";
 import { FORMAT_LABEL, allLessons } from "@/lib/course-logic";
@@ -223,9 +224,13 @@ function LessonEditor({ l, mi, li, update }: { l: Lesson; mi: number; li: number
           <textarea style={{ minHeight: 140 }} value={l.intro} onChange={(e) => set((x) => void (x.intro = e.target.value))} />
         </label>
         <div className="grid-3" style={{ gap: 12 }}>
-          <label>Video link <span className="hint">YouTube, Vimeo, Loom, Drive</span><input type="url" value={l.videoUrl} onChange={(e) => set((x) => void (x.videoUrl = e.target.value.trim()))} /></label>
+          <label>Video or audio link <span className="hint">YouTube, Vimeo, Loom, Drive, or upload below</span><input type="url" value={l.videoUrl} onChange={(e) => set((x) => void (x.videoUrl = e.target.value.trim()))} /></label>
           <label>Download link<input type="url" placeholder="https://" value={l.resourceUrl} onChange={(e) => set((x) => void (x.resourceUrl = e.target.value.trim()))} /></label>
           <label>Download label<input type="text" placeholder="Worksheet PDF" value={l.resourceLabel} onChange={(e) => set((x) => void (x.resourceLabel = e.target.value))} /></label>
+        </div>
+        <div className="row" style={{ gap: 16, flexWrap: "wrap", alignItems: "flex-start" }}>
+          <Uploader accept="video/mp4,video/quicktime,video/webm,audio/mpeg,audio/mp4,audio/x-m4a,audio/wav" label="Upload a video or audio file" folder="courses" onDone={(url) => set((x) => void (x.videoUrl = url))} />
+          <Uploader accept="application/pdf,image/png,image/jpeg" label="Upload a download (PDF or image)" folder="courses" onDone={(url) => set((x) => { x.resourceUrl = url; if (!x.resourceLabel) x.resourceLabel = "Download"; })} />
         </div>
         <label>Highlighted quote or affirmation<input type="text" value={l.callout} onChange={(e) => set((x) => void (x.callout = e.target.value))} /></label>
         <strong className="small">Workbook questions</strong>

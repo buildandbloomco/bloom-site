@@ -53,6 +53,24 @@ export const GUIDES: Guide[] = [
     lane: "orgs",
     public: true,
   },
+  {
+    slug: "conversation-planner",
+    title: "The Hard Conversation Planner",
+    tagline: "One page for the conversation you have been putting off. Fill it in before you walk in.",
+    inside: [
+      "The issue in one neutral sentence",
+      "What you need, and what they likely need",
+      "Your opening line",
+      "A question to check your story",
+      "What you will do if it gets heated",
+      "Your walk-away point",
+    ],
+    file: "/guides/Hard-Conversation-Planner.pdf",
+    pages: 1,
+    price: 0,
+    lane: "orgs",
+    public: true,
+  },
 ];
 
 export const getGuide = (slug: string) => GUIDES.find((g) => g.slug === slug);

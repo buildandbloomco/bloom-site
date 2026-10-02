@@ -1,0 +1,1037 @@
+{
+ "title": "Hard Conversations, Handled with Care",
+ "subtitle": "A conflict skills workshop and workbook for teams that carry heavy work",
+ "description": "A half-day workshop and guided workbook built on the psychology of conflict. Across six parts you will learn to name the kind of conflict you are in, check the story you are telling about it, stop escalation, read the power in the room, choose your approach on purpose, and plan a conversation you have been putting off.",
+ "pace": "One half-day session together, or one part a week on your own",
+ "welcome": "Welcome.\n\nIf you are here, there is probably a conversation you have been avoiding, or a tension on your team that keeps coming back. That is normal. Most of us were never taught how to handle conflict. We picked it up by watching.\n\nThis workbook goes with the Hard Conversations, Handled with Care workshop. You can work through it live with your team or on your own. Either way, you will pick one real conflict and carry it through every part, so that you leave with a plan and not just notes.\n\nYour answers are private to you and Build & Bloom. Take your time, and be honest.\n\nRooted in care,\n\nBuild & Bloom Collective",
+ "affirmations": [
+  "I can disagree and still belong here.",
+  "Conflict is information, and I can learn to read it.",
+  "I can pause before I respond.",
+  "The story I am telling is not the only one that fits.",
+  "I am allowed to say what I need.",
+  "Understanding someone is not the same as agreeing with them.",
+  "I can choose how I show up in hard moments."
+ ],
+ "closing": "You did real work here. Have the conversation while the plan is fresh, and be patient with yourself if it does not go perfectly. Skill comes from practice.",
+ "modules": [
+  {
+   "id": "cm5",
+   "title": "Start Here",
+   "summary": "How this workshop works, what to bring, and the one conflict you will work on throughout.",
+   "lessons": [
+    {
+     "id": "cl4",
+     "title": "Welcome, and how to use this workbook",
+     "intro": "Most of us were never taught how to handle conflict. We learned it by watching, and what we watched was often silence, blowups, or both.\n\nThis workshop treats conflict as a skill. Over six parts you will learn to read a conflict, stop it from escalating, and prepare for a conversation you have been putting off.\n\nHow it works:\n\n- Each part has one idea, one activity, and a few workbook questions.\n- Activities marked \"In the room\" are for a live session. \"On your own\" gives you a way to do the same activity by yourself.\n- Questions marked Discussion are for talking through with your group or your team. If you are working alone, write your answer instead.\n- Your answers save as you type. Only you and Build & Bloom can see them.\n\nOne ground rule. Pick a real work conflict to carry through the workbook, but choose one that is safe to practice on. If your situation involves harassment, discrimination, or a threat to anyone's safety, that belongs with HR, a supervisor, or a formal process. This workshop is education and skill practice. It does not replace those channels, and it is not therapy.",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "Conflict is not the problem. How we handle it decides whether it builds something or breaks it.",
+     "prompts": [
+      {
+       "id": "cq1",
+       "type": "long",
+       "label": "The conflict I will work on",
+       "help": "One or two sentences. Leave out names. Choose something current, real, and safe to practice on.",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq2",
+       "type": "scale",
+       "label": "How comfortable am I with conflict at work right now?",
+       "help": "1 means I avoid it at any cost. 10 means I can stay steady in a hard conversation.",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq3",
+       "type": "long",
+       "label": "What I want to be able to do by the end",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 8
+    }
+   ]
+  },
+  {
+   "id": "cm16",
+   "title": "Conflict Is Information",
+   "summary": "Why disagreement is not the enemy, and what a quick game about $100 shows about how people really respond to unfairness.",
+   "lessons": [
+    {
+     "id": "cl11",
+     "title": "Activity: The $100 Split",
+     "intro": "In the room:\n\n- Pair up. One of you is the Proposer and one is the Responder.\n- The Proposer has 60 seconds to offer a split of an imaginary $100.\n- The Responder decides right away. Accept, and you both keep your share. Reject, and you both get nothing.\n- No talking it over. One offer, one decision.\n\nOn your own: write down the split you would offer a coworker you barely know. Then write the lowest offer you would accept if you were on the other side.\n\nWhat usually happens: people turn down free money. In studies of this game, low offers are often rejected even though rejecting leaves both people with nothing. A sense of fairness regularly outweighs pure self-interest. That is the first lesson of this workshop. People in conflict are rarely fighting about the surface issue alone.",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "",
+     "prompts": [
+      {
+       "id": "cq6",
+       "type": "short",
+       "label": "The split I offered, or would offer",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq7",
+       "type": "short",
+       "label": "The lowest offer I would accept",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq8",
+       "type": "long",
+       "label": "Where did my sense of a fair split come from?",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq9",
+       "type": "long",
+       "label": "What would have changed if we could talk before deciding?",
+       "help": "Discussion",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq10",
+       "type": "long",
+       "label": "Think of a time someone at work rejected something that looked like a good deal for them. What might have felt unfair to them?",
+       "help": "Discussion",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 15
+    },
+    {
+     "id": "cl15",
+     "title": "Useful conflict and harmful conflict",
+     "intro": "For a long time, organizations treated all conflict as a failure. The goal was harmony, and disagreement was something to eliminate.\n\nThe current view is different. Too little conflict is its own problem. When nobody disagrees out loud, it usually means people have stopped saying what they think. Decisions get worse, and resentment goes underground.\n\nToo much conflict also does damage. When disagreement gets heated and personal, thinking shuts down.\n\nThe useful zone is in the middle: a moderate amount of disagreement that stays focused on the work. Research on teams finds this kind of conflict can sharpen decisions, but only where trust is high and the disagreement does not turn personal.\n\nFour levers decide which way a disagreement goes:\n\n- Focus. Is it about the issue (\"what is the best plan?\") or the person (\"what is wrong with you?\")\n- Intensity. Moderate disagreement sharpens thinking. Heated conflict stops it.\n- Climate. When people feel safe to push back, they do it honestly. When they feel judged, they defend.\n- Duration. Resolved, it builds trust. Left to sit, it hardens.",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "An absence of conflict is not peace. Sometimes it is people who have stopped trying.",
+     "prompts": [
+      {
+       "id": "cq12",
+       "type": "checklist",
+       "label": "In my conflict, which levers are off?",
+       "help": "Check all that apply.",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": [
+        "Focus: it has become about the person",
+        "Intensity: it gets too heated to think",
+        "Climate: people do not feel safe to speak",
+        "Duration: it has gone on too long",
+        "None yet, and I want to keep it that way"
+       ]
+      },
+      {
+       "id": "cq13",
+       "type": "long",
+       "label": "Describe a disagreement at work that made the result better. What kept it useful?",
+       "help": "Discussion",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq14",
+       "type": "long",
+       "label": "Where is my team too quiet? What is not being said?",
+       "help": "Discussion",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 12
+    }
+   ]
+  },
+  {
+   "id": "cm23",
+   "title": "What Kind of Conflict Is This?",
+   "summary": "You cannot fix a conflict you have misnamed. Learn the three types and start your conflict map.",
+   "lessons": [
+    {
+     "id": "cl19",
+     "title": "Task, relationship, and process conflict",
+     "intro": "The same team can be in three different kinds of conflict, and each one needs a different response.\n\n- Task conflict is disagreement about the work itself: the goal, the idea, the decision. Handled well, it can improve the result.\n- Relationship conflict is friction between people: tone, trust, history, personality. It drains energy and almost never improves the work.\n- Process conflict is disagreement about how the work gets done: who does what, by when, and who decides. It often looks like relationship conflict, because unclear roles feel personal.\n\nThe most common mistake is treating a process problem as a personality problem. \"She is difficult\" is often \"nobody decided who owns this.\"\n\nSix ways to keep task conflict from turning personal:\n\n- Catch it early. When \"I think the plan should\" becomes \"you always,\" name it and return to the issue.\n- Separate the idea from the person. Critique the argument, not whoever made it.\n- Protect safety. People defend when they feel judged. Respond to pushback with curiosity.\n- Moderate the intensity. Time-box a heated debate, take a break, or switch to written input.\n- Resolve it before it festers. Even \"we will revisit this Thursday\" closes the loop.\n- Use a structure. Agree on the criteria for the decision before you argue about the options.",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "",
+     "prompts": [
+      {
+       "id": "cq17",
+       "type": "table",
+       "label": "Sort these into task, relationship, or process",
+       "help": "Write T, R, or P and one line on why.",
+       "columns": [
+        "Situation",
+        "Type",
+        "Why"
+       ],
+       "rows": [
+        "Two clinicians disagree about the best approach for a shared client",
+        "A coworker keeps making sarcastic comments in meetings",
+        "Nobody is sure who is supposed to send the weekly report",
+        "The team is split on whether to add evening hours",
+        "Two people stopped speaking after one was promoted",
+        "Requests come from three managers with three different deadlines"
+       ],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq18",
+       "type": "long",
+       "label": "Which type shows up most on my team, and what does it cost us?",
+       "help": "Discussion",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 12
+    },
+    {
+     "id": "cl22",
+     "title": "Start your conflict map",
+     "intro": "Your conflict map is a one-page picture of the conflict you chose in Start Here. You will add to it in every part.\n\nFill in the first section now. Be specific and stick to what you have seen and heard. Leave out your guesses about why the other person is doing it. You will come back to those in the next part.",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "\"She is difficult\" is often \"nobody decided who owns this.\"",
+     "prompts": [
+      {
+       "id": "cq20",
+       "type": "table",
+       "label": "My conflict map, part 1",
+       "help": "",
+       "columns": [
+        "",
+        "My notes"
+       ],
+       "rows": [
+        "What it is about, in one neutral sentence",
+        "Type: task, relationship, or process",
+        "Who is involved",
+        "What it is costing (time, energy, quality, trust)",
+        "Which lever is most off: focus, intensity, climate, or duration",
+        "What I have already tried"
+       ],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq21",
+       "type": "long",
+       "label": "If I had to name this as a process problem instead of a people problem, what would the process problem be?",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 12
+    }
+   ]
+  },
+  {
+   "id": "cm34",
+   "title": "The Story You Tell Yourself",
+   "summary": "Your explanation of someone's behavior is a bet. Learn how attribution works and practice the listening skill that checks it.",
+   "lessons": [
+    {
+     "id": "cl29",
+     "title": "Activity: The One-Line Story",
+     "intro": "In the room:\n\n- Pair up. You will both read the same short scenario.\n- The scenario: \"Your coworker hasn't replied to your email in two days.\"\n- Take 10 seconds and privately write one sentence explaining why.\n- Read your sentences aloud to each other and notice what each of you assumed.\n\nOn your own: write your one sentence now, before you read further.\n\nWhat just happened: you made an attribution. An attribution is the explanation we assign to someone's behavior, and it shapes what we do next.\n\nTwo habits bend our explanations:\n\n- The fundamental attribution error. We explain other people's behavior by their character (\"she is inconsiderate\") and our own by our situation (\"I was slammed\").\n- Self-serving bias. We credit our successes to skill and blame our failures on circumstances.\n\nNeither habit makes you a bad person. They are shortcuts every mind takes. In a conflict, they mean the story you are telling about the other person is probably harsher than the facts support.",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "Every time you explain someone's behavior, you are making a bet about why they did it.",
+     "prompts": [
+      {
+       "id": "cq24",
+       "type": "short",
+       "label": "My one-line explanation for the unanswered email",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq25",
+       "type": "checklist",
+       "label": "My explanation blamed",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": [
+        "Their character or attitude",
+        "Their situation or workload",
+        "Me, or something I did",
+        "I honestly did not know"
+       ]
+      },
+      {
+       "id": "cq26",
+       "type": "long",
+       "label": "Give three other explanations that fit the same facts",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq27",
+       "type": "table",
+       "label": "Back to my conflict: the story and the facts",
+       "help": "",
+       "columns": [
+        "",
+        "My notes"
+       ],
+       "rows": [
+        "What they did (only what a camera would record)",
+        "The story I have been telling about why",
+        "Two situational explanations I have not considered",
+        "What I could ask to find out"
+       ],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq28",
+       "type": "long",
+       "label": "When has someone made a wrong assumption about why you did something? What did it do to the relationship?",
+       "help": "Discussion",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 12
+    },
+    {
+     "id": "cl33",
+     "title": "Skill: Reflective listening",
+     "intro": "The fastest way to check your story is to listen in a way that lets the other person correct it. Reflective listening means hearing a message and saying it back, so the speaker can confirm or fix what you understood.\n\nIt has four levels. Each one goes a little deeper.\n\n- Affirm. Small signals that you are with them. \"I hear you.\" \"Go on.\"\n- Paraphrase. Say back what they said in your own words. \"So the deadline moved twice and nobody told you.\"\n- Clarify. Check what was implied but not said. \"It sounds like you are not sure whose call that was.\"\n- Reflect feelings. Name the feeling underneath. \"That sounds frustrating, especially after the extra hours you put in.\"\n\nReflecting is not agreeing. You can understand someone completely and still disagree with them.\n\nIn the room: in pairs, one person describes their conflict for two minutes. The other may only reflect, using the four levels. No advice, no fixing, no \"that happened to me too.\" Then swap.\n\nOn your own: write what the other person in your conflict would say if they had two uninterrupted minutes. Then write a reflection for each level.",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "Reflecting is not agreeing. You can understand someone completely and still disagree.",
+     "prompts": [
+      {
+       "id": "cq30",
+       "type": "table",
+       "label": "Practice the four levels",
+       "help": "Respond to this statement: \"I am the only one who ever covers when someone calls out, and nobody even notices.\"",
+       "columns": [
+        "Level",
+        "What I would say"
+       ],
+       "rows": [
+        "Affirm",
+        "Paraphrase",
+        "Clarify what is implied",
+        "Reflect the feeling"
+       ],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq31",
+       "type": "long",
+       "label": "What the other person in my conflict would say if they had two uninterrupted minutes",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq32",
+       "type": "long",
+       "label": "Which level is hardest for me, and what do I do instead (fix, defend, advise, go quiet)?",
+       "help": "Discussion",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 15
+    }
+   ]
+  },
+  {
+   "id": "cm54",
+   "title": "How Conflict Escalates, and How to Stop It",
+   "summary": "Escalation follows patterns. Learn to see them, stay regulated, and interrupt them.",
+   "lessons": [
+    {
+     "id": "cl38",
+     "title": "Activity: Match the Tone",
+     "intro": "One neutral line, four ways to say it.\n\nIn the room:\n\n- Pair up. Partner A says this line completely flat: \"You said you'd send that file yesterday.\"\n- Partner B picks one style and says the line back in it: defensive, contemptuous, stonewalling (silence and a flat stare), or assertive.\n- Partner A guesses the style.\n- Swap and repeat with a different style.\n\nOn your own: say the line out loud four ways. Notice what your face, shoulders, and voice do in each one.\n\nWhat you just felt is the difference between defensive and nondefensive communication.\n\n- Defensive communication attacks or withdraws. It is the style most likely to start a spiral.\n- Nondefensive communication is direct and assertive. It states a position without attacking the person.\n\nWhich one you reach for under pressure predicts a lot about how a disagreement unfolds.",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "",
+     "prompts": [
+      {
+       "id": "cq35",
+       "type": "checklist",
+       "label": "Under pressure, I tend to",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": [
+        "Push harder and raise my voice",
+        "Get sarcastic",
+        "Go quiet and shut down",
+        "Over-explain and defend",
+        "Agree out loud and resent it later",
+        "Stay direct and steady"
+       ]
+      },
+      {
+       "id": "cq36",
+       "type": "long",
+       "label": "Which tone was hardest to receive, and what did it make me want to do?",
+       "help": "Discussion",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq37",
+       "type": "long",
+       "label": "Which tone would I want used with me at work? Do I use it with others?",
+       "help": "Discussion",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 12
+    },
+    {
+     "id": "cl42",
+     "title": "Three patterns that escalate conflict",
+     "intro": "Most escalation is one of three patterns.\n\n- Demand-withdraw. One person pushes to talk or change something, and the other retreats. The more one pushes, the more the other pulls back, and the harder the first one pushes.\n- Contempt. Sarcasm, mockery, eye-rolling, a tone of superiority. In John Gottman's research on couples, contempt was the strongest predictor of a relationship ending. Workplaces are not marriages, but the mechanism is the same: contempt tells the other person they are beneath you, and nothing productive follows that.\n- Stonewalling. Shutting down completely and refusing to respond. It usually comes from feeling overwhelmed, though it looks like not caring.\n\nTwo tools interrupt all three.\n\nActive listening. Use the four levels in the middle of the disagreement. It slows the pace and shows the other person they were heard.\n\nReframing. Restate an accusation in neutral language about what you need.\n\n- Escalating: \"You never listen to me.\"\n- Reframed: \"I don't feel like I'm getting through when we talk about this. Can we start over?\"",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "Contempt tells the other person they are beneath you. Nothing productive follows that.",
+     "prompts": [
+      {
+       "id": "cq39",
+       "type": "table",
+       "label": "Reframe these",
+       "help": "Rewrite each line in neutral language about what you need.",
+       "columns": [
+        "Escalating",
+        "Reframed"
+       ],
+       "rows": [
+        "\"You always dump your work on me.\"",
+        "\"Nobody here respects my time.\"",
+        "\"If you had read my email, you would know.\"",
+        "\"Fine. Do whatever you want.\""
+       ],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq40",
+       "type": "checklist",
+       "label": "Which patterns show up in my conflict?",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": [
+        "Demand-withdraw, and I am the one pushing",
+        "Demand-withdraw, and I am the one pulling back",
+        "Contempt from me",
+        "Contempt toward me",
+        "Stonewalling by me",
+        "Stonewalling by them"
+       ]
+      },
+      {
+       "id": "cq41",
+       "type": "long",
+       "label": "Which pattern is most common on our team, and what usually sets it off?",
+       "help": "Discussion",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 12
+    },
+    {
+     "id": "cl47",
+     "title": "Staying regulated when it gets hot",
+     "intro": "You cannot use any of these skills if your body has already decided you are under attack. When you are flooded, your heart rate climbs, your thinking narrows, and you say the thing you regret.\n\nThree tools, in the order you need them:\n\n- Pause. Slow your breathing and buy time. \"Give me a minute to think about that\" is a complete sentence. If you are flooded, ask for a real break and name when you will come back. A break with a return time is regulation. A break without one is stonewalling.\n- Name it. Put the feeling into plain words, even silently: \"I am angry.\" \"I feel dismissed.\" Brain imaging research has found that labeling a feeling lowers the intensity of the emotional response.\n- Reappraise. Ask what else this could mean. Research on emotion regulation finds that rethinking a situation works better than suppressing the feeling, which tends to keep your body stressed while hiding it from view.\n\nFor people in helping work: if you spend your day absorbing other people's distress, you arrive at conflict with less capacity left. That is why small disagreements escalate fast on stretched teams. It is a workload issue as much as a communication issue.",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "A break with a return time is regulation. A break without one is stonewalling.",
+     "prompts": [
+      {
+       "id": "cq43",
+       "type": "long",
+       "label": "My early warning signs that I am getting flooded",
+       "help": "In my body, my voice, and my thoughts.",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq44",
+       "type": "short",
+       "label": "My sentence for buying time",
+       "help": "Example: \"I want to answer that well. Give me a minute.\"",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq45",
+       "type": "long",
+       "label": "Reappraise my conflict: what else could their behavior mean?",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq46",
+       "type": "long",
+       "label": "What drains our team's capacity before conflict even starts?",
+       "help": "Discussion",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 10
+    },
+    {
+     "id": "cl53",
+     "title": "Activity: Escalation Autopsy",
+     "intro": "Read this exchange between two coworkers, Jordan and Priya, after a project deadline slips.\n\nJordan: \"We need to talk about the deadline. This is the third time this quarter.\"\n\nPriya: (says nothing, keeps typing)\n\nJordan: \"Are you even going to respond to that?\"\n\nPriya: \"Wow. Okay. Since you clearly have it all figured out, why don't you just do it yourself next time.\"\n\nJordan: \"That's not... I'm just trying to understand what happened.\"\n\nPriya: (turns back to screen, says nothing further)\n\nIn the room, in groups of three or four:\n\n- Diagnose. Mark each moment of demand-withdraw, contempt, or stonewalling.\n- Locate the barrier. Is something making it worse, such as a cultural or language difference, a power difference, or plain defensiveness?\n- Rewrite. Take the two most damaging lines and rewrite them using active listening or reframing.\n- Share one rewrite with the room.\n\nOn your own: do the same three steps in the workbook below.",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "",
+     "prompts": [
+      {
+       "id": "cq48",
+       "type": "table",
+       "label": "Diagnose the exchange",
+       "help": "",
+       "columns": [
+        "Line",
+        "Pattern I see",
+        "What it did to the other person"
+       ],
+       "rows": [
+        "Jordan: \"This is the third time this quarter.\"",
+        "Priya: (says nothing, keeps typing)",
+        "Jordan: \"Are you even going to respond to that?\"",
+        "Priya: \"...why don't you just do it yourself next time.\"",
+        "Priya: (turns back to screen)"
+       ],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq49",
+       "type": "long",
+       "label": "Rewrite Jordan's opening line",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq50",
+       "type": "long",
+       "label": "Rewrite Priya's sarcastic line",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq51",
+       "type": "long",
+       "label": "Jordan opened with a count of failures. What did that do before Priya said a word?",
+       "help": "Discussion",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq52",
+       "type": "long",
+       "label": "Now my conflict: the line I most need to rewrite, and my rewrite",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 20
+    }
+   ]
+  },
+  {
+   "id": "cm63",
+   "title": "Power in the Room",
+   "summary": "Who can speak freely in a conflict depends on power. Learn the five kinds and read who holds what.",
+   "lessons": [
+    {
+     "id": "cl58",
+     "title": "Five kinds of power",
+     "intro": "Power is the ability to influence what happens. French and Raven's classic framework names five sources.\n\n- Legitimate. Authority that comes with a role. The director who signs off on schedules.\n- Reward. The ability to give something people want. The supervisor who approves time off.\n- Coercive. The ability to punish or make things hard. The manager who writes the evaluations.\n- Expert. Knowledge or skill others rely on. The senior clinician everyone consults.\n- Referent. Being liked, trusted, or admired. The coworker people follow without being asked.\n\nThe first three are positional. They come with the title and stay with it when the person leaves. The last two are personal. They travel with the person.\n\nThis matters in conflict because the person with less power usually carries more of the risk. Speaking up costs them more. If you hold positional power, silence from the other side does not mean agreement.\n\nWarm-up, in the room: call out which kind of power each of these holds.\n\n- The office manager everyone goes to when something needs to get done\n- The funder who decides whether the grant renews\n- The clinician who trained half the staff\n- The supervisor who assigns the caseloads\n- The owner whose name is on the door",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "If you hold positional power, silence from the other side does not mean agreement.",
+     "prompts": [
+      {
+       "id": "cq55",
+       "type": "table",
+       "label": "Name that power",
+       "help": "One example may hold more than one kind.",
+       "columns": [
+        "Person",
+        "Kind of power",
+        "Positional or personal"
+       ],
+       "rows": [
+        "The office manager everyone goes to",
+        "The funder who decides on the grant",
+        "The clinician who trained half the staff",
+        "The supervisor who assigns caseloads",
+        "The owner whose name is on the door"
+       ],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq56",
+       "type": "long",
+       "label": "Which kinds of power do I hold at work? Which do I use most?",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq57",
+       "type": "long",
+       "label": "Who on our team has a lot of personal power and no title? How does that shape our conflicts?",
+       "help": "Discussion",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 12
+    },
+    {
+     "id": "cl62",
+     "title": "Activity: Reading the power in the room",
+     "intro": "The case: a group practice is changing its scheduling system. The owner controls the budget and must approve the plan. The office manager has run the front desk for six years and knows every process and every workaround. A new clinical lead, well liked by the staff, wants to switch vendors now, before the busy season.\n\nIn the room, with your table:\n\n- Name the kinds of power each of the three people holds.\n- Decide who has the most leverage in this disagreement, and why.\n- Decide what the person with the least formal power could do to be heard.\n\nOn your own: answer the same three questions below.\n\nInfluence outside formal channels is sometimes called political behavior. It is not good or bad on its own. Building support before a meeting, framing an issue well, and timing a request are ways of getting things done. The same moves become harmful when they are used to shut someone out of a decision or to go around it. The test is transparency: would you be comfortable if everyone involved could see what you are doing?",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "",
+     "prompts": [
+      {
+       "id": "cq59",
+       "type": "table",
+       "label": "The scheduling case",
+       "help": "",
+       "columns": [
+        "Person",
+        "Power they hold",
+        "Their leverage"
+       ],
+       "rows": [
+        "The owner",
+        "The office manager",
+        "The new clinical lead"
+       ],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq60",
+       "type": "long",
+       "label": "Who has the most leverage, and what should the others do about it?",
+       "help": "Discussion",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq61",
+       "type": "table",
+       "label": "My conflict map, part 2: power",
+       "help": "",
+       "columns": [
+        "",
+        "My notes"
+       ],
+       "rows": [
+        "Power I hold in this conflict",
+        "Power the other person holds",
+        "Who carries more risk by speaking up",
+        "Leverage the lower-power side has",
+        "How power should change the way I open the conversation"
+       ],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 15
+    }
+   ]
+  },
+  {
+   "id": "cm79",
+   "title": "Your Style and Your Walk-Away Point",
+   "summary": "Choose your approach on purpose, know your limit before you walk in, and plan the conversation.",
+   "lessons": [
+    {
+     "id": "cl68",
+     "title": "Five ways we handle conflict",
+     "intro": "Every response to conflict balances two things: how much you push for what you need, and how much you make room for what the other person needs. That gives five styles, first mapped by Kenneth Thomas and Ralph Kilmann.\n\n- Competing. High on your needs, low on theirs. Fits emergencies, safety issues, and unpopular decisions that must be made. Costs trust when overused.\n- Collaborating. High on both. Fits important issues where the relationship matters and there is time. Costs time and energy.\n- Compromising. Middle on both. Fits when time is short and both sides can live with half. Costs you the better answer you did not look for.\n- Avoiding. Low on both. Fits trivial issues and moments when everyone needs to cool down. Costs you when the issue matters, because it does not go away.\n- Accommodating. Low on your needs, high on theirs. Fits when you are wrong, or the issue matters far more to them. Costs you when it becomes a habit and resentment builds.\n\nNo style is the right one. Each fits some situations and fails in others. Most of us have a default we use whether it fits or not. The skill is choosing.",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "No style is the right one. The skill is choosing.",
+     "prompts": [
+      {
+       "id": "cq64",
+       "type": "table",
+       "label": "My styles",
+       "help": "",
+       "columns": [
+        "Style",
+        "When I use it",
+        "What it costs me"
+       ],
+       "rows": [
+        "Competing",
+        "Collaborating",
+        "Compromising",
+        "Avoiding",
+        "Accommodating"
+       ],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq65",
+       "type": "short",
+       "label": "My default style at work",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq66",
+       "type": "short",
+       "label": "The style my conflict actually needs",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq67",
+       "type": "long",
+       "label": "Which style does our team reward, and which does it punish?",
+       "help": "Discussion",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 12
+    },
+    {
+     "id": "cl74",
+     "title": "Know your walk-away point",
+     "intro": "Think back to the $100 Split. The lowest offer you would accept was your walk-away point. In negotiation it has a name.\n\nBATNA is your Best Alternative To a Negotiated Agreement. It is what you will do if this conversation produces nothing. A strong alternative gives you confidence. A weak one tells you to protect the relationship and take your time. Know yours before you walk in, and think about theirs.\n\nThe zone of possible agreement is the range where a deal can happen. It sits between the least you would accept and the most they would give. If the two do not overlap, no amount of skill will produce an agreement, and it is better to know that early.\n\nAnchoring. The first number or proposal on the table pulls the rest of the conversation toward it. Research on first offers finds they strongly shape where a negotiation ends. If you are well prepared, it is usually worth making the first specific proposal.\n\nInterests, not positions. A position is what someone says they want: \"I need Fridays off.\" An interest is why: \"I am caring for a parent on Fridays.\" Positions collide. Interests often leave room. This idea comes from Fisher and Ury's Getting to Yes, and it is the difference between splitting the difference and finding a better answer for both sides.\n\nMost workplace conflict is not a money negotiation, but the same questions apply. What do I need? What do they need? What happens if we do not resolve this?",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "Positions collide. Interests often leave room.",
+     "prompts": [
+      {
+       "id": "cq69",
+       "type": "table",
+       "label": "Positions and interests in my conflict",
+       "help": "",
+       "columns": [
+        "",
+        "Position (what is being asked for)",
+        "Interest (why it matters)"
+       ],
+       "rows": [
+        "Me",
+        "The other person"
+       ],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq70",
+       "type": "long",
+       "label": "My walk-away point",
+       "help": "What I will do if this conversation goes nowhere. Be honest about how good that alternative is.",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq71",
+       "type": "long",
+       "label": "Their likely walk-away point",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq72",
+       "type": "long",
+       "label": "Where could both of our interests be met?",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq73",
+       "type": "long",
+       "label": "Think of a standoff on our team. What interests were hiding under the positions?",
+       "help": "Discussion",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 15
+    },
+    {
+     "id": "cl78",
+     "title": "Plan the conversation",
+     "intro": "This is the page you take with you. Fill it in for the conflict you have been mapping.\n\nA few notes on the opening line. Start with the issue, not the history. Leave out \"always\" and \"never.\" Say what you want for both of you. For example: \"I want to talk about how we hand off the Thursday schedule. I think we both want it to stop being a scramble.\"\n\nCompare that with Jordan's opening in the Escalation Autopsy, which started with a count of failures.\n\nIf you hold more power than the other person, say out loud that you want to hear their view, and then prove it by listening first.",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "Start with the issue, not the history.",
+     "prompts": [
+      {
+       "id": "cq75",
+       "type": "table",
+       "label": "My conversation plan",
+       "help": "",
+       "columns": [
+        "",
+        "My plan"
+       ],
+       "rows": [
+        "The issue in one neutral sentence",
+        "What I need",
+        "What they likely need",
+        "The style I am choosing, and why",
+        "My opening line",
+        "A question I will ask to check my story",
+        "What I will do if I get flooded",
+        "My walk-away point",
+        "When and where I will have this conversation"
+       ],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq76",
+       "type": "scale",
+       "label": "How ready do I feel to have this conversation?",
+       "help": "1 means not at all. 10 means I could have it tomorrow.",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq77",
+       "type": "long",
+       "label": "What support do I need before I have it?",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 15
+    }
+   ]
+  },
+  {
+   "id": "cm87",
+   "title": "Close",
+   "summary": "One commitment, a look back at where you started, and the sources behind this workshop.",
+   "lessons": [
+    {
+     "id": "cl85",
+     "title": "Your commitment",
+     "intro": "You started with one conflict and a number for how comfortable you felt. Look back at both.\n\nIn the room: each person shares one commitment in a sentence. Keep it small and dated. \"I will ask Dana for fifteen minutes on Tuesday\" is a commitment. \"I will communicate better\" is a wish.\n\nOn your own: write yours below, and tell one person you trust.",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "\"I will communicate better\" is a wish. A commitment has a name and a date on it.",
+     "prompts": [
+      {
+       "id": "cq80",
+       "type": "short",
+       "label": "My one commitment, with a date",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq81",
+       "type": "scale",
+       "label": "How comfortable am I with conflict at work now?",
+       "help": "Use the same 1 to 10 scale as in Start Here.",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq82",
+       "type": "long",
+       "label": "The idea from this workshop I will use most",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq83",
+       "type": "long",
+       "label": "What I want Build & Bloom to know, or what I still have questions about",
+       "help": "",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      },
+      {
+       "id": "cq84",
+       "type": "long",
+       "label": "What is one agreement our team could make about how we handle disagreement?",
+       "help": "Discussion",
+       "columns": [],
+       "rows": [],
+       "blankRows": 0,
+       "options": []
+      }
+     ],
+     "minutes": 8
+    },
+    {
+     "id": "cl86",
+     "title": "Sources and further reading",
+     "intro": "This workshop draws on the PSY 350 Conflict Resolution and Negotiation course and on the research below.\n\n- Jehn, K. A. (1995). A multimethod examination of the benefits and detriments of intragroup conflict. Administrative Science Quarterly.\n- De Dreu, C. K. W., and Weingart, L. R. (2003). Task versus relationship conflict, team performance, and team member satisfaction. Journal of Applied Psychology.\n- de Wit, F. R. C., Greer, L. L., and Jehn, K. A. (2012). The paradox of intragroup conflict: A meta-analysis. Journal of Applied Psychology.\n- Edmondson, A. (1999). Psychological safety and learning behavior in work teams. Administrative Science Quarterly.\n- Guth, W., Schmittberger, R., and Schwarze, B. (1982). An experimental analysis of ultimatum bargaining. Journal of Economic Behavior and Organization.\n- Ross, L. (1977). The intuitive psychologist and his shortcomings. Advances in Experimental Social Psychology.\n- Gottman, J. M. (1994). What Predicts Divorce? Lawrence Erlbaum.\n- Gross, J. J. (2002). Emotion regulation: Affective, cognitive, and social consequences. Psychophysiology.\n- Lieberman, M. D., and colleagues (2007). Putting feelings into words. Psychological Science.\n- French, J. R. P., and Raven, B. (1959). The bases of social power. In Studies in Social Power.\n- Thomas, K. W., and Kilmann, R. H. (1974). Thomas-Kilmann Conflict Mode Instrument.\n- Fisher, R., and Ury, W. (1981). Getting to Yes. Houghton Mifflin.\n- Galinsky, A. D., and Mussweiler, T. (2001). First offers as anchors. Journal of Personality and Social Psychology.\n- Nelson, D. L., and Quick, J. C. ORGB. Cengage.\n- OpenStax. Psychology 2e.",
+     "videoUrl": "",
+     "resourceUrl": "",
+     "resourceLabel": "",
+     "callout": "",
+     "prompts": [],
+     "minutes": 5
+    }
+   ]
+  }
+ ]
+}
