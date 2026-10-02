@@ -4,6 +4,7 @@ import { getCatalog, listClients } from "./data";
 import { nextPayment } from "./course-logic";
 import { listContent } from "./content";
 import { contentTypeLabel } from "./content-types";
+import { planCalendarItems } from "./workspace";
 
 export interface CalItem {
   id: string;
@@ -44,6 +45,11 @@ export async function calendarItems(): Promise<CalItem[]> {
   for (const p of await listContent()) {
     if (!p.date || p.status === "posted") continue;
     items.push({ id: `c-${p.id}`, date: p.date, start: "", end: "", title: /^(youtube|face slot|story|reel)/i.test(p.title) ? p.title : `${contentTypeLabel(p.type)}: ${p.title}`, kind: "content", detail: p.type === "face" ? "Face content: plan and record" : `Status: ${p.status}`, href: `/admin/content/${p.id}`, apptId: "", link: "" });
+  }
+  // Strategy plan sessions (skipped when a real appointment is already booked that day) and your plan tasks
+  for (const x of await planCalendarItems()) {
+    if (x.kind === "session" && appts.some((a) => a.clientId === x.clientId && a.date === x.date)) continue;
+    items.push({ id: x.id, date: x.date, start: x.start, end: "", title: x.title, kind: x.kind, detail: x.detail, href: x.href, apptId: "", link: "" });
   }
   return items.filter((i) => i.date).sort((a, b) => (a.date + (a.start || "00")).localeCompare(b.date + (b.start || "00")));
 }

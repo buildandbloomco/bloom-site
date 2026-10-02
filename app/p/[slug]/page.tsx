@@ -1,4 +1,8 @@
 import "@/components/portal-nav.css";
+import "@/components/portal/workspace.css";
+import WorkspaceHub from "@/components/portal/WorkspaceHub";
+import { GUIDES } from "@/lib/guides";
+import { getAssessment, getPlan } from "@/lib/workspace";
 import { bookProps, fmtTime, longDate, nowET } from "@/lib/booking";
 import { redirect } from "next/navigation";
 import { currentClient } from "@/lib/auth";
@@ -76,7 +80,10 @@ export default async function Portal({
   ).filter((x): x is { e: typeof x.e; c: NonNullable<typeof x.c> } => !!x.c);
   const libAccess = await getAccess(client.id);
   const hasLibrary = libAccess?.status === "active";
+  const [plan, assessment] = await Promise.all([getPlan(client.id), getAssessment(client.id)]);
+  const hasWorkspace = !!plan.enabled || !!assessment?.enabled;
   const nav = [
+    hasWorkspace ? ["Workspace", "#workspace"] : null,
     myCourses.length ? ["Courses", "#courses"] : null,
     showWork ? ["Your work", "#work"] : null,
     pub.consults.length ? ["Consult notes", "#consult"] : null,
@@ -126,7 +133,9 @@ export default async function Portal({
                 </p>
               </div>
               <div className="row cta">
-                {showWork ? (
+                {hasWorkspace ? (
+                  <a className="btn btn-primary" href="#workspace">Open your workspace</a>
+                ) : showWork ? (
                   <a className="btn btn-primary" href="#work">View your work</a>
                 ) : (
                   <a className="btn btn-primary" href="#package">Explore your package</a>
@@ -140,6 +149,23 @@ export default async function Portal({
                 <img src="/logo.png" alt="" />
               </div>
               <span className="pill">{first}</span>
+            </div>
+          </div>
+        </section>
+
+        <WorkspaceHub slug={slug} plan={plan} assessment={assessment} today={today} />
+
+        <section className="section" id="guidebooks" style={{ paddingBottom: 0 }}>
+          <div className="wrap stack" style={{ gap: 16 }}>
+            <p className="eyebrow">Your guidebooks</p>
+            <div className="ws-hub" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}>
+              {[...GUIDES].sort((a, b) => (a.slug === "client-guidebook" ? -1 : b.slug === "client-guidebook" ? 1 : 0)).map((g) => (
+                <div className="ws-card" key={g.slug}>
+                  <h3>{g.title}</h3>
+                  <p className="small" style={{ margin: 0 }}>{g.tagline}</p>
+                  <a className="btn btn-sm btn-dark" style={{ alignSelf: "flex-start" }} href={g.file} target="_blank" rel="noopener noreferrer">Open the guidebook (PDF)</a>
+                </div>
+              ))}
             </div>
           </div>
         </section>

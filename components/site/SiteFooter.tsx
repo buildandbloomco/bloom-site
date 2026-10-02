@@ -22,6 +22,7 @@ export default function SiteFooter({ s }: { s: Settings }) {
             <Link href="/courses">Courses</Link>
             <Link href="/wellness-library">Wellness Library</Link>
             <Link href="/workshops">Workshops & events</Link>
+            <Link href="/guides">Free guidebooks</Link>
             <a {...bookProps(s)}>Book a free consult</a>
           </div>
           <div className="stack" style={{ gap: 6 }}>

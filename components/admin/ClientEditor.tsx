@@ -7,6 +7,12 @@ import { outstanding } from "@/lib/pricing";
 import type { Catalog, Client, ClientStatus } from "@/lib/types";
 import WorkEditor from "./WorkEditor";
 
+export interface WorkspaceSummary {
+  plan: { enabled: boolean; pct: number; total: number; openRequests: number; newComments: number; nextSession: string };
+  assessment: { enabled: boolean; status: string; responses: number } | null;
+}
+const ASSESS_LABEL: Record<string, string> = { leader: "Leader questionnaire", team: "Team survey open", review: "In review", shared: "Results shared" };
+
 const STATUSES: { v: ClientStatus; label: string }[] = [
   { v: "draft", label: "Draft (not sent yet)" },
   { v: "sent", label: "Sent / proposal stage" },
@@ -19,10 +25,12 @@ export default function ClientEditor({
   initial,
   catalog,
   initialCode,
+  workspace,
 }: {
   initial: Client;
   catalog: Catalog;
   initialCode: string;
+  workspace?: WorkspaceSummary;
 }) {
   const router = useRouter();
   const [c, setC] = useState<Client>(initial);
@@ -335,6 +343,24 @@ Reach out with any questions. So glad to build with you.`;
 
         {/* SIDE COLUMN */}
         <div className="sticky-col">
+          {workspace && (
+            <section className="panel">
+              <h3>Workspace</h3>
+              <div className="stack" style={{ gap: 6 }}>
+                <div className="row between small"><strong>Strategy plan</strong><span className="muted">{workspace.plan.enabled ? `${workspace.plan.pct}% done · ${workspace.plan.total} tasks` : "Off"}</span></div>
+                {workspace.plan.nextSession && <span className="tiny muted">Next session: {workspace.plan.nextSession}</span>}
+                {(workspace.plan.openRequests > 0 || workspace.plan.newComments > 0) && (
+                  <strong className="small" style={{ color: "var(--rust)" }}>{workspace.plan.openRequests} change request{workspace.plan.openRequests === 1 ? "" : "s"} · {workspace.plan.newComments} new comment{workspace.plan.newComments === 1 ? "" : "s"} waiting on you</strong>
+                )}
+                <a className="btn btn-sm btn-dark" href={`/admin/clients/${c.id}/plan`}>{workspace.plan.enabled || workspace.plan.total ? "Open strategy plan" : "Set up strategy plan"}</a>
+              </div>
+              <div className="stack" style={{ gap: 6, borderTop: "1px solid var(--line)", paddingTop: 10 }}>
+                <div className="row between small"><strong>Wellness assessment</strong><span className="muted">{workspace.assessment?.enabled ? `${ASSESS_LABEL[workspace.assessment.status]} · ${workspace.assessment.responses} responses` : "Off"}</span></div>
+                <a className="btn btn-sm btn-ghost" href={`/admin/clients/${c.id}/assessment`}>{workspace.assessment ? "Open assessment" : "Set up assessment"}</a>
+              </div>
+            </section>
+          )}
+
           <section className="panel">
             <h3>Access</h3>
             <div className="stack" style={{ gap: 6 }}>

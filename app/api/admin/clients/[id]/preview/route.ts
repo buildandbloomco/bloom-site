@@ -9,5 +9,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
   const c = await getClient(id);
   if (!c) return NextResponse.redirect(new URL("/admin", req.url));
   await startClientSession(c.id);
-  return NextResponse.redirect(new URL(`/p/${c.slug}`, req.url));
+  const to = new URL(req.url).searchParams.get("to") || "";
+  const safe = to.startsWith(`/p/${c.slug}/`) && !to.includes("//") ? to : `/p/${c.slug}`;
+  return NextResponse.redirect(new URL(safe, req.url));
 }

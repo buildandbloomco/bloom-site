@@ -7,6 +7,7 @@ export const NAV: [string, string][] = [
   ["Masterclass", "/masterclass"],
   ["Courses", "/courses"],
   ["Events", "/workshops"],
+  ["Guides", "/guides"],
   ["Contact", "/contact"],
 ];
 

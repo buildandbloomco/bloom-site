@@ -237,6 +237,8 @@ export interface Lead {
   clientId: string | null;
   /** Set when they book a consult on your booking page */
   consult?: { date: string; start: string; apptId: string } | null;
+  /** Guidebooks this person requested or bought */
+  guides?: { slug: string; title: string; at: string; paid: number; stripeSessionId?: string }[];
 }
 
 export type ClientStatus = "draft" | "sent" | "active" | "completed" | "archived";

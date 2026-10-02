@@ -184,3 +184,32 @@ Uploaded files get a long random web address. Anyone with that exact link could 
 
 ## Running it on your own computer (optional)
 Install Node.js 20 or newer, then in this folder run `npm install` and then `npm run dev`. Open http://localhost:3000. The admin password on your computer is `bloom-admin`. Without Redis, data is saved to a `.data` folder.
+
+## Strategy plans and the wellness assessment
+
+Both live on each client's page in admin, in the **Workspace** box (top right).
+
+**Strategy plan** (Clients > a client > Open strategy plan)
+- Click a starter template or build your own: sessions with a goal, agenda, notes, decisions and resources, plus tasks for you and for the client.
+- Each task has an owner, a due date, a status and an optional link to a service, course, Library item, Wellness Library piece, the assessment, or any web address.
+- Turn on "Show this plan in their portal". The client sees progress bars (overall, theirs, yours), checks off their own tasks, edits their own tasks, comments on any task, adds agenda items, and sends a change request on your tasks, a session, or the whole plan.
+- Change requests and new comments show at the top of the plan and in the Workspace box. Reply and mark resolved.
+- Dated sessions and your own dated tasks show on Admin > Calendar.
+
+**Organizational Wellness Assessment** (Clients > a client > Set up assessment)
+1. Turn it on. The leader questionnaire appears in their portal, pre-filled from their inquiry form when there is one. It includes an operations snapshot: workload by role, typical hours, scheduling, coverage, friction workflows, and tools.
+2. They get an anonymous survey link for their team. No names or emails are collected.
+3. Move the stage to "Closed for review" when you are ready. Only you see results until you share.
+4. Write your summary and recommendations. Give each one a priority (Now, Next, Later). The list sorts itself in that order when you save, and the client sees it as their prioritized action plan. "Add to plan" turns a recommendation into a task on their strategy plan.
+5. Click "Share results with client". They see scores for seven areas, your findings, recommendations, and matching services and Wellness Library pieces.
+
+Role breakdowns are hidden for any group with fewer than 3 responses. Team comments stay private unless you check "Include these comments in the client's results". To change the questions, edit `lib/assessment-def.ts`.
+
+## Guidebooks and leads
+
+- Public page: `/guides` (also linked in the site menu and footer). Each guide has its own page, for example `/guides/starter-guide`. Share that link on Instagram.
+- Anyone who requests a guide gives their name and email and shows up in **Admin > Leads** with a gold "Guide" tag. If the same email requests another guide or later sends an inquiry form, check Leads for both.
+- Clients see every guidebook in their portal under "Your guidebooks", no form needed.
+- To change a guide, replace its PDF in `public/guides` (keep the same file name).
+- To sell a guide instead of giving it away, open `lib/guides.ts` and set its `price` (in dollars). Buyers then pay through Stripe before the download, and the lead shows "paid". The PDF link itself is not locked, so anyone a buyer forwards it to can open it.
+- To add a guide, add the PDF to `public/guides` and copy one of the entries in `lib/guides.ts`.

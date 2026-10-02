@@ -50,6 +50,7 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
               <Row k="Phone" v={lead.phone} />
               <Row k="Website" v={lead.website} />
               <Row k="Heard about us" v={lead.heardFrom} />
+              <Row k="Guidebooks" v={(lead.guides ?? []).map((g) => `${g.title} (${g.paid > 0 ? `paid $${g.paid}` : "free"}, ${g.at.slice(0, 10)})`).join("; ")} />
             </div>
           </section>
           <section className="panel">
