@@ -40,7 +40,7 @@ export default function CatalogEditor({ initial, mode }: { initial: Catalog; mod
     [arr[i], arr[j]] = [arr[j], arr[i]];
   };
 
-  const blankService = (kind: "core" | "addon"): Service => ({ id: "", name: "", kind, description: "", price: kind === "addon" ? 0 : null, unit: kind === "addon" ? "per session" : "", active: true });
+  const blankService = (kind: "core" | "addon"): Service => ({ id: "", name: "", kind, description: "", priceOrg: null, showPrice: kind === "addon", price: kind === "addon" ? 0 : null, unit: kind === "addon" ? "per session" : "", active: true });
   const blankLib = (): LibraryItem => ({ id: "", title: "", kind: "product", description: "", url: "", priceLabel: "", audience: "all", active: true });
 
   return (
@@ -54,8 +54,8 @@ export default function CatalogEditor({ initial, mode }: { initial: Catalog; mod
                   <h3>{kind === "core" ? "Core services" : "Add-ons"}</h3>
                   <p className="small muted">
                     {kind === "core"
-                      ? "What you include in packages. Clients see these as “Included.”"
-                      : "Extras clients can choose and pay for in their portal. Leave price blank for “custom quote.”"}
+                      ? "What you include in packages. These prices are your suggested starting points in a consult. They stay off the website unless you check “Show price on website.”"
+                      : "A la carte extras clients can choose and pay for in their portal. Each client pays the price for their type. Leave a price blank for “custom quote.”"}
                   </p>
                 </div>
                 <button type="button" className="btn btn-sm btn-ghost" onClick={() => update((d) => void d.services.push(blankService(kind)))}>+ Add</button>
@@ -65,10 +65,14 @@ export default function CatalogEditor({ initial, mode }: { initial: Catalog; mod
                   <div className="panel" key={s.id || `new${i}`}>
                     <div className="grid-2" style={{ gap: 12 }}>
                       <label>Name<input type="text" value={s.name} onChange={(e) => update((d) => void (d.services[i].name = e.target.value))} /></label>
-                      <div className="grid-2" style={{ gap: 12 }}>
+                      <div className="grid-3" style={{ gap: 12 }}>
                         <label>
-                          Price ($)
-                          <input type="number" min={0} step="0.01" placeholder="Custom quote" value={s.price ?? ""} onChange={(e) => update((d) => void (d.services[i].price = e.target.value === "" ? null : Number(e.target.value)))} />
+                          Small business ($)
+                          <input type="number" min={0} step="0.01" placeholder="Custom" value={s.price ?? ""} onChange={(e) => update((d) => void (d.services[i].price = e.target.value === "" ? null : Number(e.target.value)))} />
+                        </label>
+                        <label>
+                          Organization ($)
+                          <input type="number" min={0} step="0.01" placeholder="Same" value={s.priceOrg ?? ""} onChange={(e) => update((d) => void (d.services[i].priceOrg = e.target.value === "" ? null : Number(e.target.value)))} />
                         </label>
                         <label>Unit<input type="text" placeholder="per session" value={s.unit} onChange={(e) => update((d) => void (d.services[i].unit = e.target.value))} /></label>
                       </div>
@@ -78,6 +82,7 @@ export default function CatalogEditor({ initial, mode }: { initial: Catalog; mod
                       <div className="checks">
                         <label><input type="checkbox" checked={s.active} onChange={() => update((d) => void (d.services[i].active = !d.services[i].active))} /> Active</label>
                         <label><input type="checkbox" checked={s.showOnSite ?? s.kind === "core"} onChange={() => update((d) => void (d.services[i].showOnSite = !(d.services[i].showOnSite ?? d.services[i].kind === "core")))} /> Show on website</label>
+                        <label><input type="checkbox" checked={s.showPrice ?? s.kind === "addon"} onChange={() => update((d) => void (d.services[i].showPrice = !(d.services[i].showPrice ?? d.services[i].kind === "addon")))} /> Show price on website</label>
                         {s.kind === "core" && (
                           <label style={{ gap: 8 }}>
                             Website section

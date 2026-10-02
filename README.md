@@ -213,3 +213,12 @@ Role breakdowns are hidden for any group with fewer than 3 responses. Team comme
 - To change a guide, replace its PDF in `public/guides` (keep the same file name).
 - To sell a guide instead of giving it away, open `lib/guides.ts` and set its `price` (in dollars). Buyers then pay through Stripe before the download, and the lead shows "paid". The PDF link itself is not locked, so anyone a buyer forwards it to can open it.
 - To add a guide, add the PDF to `public/guides` and copy one of the entries in `lib/guides.ts`.
+
+## Pricing by client type
+
+- Every service has two prices in **Admin > Services & add-ons**: Small business and Organization. Leave Organization blank to use the same price for both.
+- Core service prices stay off the website (it says "Priced at your free consult") unless you check "Show price on website". A la carte services show both prices.
+- On a **consultation sheet**, click Small business or Organization first. That sets the extra questions and the suggested prices. Check services as you talk, change any price or quantity, add an adjustment, and the starting price totals itself.
+- "Use as their proposal" copies the services, line items, and total to the client page. Review it there before you send their code.
+- "Show this starting price in the summary they see" adds it to the consult summary in their portal.
+- The client type on the client page decides which a la carte prices they see and pay in their portal.

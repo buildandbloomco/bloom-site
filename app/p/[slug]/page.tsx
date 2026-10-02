@@ -1,5 +1,6 @@
 import "@/components/portal-nav.css";
 import "@/components/portal/workspace.css";
+import { pricedFor } from "@/lib/tier";
 import WorkspaceHub from "@/components/portal/WorkspaceHub";
 import { GUIDES } from "@/lib/guides";
 import { getAssessment, getPlan } from "@/lib/workspace";
@@ -55,7 +56,7 @@ export default async function Portal({
   const today = nowET().date;
   const myAppts = allAppts.filter((x) => x.clientId === client.id && !x.enrollmentId && x.date >= today).sort((x, y) => (x.date + x.start).localeCompare(y.date + y.start)).slice(0, 5);
   const pub = toPublic(client);
-  const services = catalog.services;
+  const services = pricedFor(catalog.services, client.tier);
   const included = client.package.serviceIds
     .map((id) => services.find((s) => s.id === id))
     .filter((s): s is NonNullable<typeof s> => !!s);
@@ -189,7 +190,7 @@ export default async function Portal({
         {showWork && <YourWork client={pub} />}
 
         {pub.consults.length > 0 && (
-          <ConsultSummary consults={pub.consults} services={services} contactName={client.contactName} />
+          <ConsultSummary consults={pub.consults} services={catalog.services} contactName={client.contactName} />
         )}
 
         {/* PACKAGE */}

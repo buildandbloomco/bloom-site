@@ -3,6 +3,7 @@ import { amountPaid, getCatalog, rateLimit } from "@/lib/data";
 import { error, json, siteOrigin } from "@/lib/http";
 import { buildCharge, payChoices, type PayOption } from "@/lib/pricing";
 import { stripe } from "@/lib/stripe";
+import { pricedFor } from "@/lib/tier";
 
 export async function POST(req: Request) {
   const client = await currentClient();
@@ -19,7 +20,7 @@ export async function POST(req: Request) {
 
   const catalog = await getCatalog();
   const offered = new Set(client.addOnIds);
-  const addOns = catalog.services.filter(
+  const addOns = pricedFor(catalog.services, client.tier).filter(
     (sv) => sv.kind === "addon" && sv.active && offered.has(sv.id) && (Array.isArray(body.addOnIds) ? body.addOnIds : []).includes(sv.id) && typeof sv.price === "number"
   );
   const paid = amountPaid(client);

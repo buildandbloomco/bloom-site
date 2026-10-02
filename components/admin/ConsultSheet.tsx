@@ -2,18 +2,22 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Consult, ConsultAction, Service } from "@/lib/types";
-import { CONSULT_TYPES, FOCUS_AREAS, OWNER_LABEL, STAGES } from "@/lib/consult";
-import { shortDate } from "@/lib/format";
+import { CONSULT_TYPES, FOCUS_AREAS, OWNER_LABEL, STAGES, TYPE_QUESTIONS } from "@/lib/consult";
+import { money, shortDate } from "@/lib/format";
+import { buildQuote, priceFor, TIERS, tierLabel } from "@/lib/tier";
 
 const rid = () => Math.random().toString(36).slice(2, 10);
 
 const SECTIONS: [string, string][] = [
   ["call", "Call details"],
+  ["tier", "Client type"],
   ["about", "About them"],
+  ["typeq", "Type questions"],
   ["goals", "Goals & vision"],
   ["challenges", "Challenges"],
   ["logistics", "Budget & timing"],
-  ["services", "Services discussed"],
+  ["services", "Services & pricing"],
+  ["price", "Starting price"],
   ["deliverables", "Deliverables"],
   ["actions", "Action items"],
   ["notes", "Notes"],
@@ -34,6 +38,7 @@ export default function ConsultSheet({
   const [s, setS] = useState<Consult>(initial);
   const [status, setStatus] = useState<"saved" | "pending" | "saving" | "error">("saved");
   const [workMsg, setWorkMsg] = useState("");
+  const [propMsg, setPropMsg] = useState("");
   const latest = useRef(s);
   const dirty = useRef(false);
   const url = `/api/admin/clients/${clientId}/consults/${initial.id}`;
@@ -98,6 +103,19 @@ export default function ConsultSheet({
     setWorkMsg(`Added ${data.added} to Your Work. Add links and details on the client page.`);
   }
 
+  const quote = buildQuote(s, services);
+  const num = (v: string) => (v === "" ? undefined : Math.max(0, Number(v) || 0));
+
+  async function sendToProposal() {
+    if (!confirm(`Use ${money(quote.total)} as their proposal? This replaces the services, line items, and total on their client page. You can still edit them there.`)) return;
+    await save();
+    const res = await fetch(`${url}/to-proposal`, { method: "POST" });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) return setPropMsg(data.error || "Could not copy it over.");
+    setS((p) => ({ ...p, quote: { ...p.quote, appliedAt: data.appliedAt } }));
+    setPropMsg(`Their proposal now shows ${money(data.total)}. Review it on the client page before you send their code.`);
+  }
+
   async function remove() {
     if (!confirm("Delete this consultation sheet?")) return;
     dirty.current = false;
@@ -140,6 +158,20 @@ export default function ConsultSheet({
             </div>
           </section>
 
+          <section className="panel" id="tier">
+            <h3>Who is this consult for?</h3>
+            <p className="small muted">Pick one. It sets the questions below and which prices are suggested.</p>
+            <div className="grid-2" style={{ gap: 12 }}>
+              {TIERS.map((t) => (
+                <button key={t.id} type="button" aria-pressed={s.tier === t.id} className={`btn ${s.tier === t.id ? "btn-dark" : "btn-ghost"}`} style={{ height: "auto", padding: "14px 16px", flexDirection: "column", alignItems: "flex-start", gap: 4, textAlign: "left", whiteSpace: "normal" }}
+                  onClick={() => update((d) => void (d.tier = d.tier === t.id ? "" : t.id))}>
+                  <span>{t.label}</span>
+                  <span style={{ fontSize: "0.78rem", letterSpacing: 0, textTransform: "none", fontWeight: 400, opacity: 0.85 }}>{t.hint}</span>
+                </button>
+              ))}
+            </div>
+          </section>
+
           <section className="panel" id="about">
             <h3>About them</h3>
             <div className="grid-2" style={{ gap: 12 }}>
@@ -156,6 +188,17 @@ export default function ConsultSheet({
             </div>
             {area("What they do", "their offer, programs, or mission", s.about.offer, (v) => update((d) => void (d.about.offer = v)), 3)}
             {area("Who they serve", "", s.about.audience, (v) => update((d) => void (d.about.audience = v)), 2)}
+          </section>
+
+          <section className="panel" id="typeq">
+            <h3>{s.tier === "org" ? "Their team & operations" : s.tier === "business" ? "Their business today" : "Type questions"}</h3>
+            {!s.tier && <p className="small muted">Choose small business or organization above to see the questions for that kind of client.</p>}
+            {s.tier && TYPE_QUESTIONS[s.tier].map((f) => (
+              <label key={f.key}>
+                {f.label} <span className="hint">{f.hint}</span>
+                <textarea rows={2} style={{ minHeight: 56 }} value={s.typeAnswers[f.key] ?? ""} onChange={(e) => update((d) => void (d.typeAnswers[f.key] = e.target.value))} />
+              </label>
+            ))}
           </section>
 
           <section className="panel" id="goals">
@@ -188,15 +231,82 @@ export default function ConsultSheet({
           </section>
 
           <section className="panel" id="services">
-            <h3>Services discussed</h3>
-            <div className="checks">
-              {[...core, ...addons].map((sv) => (
-                <label key={sv.id}>
-                  <input type="checkbox" checked={s.serviceIds.includes(sv.id)} onChange={() => update((d) => void (d.serviceIds = toggle(d.serviceIds, sv.id)))} />
-                  {sv.name} {sv.kind === "addon" && <span className="hint">(add-on)</span>}
-                </label>
-              ))}
+            <h3>Services & pricing</h3>
+            <p className="small muted">
+              Check what you discuss. {s.tier ? `Suggested prices are for a ${tierLabel(s.tier).toLowerCase()}.` : "Choose the client type above to see the right suggested prices."} Change the price or the number of sessions or months for this client. The starting price adds up as you go.
+            </p>
+            {([["Core services", core], ["A la carte", addons]] as const).map(([title, list]) => (
+              <div className="stack" key={title} style={{ gap: 8 }}>
+                <strong className="tiny muted" style={{ letterSpacing: "0.14em", textTransform: "uppercase" }}>{title}</strong>
+                {list.map((sv) => {
+                  const on = s.serviceIds.includes(sv.id);
+                  const suggested = priceFor(sv, s.tier);
+                  const line = quote.lines.find((l) => l.id === sv.id);
+                  return (
+                    <div key={sv.id} className="stack" style={{ gap: 6, padding: "10px 0", borderTop: "1px solid var(--line)" }}>
+                      <label style={{ flexDirection: "row", alignItems: "center", gap: 10, fontWeight: on ? 600 : 400 }}>
+                        <input type="checkbox" checked={on} style={{ width: 18, height: 18, accentColor: "var(--rust)", flexShrink: 0 }} onChange={() => update((d) => void (d.serviceIds = toggle(d.serviceIds, sv.id)))} />
+                        <span style={{ flex: 1 }}>{sv.name}</span>
+                        <span className="small muted" style={{ fontWeight: 400, whiteSpace: "nowrap" }}>{suggested === null ? "Custom quote" : `${money(suggested)}${sv.unit ? ` ${sv.unit}` : ""}`}</span>
+                      </label>
+                      {on && (
+                        <div className="row" style={{ gap: 10, paddingLeft: 28, alignItems: "center", flexWrap: "wrap" }}>
+                          <label style={{ flexDirection: "row", alignItems: "center", gap: 6, fontWeight: 400 }} className="small">
+                            Price $
+                            <input type="number" min={0} step="1" aria-label={`Price for ${sv.name}`} style={{ width: 110, minHeight: 38, padding: "4px 10px" }} placeholder={suggested === null ? "Set a price" : String(suggested)}
+                              value={s.quote.prices[sv.id] ?? ""} onChange={(e) => update((d) => { const v = num(e.target.value); if (v === undefined) delete d.quote.prices[sv.id]; else d.quote.prices[sv.id] = v; })} />
+                          </label>
+                          <label style={{ flexDirection: "row", alignItems: "center", gap: 6, fontWeight: 400 }} className="small">
+                            How many
+                            <input type="number" min={1} max={99} step="1" aria-label={`Quantity for ${sv.name}`} style={{ width: 76, minHeight: 38, padding: "4px 10px" }}
+                              value={s.quote.qty[sv.id] ?? 1} onChange={(e) => update((d) => void (d.quote.qty[sv.id] = Math.max(1, Math.round(Number(e.target.value) || 1))))} />
+                          </label>
+                          <span className="small" style={{ marginLeft: "auto" }}>
+                            {line?.custom && suggested !== null && <span className="muted">suggested {money(suggested)} · </span>}
+                            <strong>{line && line.price !== null ? money(line.total) : "Needs a price"}</strong>
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </section>
+
+          <section className="panel" id="price">
+            <h3>Starting price</h3>
+            {quote.lines.length === 0 ? <p className="small muted">Check services above and the starting price builds here.</p> : (
+              <>
+                <ul className="lines small">
+                  {quote.lines.map((l) => (
+                    <li key={l.id}><span>{l.name}{l.qty > 1 ? ` x ${l.qty}` : ""}</span><strong>{l.price === null ? "Needs a price" : money(l.total)}</strong></li>
+                  ))}
+                  {quote.discount > 0 && <li><span>{s.quote.discountNote || "Adjustment"}</span><strong>-{money(quote.discount)}</strong></li>}
+                </ul>
+                <div className="row between" style={{ borderTop: "2px solid var(--gold)", paddingTop: 10 }}>
+                  <strong>Starting price{s.tier ? ` · ${tierLabel(s.tier)}` : ""}</strong>
+                  <strong style={{ fontSize: "1.4rem", color: "var(--rust)" }}>{money(quote.total)}</strong>
+                </div>
+                {quote.unpriced > 0 && <p className="small error-text" style={{ margin: 0 }}>{quote.unpriced} service{quote.unpriced === 1 ? " has" : "s have"} no price yet. Type one in above.</p>}
+              </>
+            )}
+            <div className="grid-2" style={{ gap: 12 }}>
+              <label>Adjustment ($ off) <span className="hint">bundle, community rate, sliding scale</span><input type="number" min={0} step="1" value={s.quote.discount || ""} onChange={(e) => update((d) => void (d.quote.discount = num(e.target.value) ?? 0))} /></label>
+              <label>Reason shown on the proposal<input type="text" placeholder="Community rate" value={s.quote.discountNote} onChange={(e) => update((d) => void (d.quote.discountNote = e.target.value))} /></label>
             </div>
+            <label>Pricing note <span className="hint">payment plan, what could change the price</span><input type="text" value={s.quote.note} onChange={(e) => update((d) => void (d.quote.note = e.target.value))} /></label>
+            <div className="checks">
+              <label>
+                <input type="checkbox" checked={s.quote.share} onChange={() => update((d) => void (d.quote.share = !d.quote.share))} />
+                Show this starting price in the summary they see <span className="hint">(only when the sheet is shared)</span>
+              </label>
+            </div>
+            <div className="row" style={{ gap: 12, alignItems: "center" }}>
+              <button type="button" className="btn btn-sm btn-primary" disabled={!quote.lines.length || quote.unpriced > 0} onClick={sendToProposal}>Use as their proposal</button>
+              {s.quote.appliedAt && <span className="small muted">Copied to their proposal {shortDate(s.quote.appliedAt)}</span>}
+            </div>
+            {propMsg && <p className="ok-text small" style={{ margin: 0 }}>{propMsg} <a href={`/admin/clients/${clientId}`}>Open client page</a></p>}
           </section>
 
           <section className="panel" id="deliverables">
@@ -275,6 +385,12 @@ export default function ConsultSheet({
             <nav className="stack" style={{ gap: 6 }} aria-label="Sheet sections">
               {SECTIONS.map(([id, label]) => <a key={id} href={`#${id}`} className="small">{label}</a>)}
             </nav>
+          </section>
+          <section className="panel" style={{ borderTopColor: "var(--gold)" }}>
+            <h3>Starting price</h3>
+            <strong style={{ fontSize: "1.6rem", color: "var(--rust)" }}>{money(quote.total)}</strong>
+            <span className="small muted">{quote.lines.length} service{quote.lines.length === 1 ? "" : "s"}{s.tier ? ` · ${tierLabel(s.tier)} pricing` : " · choose a client type"}</span>
+            <a href="#price" className="small">See the breakdown</a>
           </section>
           <section className="panel">
             <h3>After the call</h3>

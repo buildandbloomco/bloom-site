@@ -30,6 +30,8 @@ export async function POST(_req: Request, ctx: { params: Promise<{ id: string }>
   sheet.challenges = lead.challenges;
   sheet.budget = lead.budget;
   sheet.keyDates = lead.timeline ? `Timeline from inquiry: ${lead.timeline}` : "";
+  sheet.tier = lead.lane === "orgs" ? "org" : lead.lane === "business" ? "business" : "";
+  client.tier = sheet.tier;
   sheet.serviceIds = lead.interests.filter((i) => catalog.services.some((s) => s.id === i));
   const a = lead.assessment;
   if (a) {

@@ -1,7 +1,7 @@
 import { bookProps } from "@/lib/booking";
 import Link from "next/link";
 import { getCatalog, getSettings } from "@/lib/data";
-import { priceLabel } from "@/lib/format";
+import { money } from "@/lib/format";
 import type { Service } from "@/lib/types";
 
 export const metadata = {
@@ -9,13 +9,29 @@ export const metadata = {
   description: "Organizational wellness services for mental health practices and helping organizations, and strategy, operations, and event support for Black entrepreneurs and community organizations.",
 };
 
+/** Core services are priced at the consult. A la carte prices show for both kinds of client. */
+function PriceLine({ s }: { s: Service }) {
+  const biz = typeof s.price === "number" ? s.price : null;
+  const org = typeof s.priceOrg === "number" ? s.priceOrg : null;
+  if (!s.showPrice || (biz === null && org === null)) return <span className="small price-line">Priced at your free consult</span>;
+  const unit = s.unit ? ` ${s.unit}` : "";
+  if (biz === null || org === null || biz === org) return <span className="small price-line">{money((biz ?? org) as number)}{unit}</span>;
+  return (
+    <span className="small price-line" style={{ display: "grid", gap: 2 }}>
+      <span style={{ whiteSpace: "nowrap" }}><span className="muted">Small business</span> {money(biz)}</span>
+      <span style={{ whiteSpace: "nowrap" }}><span className="muted">Organization</span> {money(org)}</span>
+      {s.unit && <span className="muted">{s.unit}</span>}
+    </span>
+  );
+}
+
 function ServiceCard({ s, lane }: { s: Service; lane: string }) {
   return (
     <article className="card lib-card">
       <h3>{s.name}</h3>
       <p>{s.description}</p>
-      <div className="foot">
-        <span className="small price-line">{priceLabel(s.price, s.unit)}</span>
+      <div className="foot" style={{ flexWrap: "wrap", gap: 12 }}>
+        <PriceLine s={s} />
         <Link className="btn btn-dark btn-sm" href={`/contact?lane=${lane}&interest=${encodeURIComponent(s.id)}`}>Ask about this</Link>
       </div>
     </article>
@@ -88,8 +104,9 @@ export default async function Services() {
         <section className="section alt">
           <div className="wrap">
             <div className="section-head">
-              <p className="eyebrow">Add-ons</p>
+              <p className="eyebrow">A la carte</p>
               <h2>Focused support</h2>
+              <p className="muted">Single sessions and one-time projects you can book on their own. Pricing depends on whether you are a small business or an organization.</p>
             </div>
             <div className="grid-3">{addons.map((x) => <ServiceCard key={x.id} s={x} lane="other" />)}</div>
           </div>

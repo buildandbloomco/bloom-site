@@ -33,6 +33,8 @@ export async function PUT(req: Request) {
       kind: s.kind === "core" ? "core" : "addon",
       description: str(s.description),
       price: s.price === null || (s.price as unknown) === "" || s.price === undefined ? null : Math.max(0, Math.round(Number(s.price) * 100) / 100),
+      priceOrg: s.priceOrg === null || (s.priceOrg as unknown) === "" || s.priceOrg === undefined ? null : Math.max(0, Math.round(Number(s.priceOrg) * 100) / 100),
+      showPrice: s.showPrice === undefined ? s.kind !== "core" : !!s.showPrice,
       unit: str(s.unit, 80),
       active: !!s.active,
       showOnSite: s.showOnSite === undefined ? s.kind === "core" : !!s.showOnSite,

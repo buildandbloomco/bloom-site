@@ -16,6 +16,8 @@ export async function PUT(req: Request, ctx: Ctx) {
   const body = await req.json().catch(() => null);
   if (!body) return error("Bad request.");
   c.consults[i] = sanitizeConsult(body, c.consults[i]);
+  // The newest sheet decides which prices this client sees in their portal
+  if (c.consults[i].tier && i === 0) c.tier = c.consults[i].tier;
   await saveClient(c);
   const s = c.consults[i];
   return json({

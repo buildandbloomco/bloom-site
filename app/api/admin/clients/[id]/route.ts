@@ -25,6 +25,7 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
     contactName: str(b.contactName, 120),
     email: str(b.email, 200),
     status: STATUSES.includes(b.status) ? b.status : c.status,
+    tier: b.tier === "business" || b.tier === "org" ? b.tier : "",
     welcome: str(b.welcome),
     package: {
       title: str(b.package?.title, 200),

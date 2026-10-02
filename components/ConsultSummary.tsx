@@ -1,6 +1,8 @@
 import type { Consult, Service } from "@/lib/types";
-import { shortDate } from "@/lib/format";
-import { OWNER_LABEL } from "@/lib/consult";
+import { money, shortDate } from "@/lib/format";
+import { buildQuote } from "@/lib/tier";
+import { OWNER_LABEL, TYPE_QUESTIONS } from "@/lib/consult";
+
 import ConfirmConsult from "./ConfirmConsult";
 
 function Block({ title, children }: { title: string; children: React.ReactNode }) {
@@ -33,6 +35,8 @@ export default function ConsultSummary({ consults, services, contactName }: { co
         <div className="stack" style={{ gap: 18 }}>
           {consults.map((c, i) => {
             const svc = c.serviceIds.map(name).filter(Boolean) as string[];
+            const q = c.quote.share ? buildQuote(c, services) : null;
+            const typeQs = c.tier ? TYPE_QUESTIONS[c.tier].filter((f) => c.typeAnswers[f.key]) : [];
             const hasAbout = c.about.business || c.about.stage || c.about.teamSize || c.about.offer || c.about.audience;
             return (
               <details key={c.id} className="consult" open={i === 0}>
@@ -49,6 +53,7 @@ export default function ConsultSummary({ consults, services, contactName }: { co
                         <Para label="Team" text={c.about.teamSize} />
                         <Para label="What you do" text={c.about.offer} />
                         <Para label="Who you serve" text={c.about.audience} />
+                        {typeQs.map((f) => <Para key={f.key} label={f.label} text={c.typeAnswers[f.key]} />)}
                       </Block>
                     )}
                     {(c.goals || c.success) && (
@@ -77,6 +82,18 @@ export default function ConsultSummary({ consults, services, contactName }: { co
                       </Block>
                     )}
                   </div>
+
+                  {q && q.lines.length > 0 && q.unpriced === 0 && (
+                    <Block title="Starting price">
+                      <ul className="lines">
+                        {q.lines.map((l) => <li key={l.id}><span>{l.name}{l.qty > 1 ? ` x ${l.qty}` : ""}</span><span>{money(l.total)}</span></li>)}
+                        {q.discount > 0 && <li><span>{c.quote.discountNote || "Adjustment"}</span><span>-{money(q.discount)}</span></li>}
+                        <li><strong>Starting price</strong><strong>{money(q.total)}</strong></li>
+                      </ul>
+                      <Para text={c.quote.note} />
+                      <p className="tiny muted">A starting point from our conversation. Your final proposal may adjust as we confirm scope.</p>
+                    </Block>
+                  )}
 
                   {c.deliverables.length > 0 && (
                     <Block title="Deliverables we agreed on">

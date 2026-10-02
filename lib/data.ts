@@ -3,6 +3,7 @@ import { kv } from "./kv";
 import { codeIndex, encryptCode, newId, normalizeCode } from "./crypto";
 import { DEFAULT_CATALOG, DEFAULT_SETTINGS, NEW_ORG_SERVICES } from "./seed";
 import type { Catalog, Client, PublicClient, Settings } from "./types";
+import { normalizeConsult } from "./consult";
 
 const K = {
   seeded: "bb:seeded",
@@ -112,6 +113,8 @@ export function normalizeClient(c: Client): Client {
   if (c.progressOverride === undefined) c.progressOverride = null;
   if (typeof c.driveFolderUrl !== "string") c.driveFolderUrl = "";
   if (!Array.isArray(c.consults)) c.consults = [];
+  c.consults = c.consults.map(normalizeConsult);
+  if (c.tier !== "business" && c.tier !== "org") c.tier = "";
   delete c.links;
   return c;
 }
@@ -138,10 +141,13 @@ export async function saveSettings(s: Settings) {
 export async function getCatalog(): Promise<Catalog> {
   await ensureSeeded();
   await migrateV2();
+  await migratePricing();
   const cat = (await kv().get<Catalog>(K.catalog)) ?? DEFAULT_CATALOG;
   for (const s of cat.services) {
     s.showOnSite ??= s.kind === "core";
     s.lane ??= "both";
+    s.showPrice ??= s.kind === "addon";
+    if (s.priceOrg === undefined) s.priceOrg = null;
   }
   for (const l of cat.library) l.showOnSite ??= l.kind !== "resource";
   return cat;
@@ -171,6 +177,45 @@ function migrateV2() {
     });
   }
   return migrating;
+}
+/** One-time: add suggested small business and organization prices where a price was still blank */
+export const SUGGESTED_PRICES: Record<string, { business: number | null; org: number | null; unit?: string }> = {
+  masterclass: { business: 3000, org: 4500, unit: "3-session team program" },
+  "org-assessment": { business: 2500, org: 6000, unit: "project" },
+  strategy: { business: 2400, org: 4500, unit: "three-session plan" },
+  operations: { business: 1500, org: 2800, unit: "per month" },
+  workshops: { business: 1500, org: 2500, unit: "per session" },
+  events: { business: 2500, org: 4000, unit: "per event, starting" },
+  integrated: { business: null, org: null },
+  "addon-intensive": { business: 350, org: 475 },
+  "addon-sops": { business: 900, org: 1500 },
+  "addon-offer": { business: 300, org: 400 },
+  "addon-team-workshop": { business: 900, org: 1500 },
+  "addon-checkin": { business: 200, org: 275 },
+  "addon-dayof": { business: 800, org: 1200 },
+};
+let pricing: Promise<void> | null = null;
+function migratePricing() {
+  if (!pricing) {
+    pricing = (async () => {
+      if (await kv().get("bb:mig:pricing1")) return;
+      const cat = (await kv().get<Catalog>(K.catalog)) ?? DEFAULT_CATALOG;
+      for (const s of cat.services) {
+        const p = SUGGESTED_PRICES[s.id];
+        if (!p) continue;
+        if (s.price === null || s.price === undefined) { s.price = p.business; if (p.unit && p.business !== null) s.unit = p.unit; }
+        if (s.priceOrg === null || s.priceOrg === undefined) s.priceOrg = p.org;
+        // A la carte services and their prices go on the Services page
+        if (s.kind === "addon") { s.showOnSite = true; s.showPrice = true; }
+      }
+      await kv().set(K.catalog, cat);
+      await kv().set("bb:mig:pricing1", true);
+    })().catch((e) => {
+      pricing = null;
+      throw e;
+    });
+  }
+  return pricing;
 }
 export async function saveCatalog(c: Catalog) {
   await kv().set(K.catalog, c);
@@ -258,7 +303,8 @@ export function toPublic(c: Client): PublicClient {
   return {
     ...rest,
     // Only sheets you chose to share, and never your private notes
-    consults: c.consults.filter((x) => x.shared).map((x) => ({ ...x, privateNotes: "" })),
+    // The starting price only goes along when you chose to share it
+    consults: c.consults.filter((x) => x.shared).map((x) => ({ ...x, privateNotes: "", quote: x.quote.share ? x.quote : { ...x.quote, prices: {}, qty: {}, discount: 0, discountNote: "", note: "" } })),
   };
 }
 

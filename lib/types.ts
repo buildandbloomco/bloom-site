@@ -5,8 +5,12 @@ export interface Service {
   name: string;
   kind: ServiceKind;
   description: string;
-  /** Price in dollars. null = custom quote */
+  /** Price in dollars for a small business or individual. null = custom quote */
   price: number | null;
+  /** Price in dollars for an organization. Empty = same as the small business price */
+  priceOrg?: number | null;
+  /** Show the price on the public website (otherwise it says the price is set at the consult) */
+  showPrice?: boolean;
   /** e.g. "per session", "per month", "one time" */
   unit: string;
   active: boolean;
@@ -186,6 +190,24 @@ export interface Consult {
   startDate: string;
   keyDates: string;
   serviceIds: string[];
+  /** Which kind of client this is. Sets the questions on the sheet and which prices are suggested */
+  tier: "business" | "org" | "";
+  /** Answers to the questions for that kind of client */
+  typeAnswers: Record<string, string>;
+  /** Starting price built during the call */
+  quote: {
+    /** Your own price for a service, when different from the suggested one */
+    prices: Record<string, number>;
+    /** Sessions, months, or units for a service */
+    qty: Record<string, number>;
+    discount: number;
+    discountNote: string;
+    note: string;
+    /** Show the starting price in the summary the client sees */
+    share: boolean;
+    /** When this starting price was copied into their proposal */
+    appliedAt: string | null;
+  };
   deliverables: ConsultDeliverable[];
   actions: ConsultAction[];
   notes: string;
@@ -250,6 +272,8 @@ export interface Client {
   contactName: string;
   email: string;
   status: ClientStatus;
+  /** Small business or organization. Sets which add-on prices they see and pay in the portal */
+  tier?: "business" | "org" | "";
   codeEnc: string;
   codeIndex: string;
   welcome: string;

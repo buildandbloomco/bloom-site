@@ -6,6 +6,7 @@ import { money, priceLabel, shortDate } from "@/lib/format";
 import { outstanding } from "@/lib/pricing";
 import type { Catalog, Client, ClientStatus } from "@/lib/types";
 import WorkEditor from "./WorkEditor";
+import { priceFor, TIERS } from "@/lib/tier";
 
 export interface WorkspaceSummary {
   plan: { enabled: boolean; pct: number; total: number; openRequests: number; newComments: number; nextSession: string };
@@ -177,6 +178,13 @@ Reach out with any questions. So glad to build with you.`;
                 </select>
               </label>
               <label>
+                Client type <span className="hint">sets the add-on prices they see</span>
+                <select value={c.tier ?? ""} onChange={(e) => update((d) => void (d.tier = e.target.value as Client["tier"]))}>
+                  <option value="">Not set (small business prices)</option>
+                  {TIERS.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
+                </select>
+              </label>
+              <label>
                 Page address <span className="hint">yoursite.com/p/{c.slug}</span>
                 <input type="text" value={c.slug} onChange={(e) => update((d) => void (d.slug = e.target.value))} />
               </label>
@@ -293,7 +301,7 @@ Reach out with any questions. So glad to build with you.`;
               {addons.map((s) => (
                 <label key={s.id}>
                   <input type="checkbox" checked={c.addOnIds.includes(s.id)} onChange={() => update((d) => void (d.addOnIds = toggleIn(d.addOnIds, s.id)))} />
-                  {s.name} <span className="hint">{priceLabel(s.price, s.unit)}{!s.active ? " · hidden (inactive)" : ""}</span>
+                  {s.name} <span className="hint">{priceLabel(priceFor(s, c.tier), s.unit)}{!s.active ? " · hidden (inactive)" : ""}</span>
                 </label>
               ))}
               {!addons.length && <p className="muted small">No add-ons yet. Create them under Services & add-ons.</p>}
