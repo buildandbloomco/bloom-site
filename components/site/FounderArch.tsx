@@ -9,8 +9,9 @@ function founderPhoto(): string | null {
   return null;
 }
 
-export default function FounderArch({ pill = "Founder" }: { pill?: string }) {
-  const photo = founderPhoto();
+/** logoOnly keeps the logo even when a founder photo exists (used at the top of the home page) */
+export default function FounderArch({ pill = "Founder", logoOnly = false }: { pill?: string; logoOnly?: boolean }) {
+  const photo = logoOnly ? null : founderPhoto();
   return (
     <div className="arch-frame">
       <div className="back" />

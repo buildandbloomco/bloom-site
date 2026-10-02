@@ -28,7 +28,7 @@ export default async function Home() {
               <Link className="btn btn-ghost" href="/masterclass">Explore the Masterclass</Link>
             </div>
           </div>
-          <FounderArch pill="Psychology of Care" />
+          <FounderArch pill="Psychology of Care" logoOnly />
         </div>
       </section>
 
