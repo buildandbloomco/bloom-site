@@ -1,3 +1,4 @@
+import { notifyAdmin } from "@/lib/notify";
 import { currentClient } from "@/lib/auth";
 import { rateLimit } from "@/lib/data";
 import { newId } from "@/lib/crypto";
@@ -18,6 +19,7 @@ export async function POST(req: Request) {
   const b = await req.json().catch(() => ({}));
   const now = new Date().toISOString();
   const task = plan.tasks.find((t) => t.id === String(b.taskId));
+  let note: string[] | null = null;
   switch (b.action) {
     case "status": {
       if (!task) return error("We couldn't find that task.", 404);
@@ -51,6 +53,7 @@ export async function POST(req: Request) {
       const text = str(b.text, 2000);
       if (!text) return error("Write a comment first.");
       task.comments.push({ id: newId(), by: "client", text, at: now });
+      note = [`${client.name} commented on a task`, `On "${task.title}":`, text];
       break;
     }
     case "agenda": {
@@ -68,6 +71,7 @@ export async function POST(req: Request) {
       const tt: PlanRequest["targetType"] = ["task", "session"].includes(b.targetType) ? b.targetType : "plan";
       const label = tt === "task" ? plan.tasks.find((t) => t.id === b.targetId)?.title : tt === "session" ? plan.sessions.find((s) => s.id === b.targetId)?.title : plan.title;
       plan.requests.push({ id: newId(), kind: ["change", "new", "remove", "question"].includes(b.kind) ? b.kind : "change", targetType: tt, targetId: str(b.targetId, 40), targetLabel: label ?? "", text, at: now, status: "open", reply: "" });
+      note = [`${client.name} sent a change request`, label ? `About: ${label}` : "", text];
       break;
     }
     default:
@@ -75,5 +79,6 @@ export async function POST(req: Request) {
   }
   const next = await sanitizePlan(plan, plan, client);
   await savePlan(next);
+  if (note) await notifyAdmin(note[0], note.slice(1), `/admin/clients/${client.id}/desk`);
   return json(next);
 }

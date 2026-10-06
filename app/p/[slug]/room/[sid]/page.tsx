@@ -21,7 +21,7 @@ export default async function ClientRoom({ params }: { params: Promise<{ slug: s
       <PortalTop slug={slug} brand={settings.brandName} title="plan" />
       <main className="section" style={{ paddingTop: 24 }}>
         <div className="wrap">
-          <StrategyRoom sid={sid} role="client" names={{ us: "Jadon", client: client.contactName || "You" }} title={s.title} date={s.date} closed={s.status === "done"} backHref={`/p/${slug}/plan`} />
+          <StrategyRoom sid={sid} role="client" names={{ us: "Jadon", client: client.contactName || "You" }} title={s.title} date={s.date} closed={s.status === "done"} link={s.link ?? ""} calHref={s.date ? `/api/portal/plan/ics?sid=${sid}` : ""} backHref={`/p/${slug}/plan`} />
         </div>
       </main>
     </>

@@ -1,3 +1,4 @@
+import { notifyAdmin } from "@/lib/notify";
 import { rateLimit } from "@/lib/data";
 import { listLeads, saveLead } from "@/lib/leads";
 import { newId } from "@/lib/crypto";
@@ -39,6 +40,7 @@ export async function POST(req: Request) {
   const had = lead.guides.find((g) => g.slug === guide.slug);
   if (!had) lead.guides.push({ slug: guide.slug, title: guide.title, at: now, paid: 0 });
   await saveLead(lead);
+  if (!had) await notifyAdmin(`New guide lead: ${name}`, [`${name} (${email}) asked for "${guide.title}".`, lead.organization, str(b.working, 1000)], `/admin/leads/${lead.id}`);
 
   if (guide.price <= 0 || (had && had.paid > 0)) return json({ ok: true, url: guide.file });
 

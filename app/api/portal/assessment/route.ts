@@ -1,3 +1,4 @@
+import { notifyAdmin } from "@/lib/notify";
 import { currentClient } from "@/lib/auth";
 import { rateLimit } from "@/lib/data";
 import { error, json } from "@/lib/http";
@@ -24,5 +25,6 @@ export async function POST(req: Request) {
     if (a.status === "leader") a.status = "team";
   }
   await saveAssessment(a);
+  if (b.action === "submit") await notifyAdmin(`${client.name} submitted the leader questionnaire`, [`${a.leaderName} finished the leader questionnaire for ${client.name}.`], `/admin/clients/${client.id}/assessment`);
   return json({ ok: true, leaderSubmittedAt: a.leaderSubmittedAt, status: a.status });
 }

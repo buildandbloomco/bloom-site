@@ -1,3 +1,4 @@
+import { notifyAdmin } from "@/lib/notify";
 import { currentClient } from "@/lib/auth";
 import { rateLimit, saveClient } from "@/lib/data";
 import { error, json } from "@/lib/http";
@@ -16,5 +17,6 @@ export async function POST(req: Request) {
   sheet.clientComment = String(b.comment || "").slice(0, 3000);
   sheet.clientConfirmedAt = new Date().toISOString();
   await saveClient(client);
+  await notifyAdmin(`${client.name} confirmed the consult summary`, [`${name} confirmed the summary.`, sheet.clientComment ? `They added: ${sheet.clientComment}` : ""], `/admin/clients/${client.id}/consult/${sheet.id}`);
   return json({ ok: true, at: sheet.clientConfirmedAt });
 }

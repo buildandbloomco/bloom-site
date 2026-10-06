@@ -14,6 +14,6 @@ export default async function AdminRoom({ params }: { params: Promise<{ id: stri
   if (!s) notFound();
   return (
     <StrategyRoom sid={sid} clientId={id} role="us" names={{ us: "Jadon", client: client.contactName || client.name }}
-      title={`${client.name}: ${s.title}`} date={s.date} closed={s.status === "done"} backHref={`/admin/clients/${id}/desk`} />
+      title={`${client.name}: ${s.title}`} date={s.date} closed={s.status === "done"} link={s.link ?? ""} calHref={s.date ? `/api/admin/clients/${id}/plan/ics?sid=${sid}` : ""} backHref={`/admin/clients/${id}/desk`} />
   );
 }

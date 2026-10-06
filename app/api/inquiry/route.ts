@@ -1,3 +1,4 @@
+import { notifyAdmin } from "@/lib/notify";
 import { rateLimit } from "@/lib/data";
 import { saveLead } from "@/lib/leads";
 import { newId } from "@/lib/crypto";
@@ -59,5 +60,6 @@ export async function POST(req: Request) {
     clientId: null,
   };
   await saveLead(lead);
+  await notifyAdmin(`New inquiry: ${name}`, [`${name} (${email}) sent an inquiry.`, lead.organization, lead.goals], `/admin/leads/${lead.id}`);
   return json({ ok: true });
 }

@@ -1,6 +1,7 @@
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/auth";
+import { FILE_TYPES } from "@/lib/files";
 
 // Uploads go straight from your browser to Vercel Blob storage. Only you (signed in to admin) can upload.
 export async function POST(request: Request): Promise<NextResponse> {
@@ -19,6 +20,7 @@ export async function POST(request: Request): Promise<NextResponse> {
             "video/mp4", "video/quicktime", "video/webm",
             "audio/mpeg", "audio/mp4", "audio/x-m4a", "audio/wav", "audio/x-wav", "audio/aac",
             "image/png", "image/jpeg", "image/webp", "application/pdf",
+            ...FILE_TYPES,
           ],
           maximumSizeInBytes: 1024 * 1024 * 1024,
           addRandomSuffix: true,

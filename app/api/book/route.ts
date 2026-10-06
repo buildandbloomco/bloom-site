@@ -1,3 +1,4 @@
+import { notifyAdmin } from "@/lib/notify";
 import { getSettings, rateLimit } from "@/lib/data";
 import { getEnrollment, saveAppointment, saveEnrollment } from "@/lib/courses";
 import { listLeads, saveLead } from "@/lib/leads";
@@ -106,5 +107,6 @@ export async function POST(req: Request) {
   }
 
   await saveAppointment(a);
+  await notifyAdmin(`New booking: ${name}`, [`${name}${email ? ` (${email})` : ""} booked ${a.title || "a session"} on ${longDate(date)} at ${fmtTime(start)} ET.`], "/admin/calendar");
   return json({ id: a.id, token: a.token });
 }

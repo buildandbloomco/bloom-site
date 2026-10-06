@@ -430,3 +430,24 @@ input:focus, select:focus, textarea:focus, .btn:focus-visible, a:focus-visible, 
 .cal-agenda { display: none; }
 @media (max-width: 760px) { .cal-grid { display: none; } .cal-agenda { display: flex; flex-direction: column; gap: 6px; } }
 
+
+/* Scorecard trend, shared files, agreements, review */
+.trend { display: flex; flex-direction: column; }
+.trend-row { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(70px, auto); gap: 14px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+.trend-row:first-child { border-top: 0; }
+.trend-row svg { max-width: 100%; height: auto; }
+.trend.compact .trend-row { grid-template-columns: auto 1fr; }
+.trend.compact .trend-row > :first-child { grid-column: 1 / -1; }
+@media (max-width: 520px) { .trend-row { grid-template-columns: 1fr auto; } .trend-row svg { grid-column: 1 / -1; order: 3; } }
+.file-row { display: flex; gap: 12px; align-items: center; justify-content: space-between; padding: 10px 0; border-top: 1px solid var(--line); flex-wrap: wrap; }
+.file-row:first-child { border-top: 0; }
+.file-row a.name { font-weight: 600; overflow-wrap: anywhere; }
+.agree-body { white-space: pre-wrap; font-size: 1.02rem; line-height: 1.65; overflow-wrap: anywhere; }
+.sign-line { font-family: var(--serif); font-style: italic; font-size: 1.6rem; border-bottom: 1px solid var(--espresso); padding: 4px 0; display: inline-block; min-width: 240px; }
+.review h3 { text-transform: none; letter-spacing: 0; font-size: 1.2rem; color: var(--rust); margin: 0 0 8px; }
+.review ul { margin: 0; padding-left: 20px; }
+.review li { margin: 3px 0; }
+.review-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
+.review-stats div { background: var(--cream); border-radius: 12px; padding: 14px; }
+.review-stats .n { font-family: var(--serif); font-size: 2rem; line-height: 1; color: var(--rust); display: block; }
+@media print { .review section, .agree-print { break-inside: avoid; } .footer, .admin-nav, nav { display: none !important; } }

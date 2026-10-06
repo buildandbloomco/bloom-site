@@ -11,6 +11,13 @@ import { money, shortDate } from "@/lib/format";
 import { outstanding } from "@/lib/pricing";
 import { tierLabel } from "@/lib/tier";
 import SessionDesk from "@/components/admin/SessionDesk";
+import { emailReady } from "@/lib/invite";
+import { siteOrigin } from "@/lib/http";
+import SharedFiles from "@/components/SharedFiles";
+import ScoreTrend from "@/components/ScoreTrend";
+import { listAgreements } from "@/lib/agreements";
+import { listFiles } from "@/lib/files";
+import { scorecardHistory } from "@/lib/room";
 import PrivateNotes from "@/components/admin/PrivateNotes";
 
 export const dynamic = "force-dynamic";
@@ -26,6 +33,7 @@ export default async function ClientDesk({ params }: { params: Promise<{ id: str
   const [plan, catalog, assessment, responses, enrollments, appts, lib] = await Promise.all([
     getPlan(id), getCatalog(), getAssessment(id), listResponses(id), listEnrollments({ clientId: id }), listAppointments(), getAccess(id),
   ]);
+  const [agreements, files, scores] = await Promise.all([listAgreements(id), listFiles(id), scorecardHistory(id)]);
   const courses = (await Promise.all(enrollments.map(async (e) => ({ e, c: await getCourse(e.courseId) })))).filter((x) => x.c);
   const upcoming = appts.filter((a) => a.clientId === id && a.date >= today).sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start)).slice(0, 3);
   const openReqs = plan.requests.filter((r) => r.status === "open");
@@ -51,12 +59,13 @@ export default async function ClientDesk({ params }: { params: Promise<{ id: str
         </div>
         <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
           <a className="btn btn-sm btn-ghost" href={`/api/admin/clients/${id}/preview`} target="_blank" rel="noreferrer">Their portal &#8599;</a>
+          <Link className="btn btn-sm btn-ghost" href={`/admin/clients/${id}/review`}>Progress review</Link>
           <Link className="btn btn-sm btn-ghost" href={`/admin/clients/${id}`}>Edit client page</Link>
         </div>
       </div>
 
       <div className="editor-grid">
-        <SessionDesk clientId={id} slug={client.slug} initial={plan} today={today} />
+        <SessionDesk clientId={id} slug={client.slug} initial={plan} today={today} clientEmail={client.email} firstName={client.contactName} emailReady={emailReady()} origin={await siteOrigin()} />
 
         <aside className="stack" style={{ gap: 16 }}>
           {(openReqs.length > 0 || clientComments.length > 0 || addOnReqs.length > 0) && (
@@ -83,6 +92,25 @@ export default async function ClientDesk({ params }: { params: Promise<{ id: str
               </>
             )}
             {lib?.status === "active" && <Row k="Wellness Library" v="Member" />}
+          </section>
+
+          {scores.length > 0 && (
+            <section className="panel">
+              <h3>Scorecard over time</h3>
+              <ScoreTrend series={scores} compact />
+            </section>
+          )}
+
+          <section className="panel" style={agreements.some((a) => a.status === "sent") ? { borderTopColor: "var(--gold)" } : undefined}>
+            <h3>Agreements</h3>
+            {agreements.length === 0 && <p className="small muted" style={{ margin: 0 }}>None yet.</p>}
+            {agreements.map((a) => <Row key={a.id} k={a.title} v={a.status === "signed" ? `Signed ${shortDate(a.signedAt ?? "")}` : a.status === "sent" ? "Waiting for signature" : "Draft"} />)}
+            <Link className="small" href={`/admin/clients/${id}/agreements`}>{agreements.length ? "Open agreements" : "Create an agreement"}</Link>
+          </section>
+
+          <section className="panel">
+            <h3>Shared files</h3>
+            <SharedFiles initial={files} as="us" clientId={id} />
           </section>
 
           {upcoming.length > 0 && (
@@ -137,6 +165,7 @@ export default async function ClientDesk({ params }: { params: Promise<{ id: str
             <h3>Private notes</h3>
             <PrivateNotes clientId={id} initial={client.notes} />
           </section>
+          <a className="small" href={`/api/admin/export?client=${id}`}>Download a backup of this client</a>
         </aside>
       </div>
     </div>

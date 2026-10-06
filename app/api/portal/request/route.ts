@@ -1,3 +1,4 @@
+import { notifyAdmin } from "@/lib/notify";
 import { currentClient } from "@/lib/auth";
 import { getCatalog, rateLimit, saveClient } from "@/lib/data";
 import { newId } from "@/lib/crypto";
@@ -18,5 +19,6 @@ export async function POST(req: Request) {
   if (!ids.length && !note.trim()) return error("Choose at least one add-on or leave a note.");
   client.requests.push({ id: newId(), addOnIds: ids, note, date: new Date().toISOString(), status: "new" });
   await saveClient(client);
+  await notifyAdmin(`${client.name} asked about add-ons`, [ids.length ? `Add-ons: ${ids.map((id) => catalog.services.find((s) => s.id === id)?.name).join(", ")}` : "", note], `/admin/clients/${client.id}`);
   return json({ ok: true });
 }

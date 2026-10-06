@@ -16,6 +16,10 @@ import SignOut from "@/components/SignOut";
 import Ribbon from "@/components/Ribbon";
 import YourWork, { hasWork } from "@/components/YourWork";
 import ConsultSummary from "@/components/ConsultSummary";
+import SharedFiles from "@/components/SharedFiles";
+import { listAgreements } from "@/lib/agreements";
+import { listFiles } from "@/lib/files";
+import { getReview } from "@/lib/reviews";
 import MyCourses from "@/components/course/MyCourses";
 import { getAccess } from "@/lib/library";
 import { getCourse, listAppointments, listEnrollments } from "@/lib/courses";
@@ -84,6 +88,9 @@ export default async function Portal({
   const hasLibrary = libAccess?.status === "active";
   const [plan, assessment] = await Promise.all([getPlan(client.id), getAssessment(client.id)]);
   const hasWorkspace = !!plan.enabled || !!assessment?.enabled;
+  const [agreements, files, review] = await Promise.all([listAgreements(client.id), listFiles(client.id), getReview(client.id)]);
+  const myAgreements = agreements.filter((a) => a.status !== "draft");
+  const toSign = myAgreements.filter((a) => a.status === "sent");
   const nav = [
     hasWorkspace ? ["Workspace", "#workspace"] : null,
     myCourses.length ? ["Courses", "#courses"] : null,
@@ -94,6 +101,7 @@ export default async function Portal({
     addOns.length && !noPay ? ["Add-ons", "#addons"] : null,
     noPay ? null : ["Pay", "#pay"],
     library.length ? ["Library", "#library"] : null,
+    ["Files", "#files"],
     client.showBooking ? ["Book a session", "#book"] : null,
     ["Next steps", "#next"],
   ].filter(Boolean) as [string, string][];
@@ -155,7 +163,32 @@ export default async function Portal({
           </div>
         </section>
 
+        {toSign.length > 0 && (
+          <section className="section" style={{ paddingBottom: 0 }}>
+            <div className="wrap">
+              <div className="banner warn row between" style={{ margin: 0, gap: 14, flexWrap: "wrap" }}>
+                <span><strong>Please sign: {toSign.map((a) => a.title).join(", ")}.</strong>{toSign.some((a) => a.requiredToPay) && !noPay ? " This needs your signature before you can pay online." : " It takes about two minutes."}</span>
+                <a className="btn btn-sm btn-dark" href={`/p/${slug}/agreements/${toSign[0].id}`}>Read and sign</a>
+              </div>
+            </div>
+          </section>
+        )}
+
         <WorkspaceHub slug={slug} plan={plan} assessment={assessment} today={today} />
+
+        {review?.sharedAt && (
+          <section className="section" style={{ paddingBottom: 0 }}>
+            <div className="wrap">
+              <div className="ws-card" style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap" }}>
+                <div className="stack" style={{ gap: 4 }}>
+                  <h3>Your progress review</h3>
+                  <p className="small" style={{ margin: 0 }}>{shortDate(review.from)} to {shortDate(review.to)}: what we did, what moved, and what comes next.</p>
+                </div>
+                <a className="btn btn-sm btn-dark" href={`/p/${slug}/review`}>Open the review</a>
+              </div>
+            </div>
+          </section>
+        )}
 
         <section className="section" id="guidebooks" style={{ paddingBottom: 0 }}>
           <div className="wrap stack" style={{ gap: 16 }}>
@@ -333,6 +366,37 @@ export default async function Portal({
             </div>
           </section>
         )}
+
+        {/* FILES AND AGREEMENTS */}
+        <section className="section" id="files">
+          <div className="wrap">
+            <div className="section-head">
+              <p className="eyebrow">Files and agreements</p>
+              <h2>Everything we share, in one place</h2>
+            </div>
+            <div className={myAgreements.length ? "grid-2" : "stack"}>
+              <div className="card stack" style={{ gap: 12 }}>
+                <h3 style={{ margin: 0 }}>Shared files</h3>
+                <p className="small muted" style={{ margin: 0 }}>Send us documents we ask for, and find the ones we send you.</p>
+                <SharedFiles initial={files} as="client" clientId={client.id} />
+              </div>
+              {myAgreements.length > 0 && (
+                <div className="card stack" style={{ gap: 12 }}>
+                  <h3 style={{ margin: 0 }}>Agreements</h3>
+                  {myAgreements.map((a) => (
+                    <div className="file-row" key={a.id}>
+                      <div className="stack" style={{ gap: 2 }}>
+                        <strong>{a.title}</strong>
+                        <span className="tiny muted">{a.status === "signed" ? `Signed by ${a.signedName} on ${shortDate(a.signedAt ?? "")}` : "Waiting for your signature"}</span>
+                      </div>
+                      <a className={`btn btn-sm ${a.status === "signed" ? "btn-ghost" : "btn-primary"}`} href={`/p/${slug}/agreements/${a.id}`}>{a.status === "signed" ? "View" : "Read and sign"}</a>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
 
         {/* BOOK */}
         {client.showBooking && (
