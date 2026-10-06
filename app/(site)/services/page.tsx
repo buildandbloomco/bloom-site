@@ -63,6 +63,18 @@ export default async function Services() {
         </div>
       </section>
 
+      <section className="section" style={{ paddingBottom: 0 }}>
+        <div className="wrap">
+          <div className="dark-card row between" style={{ gap: 20, flexWrap: "wrap" }}>
+            <div className="stack" style={{ gap: 6, maxWidth: 640 }}>
+              <span className="eyebrow gold">New: custom client portals &amp; systems</span>
+              <p style={{ margin: 0, color: "var(--on-dark-2)" }}>A private, branded home base where clients view proposals, sign, pay, and track their work, and you see what needs attention on one screen.</p>
+            </div>
+            <Link className="btn btn-gold" href="/systems">See how it works</Link>
+          </div>
+        </div>
+      </section>
+
       {orgs.length > 0 && (
         <section className="section" id="orgs">
           <div className="wrap">

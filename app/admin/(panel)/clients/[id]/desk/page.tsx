@@ -18,6 +18,10 @@ import ScoreTrend from "@/components/ScoreTrend";
 import { listAgreements } from "@/lib/agreements";
 import { listFiles } from "@/lib/files";
 import { scorecardHistory } from "@/lib/room";
+import { getBuild } from "@/lib/builds";
+import { STAGES } from "@/lib/build-def";
+import { getProposal } from "@/lib/proposals";
+import { proposalState } from "@/lib/proposal-def";
 import PrivateNotes from "@/components/admin/PrivateNotes";
 
 export const dynamic = "force-dynamic";
@@ -34,6 +38,8 @@ export default async function ClientDesk({ params }: { params: Promise<{ id: str
     getPlan(id), getCatalog(), getAssessment(id), listResponses(id), listEnrollments({ clientId: id }), listAppointments(), getAccess(id),
   ]);
   const [agreements, files, scores] = await Promise.all([listAgreements(id), listFiles(id), scorecardHistory(id)]);
+  const propState = proposalState(await getProposal(id), today);
+  const build = await getBuild(id);
   const courses = (await Promise.all(enrollments.map(async (e) => ({ e, c: await getCourse(e.courseId) })))).filter((x) => x.c);
   const upcoming = appts.filter((a) => a.clientId === id && a.date >= today).sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start)).slice(0, 3);
   const openReqs = plan.requests.filter((r) => r.status === "open");
@@ -102,7 +108,9 @@ export default async function ClientDesk({ params }: { params: Promise<{ id: str
           )}
 
           <section className="panel" style={agreements.some((a) => a.status === "sent") ? { borderTopColor: "var(--gold)" } : undefined}>
-            <h3>Agreements</h3>
+            <h3>Proposal and agreements</h3>
+            <Row k="Systems build" v={<Link href={`/admin/clients/${id}/build`}>{build.enabled ? `${STAGES.find((s) => s.id === build.stage)?.label}${build.requests.some((r) => r.status === "new") ? " · new add-on request" : ""}` : "Set up"}</Link>} />
+            <Row k="Proposal" v={<Link href={`/admin/clients/${id}/proposal`}>{propState ? propState.label.replace("Proposal ", "").replace(/^./, (m) => m.toUpperCase()) : "Create one"}</Link>} />
             {agreements.length === 0 && <p className="small muted" style={{ margin: 0 }}>None yet.</p>}
             {agreements.map((a) => <Row key={a.id} k={a.title} v={a.status === "signed" ? `Signed ${shortDate(a.signedAt ?? "")}` : a.status === "sent" ? "Waiting for signature" : "Draft"} />)}
             <Link className="small" href={`/admin/clients/${id}/agreements`}>{agreements.length ? "Open agreements" : "Create an agreement"}</Link>

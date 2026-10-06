@@ -4,12 +4,14 @@ import { error, json, siteOrigin } from "@/lib/http";
 import { buildCharge, payChoices, type PayOption } from "@/lib/pricing";
 import { stripe } from "@/lib/stripe";
 import { pricedFor } from "@/lib/tier";
+import { getProposal } from "@/lib/proposals";
 import { blocksPayment, listAgreements } from "@/lib/agreements";
 
 export async function POST(req: Request) {
   const client = await currentClient();
   if (!client) return error("Your session ended. Please enter your access code again.", 401);
   if (client.billing === "none") return error("There is nothing to pay on this account.");
+  if ((await getProposal(client.id))?.status === "sent") return error("Please accept your proposal first. You will find it at the top of your portal.");
   if (blocksPayment(await listAgreements(client.id))) return error("Please sign your agreement first. You will find it at the top of your portal.");
   const s = stripe();
   if (!s) return error("Online payments are not turned on yet. Please reach out and we will send an invoice.", 503);

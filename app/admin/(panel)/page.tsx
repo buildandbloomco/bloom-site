@@ -3,6 +3,9 @@ import { amountPaid, getCatalog, listClients, totalCollected } from "@/lib/data"
 import { money, shortDate } from "@/lib/format";
 import { outstanding } from "@/lib/pricing";
 import { computeProgress } from "@/lib/progress";
+import { allProposals } from "@/lib/proposals";
+import { proposalState } from "@/lib/proposal-def";
+import { nowET } from "@/lib/booking";
 import NewClient from "@/components/admin/NewClient";
 
 export const dynamic = "force-dynamic";
@@ -10,7 +13,8 @@ export const dynamic = "force-dynamic";
 const STATUS_TAG: Record<string, string> = { draft: "", sent: "gold", active: "green", completed: "green", archived: "" };
 
 export default async function AdminHome() {
-  const [clients, catalog] = await Promise.all([listClients(), getCatalog()]);
+  const [clients, catalog, proposals] = await Promise.all([listClients(), getCatalog(), allProposals()]);
+  const today = nowET().date;
   const live = clients.filter((c) => c.status !== "archived");
   const collected = clients.reduce((s, c) => s + totalCollected(c), 0);
   const owed = live.reduce((s, c) => s + outstanding(c.investment, amountPaid(c)), 0);
@@ -84,6 +88,7 @@ export default async function AdminHome() {
                   </td>
                   <td>
                     <span className={`tag ${STATUS_TAG[c.status] ?? ""}`}>{c.status}</span>
+                    {(() => { const ps = proposalState(proposals[c.id] ?? null, today); return ps ? <div style={{ marginTop: 6 }}><Link href={`/admin/clients/${c.id}/proposal`} className={`tag ${ps.tone}`} style={{ textDecoration: "none" }}>{ps.label}</Link></div> : null; })()}
                     {reqs > 0 && <div style={{ marginTop: 6 }}><span className="tag rust">{reqs} new request{reqs > 1 ? "s" : ""}</span></div>}
                   </td>
                   <td className="small">{c.package.title || <span className="muted">Not set</span>}</td>

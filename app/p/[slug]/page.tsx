@@ -19,6 +19,10 @@ import ConsultSummary from "@/components/ConsultSummary";
 import SharedFiles from "@/components/SharedFiles";
 import { listAgreements } from "@/lib/agreements";
 import { listFiles } from "@/lib/files";
+import { getProposal } from "@/lib/proposals";
+import { isExpired } from "@/lib/proposal-def";
+import { getBuild } from "@/lib/builds";
+import { BUILD_KINDS, STAGES, intakeProgress } from "@/lib/build-def";
 import { getReview } from "@/lib/reviews";
 import MyCourses from "@/components/course/MyCourses";
 import { getAccess } from "@/lib/library";
@@ -73,7 +77,8 @@ export default async function Portal({
   const paid = amountPaid(client);
   const owe = outstanding(client.investment, paid);
   const noPay = client.billing === "none";
-  const hasInvestment = client.investment.total > 0 && !noPay;
+  const holdPay = (await getProposal(client.id))?.status === "sent";
+  const hasInvestment = client.investment.total > 0 && !noPay && !holdPay;
   const first = client.contactName || client.name;
 
   const showWork = hasWork(pub);
@@ -91,15 +96,20 @@ export default async function Portal({
   const [agreements, files, review] = await Promise.all([listAgreements(client.id), listFiles(client.id), getReview(client.id)]);
   const myAgreements = agreements.filter((a) => a.status !== "draft");
   const toSign = myAgreements.filter((a) => a.status === "sent");
+  const proposal = await getProposal(client.id);
+  const build = await getBuild(client.id);
+  // While a proposal is waiting for an answer, the price lives on the proposal page, not here
+  const proposalOpen = proposal?.status === "sent";
   const nav = [
+    build.enabled ? ["Your build", `/p/${slug}/build`] : null,
     hasWorkspace ? ["Workspace", "#workspace"] : null,
     myCourses.length ? ["Courses", "#courses"] : null,
     showWork ? ["Your work", "#work"] : null,
     pub.consults.length ? ["Consult notes", "#consult"] : null,
-    ["Your package", "#package"],
+    holdPay ? ["Your proposal", `/p/${slug}/proposal`] : ["Your package", "#package"],
     hasInvestment ? ["Investment", "#investment"] : null,
-    addOns.length && !noPay ? ["Add-ons", "#addons"] : null,
-    noPay ? null : ["Pay", "#pay"],
+    addOns.length && !noPay && !holdPay ? ["Add-ons", "#addons"] : null,
+    noPay || holdPay ? null : ["Pay", "#pay"],
     library.length ? ["Library", "#library"] : null,
     ["Files", "#files"],
     client.showBooking ? ["Book a session", "#book"] : null,
@@ -148,9 +158,9 @@ export default async function Portal({
                 ) : showWork ? (
                   <a className="btn btn-primary" href="#work">View your work</a>
                 ) : (
-                  <a className="btn btn-primary" href="#package">Explore your package</a>
+                  holdPay ? <a className="btn btn-primary" href="#next">Next steps</a> : <a className="btn btn-primary" href="#package">Explore your package</a>
                 )}
-                {noPay ? <a className="btn btn-ghost" href="#next">Next steps</a> : <a className="btn btn-ghost" href="#pay">Pay your part</a>}
+                {holdPay ? <a className="btn btn-ghost" href={`/p/${slug}/proposal`}>Review your proposal</a> : noPay ? <a className="btn btn-ghost" href="#next">Next steps</a> : <a className="btn btn-ghost" href="#pay">Pay your part</a>}
               </div>
             </div>
             <div className="arch-frame" aria-hidden="true">
@@ -163,7 +173,24 @@ export default async function Portal({
           </div>
         </section>
 
-        {toSign.length > 0 && (
+        {proposalOpen && proposal && (
+          <section className="section" style={{ paddingBottom: 0 }}>
+            <div className="wrap">
+              <div className="dark-card row between" style={{ gap: 20, flexWrap: "wrap" }}>
+                <div className="stack" style={{ gap: 6, maxWidth: 640 }}>
+                  <span className="eyebrow gold">Your proposal is ready</span>
+                  <p style={{ margin: 0, color: "var(--on-dark-2)" }}>
+                    {isExpired(proposal, today) ? "This proposal has expired. Reach out and we will send an updated one." : proposal.options.length > 1 ? `${proposal.options.length} ways we can work together. Review them and choose the one that fits.` : "Review what is included and the investment, then accept to get started."}
+                    {proposal.expires && !isExpired(proposal, today) ? ` Good through ${longDate(proposal.expires)}.` : ""}
+                  </p>
+                </div>
+                <a className="btn btn-gold" href={`/p/${slug}/proposal`}>Review your proposal</a>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {toSign.length > 0 && !proposalOpen && (
           <section className="section" style={{ paddingBottom: 0 }}>
             <div className="wrap">
               <div className="banner warn row between" style={{ margin: 0, gap: 14, flexWrap: "wrap" }}>
@@ -175,6 +202,21 @@ export default async function Portal({
         )}
 
         <WorkspaceHub slug={slug} plan={plan} assessment={assessment} today={today} />
+
+        {build.enabled && (
+          <section className="section" style={{ paddingBottom: 0 }} id="build">
+            <div className="wrap">
+              <div className="ws-card" style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap" }}>
+                <div className="stack" style={{ gap: 4, maxWidth: 640 }}>
+                  <span className="eyebrow">Your build · {STAGES.find((s) => s.id === build.stage)?.label}</span>
+                  <h3>{BUILD_KINDS.find((k) => k.id === build.kind)?.label}</h3>
+                  <p className="small" style={{ margin: 0 }}>{build.updates[0] ? build.updates[0].text.slice(0, 160) : "Follow progress, send us your brand and details, and request add-ons."}{!build.intakeSubmittedAt ? ` Your questionnaire is ${intakeProgress(build).percent}% done.` : ""}</p>
+                </div>
+                <a className="btn btn-sm btn-dark" href={`/p/${slug}/build`}>{build.intakeSubmittedAt ? "Open your build" : "Continue your questionnaire"}</a>
+              </div>
+            </div>
+          </section>
+        )}
 
         {review?.sharedAt && (
           <section className="section" style={{ paddingBottom: 0 }}>
@@ -228,12 +270,13 @@ export default async function Portal({
         )}
 
         {/* PACKAGE */}
-        <section className="section" id="package">
+        {!holdPay && <section className="section" id="package">
           <div className="wrap">
             <div className="section-head">
               <p className="eyebrow">Your package</p>
               <h2>What we are building together</h2>
               {client.package.summary && <p className="muted">{client.package.summary}</p>}
+              {proposal?.status === "accepted" && <p className="small" style={{ margin: 0 }}><a href={`/p/${slug}/proposal`}>View your accepted proposal</a></p>}
             </div>
             {(client.package.format || client.package.duration || client.package.startDate) && (
               <div className="stats" style={{ marginBottom: 32 }}>
@@ -262,7 +305,7 @@ export default async function Portal({
               )}
             </div>
           </div>
-        </section>
+        </section>}
 
         {/* INVESTMENT */}
         {hasInvestment && (
@@ -305,7 +348,7 @@ export default async function Portal({
           </section>
         )}
 
-        {!noPay && <AddOnsAndPay
+        {!noPay && !holdPay && <AddOnsAndPay
           client={pub}
           addOns={addOns}
           paid={paid}

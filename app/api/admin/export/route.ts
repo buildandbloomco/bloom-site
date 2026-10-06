@@ -3,7 +3,7 @@ import { requireAdmin } from "@/lib/http";
 import type { Client } from "@/lib/types";
 import type { StrategyPlan } from "@/lib/plan-types";
 
-const HASHES = ["bb:leads", "bb:courses", "bb:enrollments", "bb:appts", "bb:plans", "bb:assess", "bb:content:posts", "bb:lib:pieces", "bb:lib:members", "bb:lib:answers", "bb:lib:done", "bb:waitlist", "bb:agreements", "bb:reviews"];
+const HASHES = ["bb:leads", "bb:courses", "bb:enrollments", "bb:appts", "bb:plans", "bb:assess", "bb:content:posts", "bb:lib:pieces", "bb:lib:members", "bb:lib:answers", "bb:lib:done", "bb:waitlist", "bb:agreements", "bb:reviews", "bb:proposals", "bb:builds"];
 const VALUES = ["bb:settings", "bb:catalog", "bb:lib:settings"];
 
 // A full copy of everything stored in the portal, as one file you can keep somewhere safe.
@@ -41,6 +41,8 @@ export async function GET(req: Request) {
     out.assessment = await db.hget("bb:assess", only);
     out.agreements = await db.hget("bb:agreements", only);
     out.review = await db.hget("bb:reviews", only);
+    out.proposal = await db.hget("bb:proposals", only);
+    out.build = await db.hget("bb:builds", only);
     const enr = await db.hgetall<{ clientId?: string }>("bb:enrollments");
     out.enrollments = Object.fromEntries(Object.entries(enr).filter(([, e]) => e.clientId === only));
     const ap = await db.hgetall<{ clientId?: string }>("bb:appts");
