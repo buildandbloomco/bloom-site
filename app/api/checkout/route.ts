@@ -8,6 +8,7 @@ import { pricedFor } from "@/lib/tier";
 export async function POST(req: Request) {
   const client = await currentClient();
   if (!client) return error("Your session ended. Please enter your access code again.", 401);
+  if (client.billing === "none") return error("There is nothing to pay on this account.");
   const s = stripe();
   if (!s) return error("Online payments are not turned on yet. Please reach out and we will send an invoice.", 503);
   if (!(await rateLimit(`pay:${client.id}`, 30, 60 * 60))) return error("Too many tries. Try again later.", 429);

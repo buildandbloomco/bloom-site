@@ -160,6 +160,7 @@ Reach out with any questions. So glad to build with you.`;
           <p className="eyebrow">Client portal</p>
           <h2>{c.name}</h2>
         </div>
+        <a className="btn btn-dark" href={`/admin/clients/${c.id}/desk`}>Open meeting view</a>
       </div>
 
       <div className="editor-grid">
@@ -182,6 +183,13 @@ Reach out with any questions. So glad to build with you.`;
                 <select value={c.tier ?? ""} onChange={(e) => update((d) => void (d.tier = e.target.value as Client["tier"]))}>
                   <option value="">Not set (small business prices)</option>
                   {TIERS.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
+                </select>
+              </label>
+              <label>
+                Payment
+                <select value={c.billing ?? "standard"} onChange={(e) => update((d) => void (d.billing = e.target.value as Client["billing"]))}>
+                  <option value="standard">Pays through the portal</option>
+                  <option value="none">No payment needed (existing client)</option>
                 </select>
               </label>
               <label>

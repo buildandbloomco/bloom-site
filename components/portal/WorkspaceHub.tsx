@@ -56,7 +56,10 @@ export default function WorkspaceHub({ slug, plan, assessment, today }: { slug: 
                 ) : <span className="small muted">You&rsquo;re all caught up.</span>}
               </div>
               {replies > 0 && <span className="small muted">{replies} of your requests have a reply.</span>}
-              <Link className="btn btn-primary" style={{ alignSelf: "flex-start" }} href={`/p/${slug}/plan`}>Open your strategy plan</Link>
+              <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+                {next && <Link className="btn btn-primary" href={`/p/${slug}/room/${next.id}`}>Open the strategy room</Link>}
+                <Link className={`btn ${next ? "btn-ghost" : "btn-primary"}`} href={`/p/${slug}/plan`}>Open your strategy plan</Link>
+              </div>
             </div>
           )}
           {showAssess && assessment && (

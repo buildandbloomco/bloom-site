@@ -80,6 +80,7 @@ export default async function AdminHome() {
                   <td>
                     <Link href={`/admin/clients/${c.id}`} style={{ color: "var(--ink)", fontWeight: 600 }}>{c.name}</Link>
                     <div className="tiny muted">{c.contactName || c.email || `/p/${c.slug}`}</div>
+                    <Link className="tiny" href={`/admin/clients/${c.id}/desk`}>Meeting view</Link>
                   </td>
                   <td>
                     <span className={`tag ${STATUS_TAG[c.status] ?? ""}`}>{c.status}</span>

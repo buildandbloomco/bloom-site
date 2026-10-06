@@ -68,7 +68,8 @@ export default async function Portal({
   const products = library.filter((l) => l.kind !== "workshop");
   const paid = amountPaid(client);
   const owe = outstanding(client.investment, paid);
-  const hasInvestment = client.investment.total > 0;
+  const noPay = client.billing === "none";
+  const hasInvestment = client.investment.total > 0 && !noPay;
   const first = client.contactName || client.name;
 
   const showWork = hasWork(pub);
@@ -90,8 +91,8 @@ export default async function Portal({
     pub.consults.length ? ["Consult notes", "#consult"] : null,
     ["Your package", "#package"],
     hasInvestment ? ["Investment", "#investment"] : null,
-    addOns.length ? ["Add-ons", "#addons"] : null,
-    ["Pay", "#pay"],
+    addOns.length && !noPay ? ["Add-ons", "#addons"] : null,
+    noPay ? null : ["Pay", "#pay"],
     library.length ? ["Library", "#library"] : null,
     client.showBooking ? ["Book a session", "#book"] : null,
     ["Next steps", "#next"],
@@ -141,7 +142,7 @@ export default async function Portal({
                 ) : (
                   <a className="btn btn-primary" href="#package">Explore your package</a>
                 )}
-                <a className="btn btn-ghost" href="#pay">Pay your part</a>
+                {noPay ? <a className="btn btn-ghost" href="#next">Next steps</a> : <a className="btn btn-ghost" href="#pay">Pay your part</a>}
               </div>
             </div>
             <div className="arch-frame" aria-hidden="true">
@@ -271,7 +272,7 @@ export default async function Portal({
           </section>
         )}
 
-        <AddOnsAndPay
+        {!noPay && <AddOnsAndPay
           client={pub}
           addOns={addOns}
           paid={paid}
@@ -280,7 +281,7 @@ export default async function Portal({
           paymentsOn={!!process.env.STRIPE_SECRET_KEY}
           beforeYouBook={settings.beforeYouBook}
           email={settings.email}
-        />
+        />}
 
         {/* LIBRARY */}
         {library.length > 0 && (

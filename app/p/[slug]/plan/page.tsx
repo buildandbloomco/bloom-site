@@ -26,7 +26,7 @@ export default async function PlanPage({ params }: { params: Promise<{ slug: str
             {plan.focus && <p className="muted" style={{ margin: 0 }}>{plan.focus}</p>}
           </div>
           {plan.enabled ? (
-            <PlanBoard initial={plan} firstName={client.contactName || client.name} />
+            <PlanBoard initial={plan} firstName={client.contactName || client.name} slug={slug} />
           ) : (
             <div className="card"><p style={{ margin: 0 }}>Your strategy plan will show up here once we schedule our first session.</p></div>
           )}

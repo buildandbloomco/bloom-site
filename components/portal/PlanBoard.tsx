@@ -1,5 +1,7 @@
 "use client";
 
+import { STATUS_LABEL } from "@/lib/plan-types";
+
 import { useState } from "react";
 import type { PlanLink, PlanSession, PlanTask, StrategyPlan } from "@/lib/plan-types";
 import { PlanProgress } from "./WorkspaceBits";
@@ -27,7 +29,7 @@ export function LinkChip({ l }: { l: PlanLink }) {
 
 type Filter = "mine" | "all" | "us" | "done";
 
-export default function PlanBoard({ initial, firstName }: { initial: StrategyPlan; firstName: string }) {
+export default function PlanBoard({ initial, firstName, slug }: { initial: StrategyPlan; firstName: string; slug: string }) {
   const [plan, setPlan] = useState(initial);
   const [filter, setFilter] = useState<Filter>("mine");
   const [msg, setMsg] = useState("");
@@ -81,7 +83,7 @@ export default function PlanBoard({ initial, firstName }: { initial: StrategyPla
             </div>
           ) : (
             <>
-              <span className="who">{mine ? "You" : "Build & Bloom"}{t.status === "doing" ? " · In progress" : ""}</span>
+              <span className="who">{mine ? "You" : "Build & Bloom"} · {STATUS_LABEL[t.status]}{t.carriedFrom ? ` · carried over from ${t.carriedFrom}` : ""}</span>
               <div className="t">{t.title}</div>
             </>
           )}
@@ -185,7 +187,8 @@ export default function PlanBoard({ initial, firstName }: { initial: StrategyPla
         </section>
       )}
 
-      {plan.sessions.map((s, i) => {
+      {/* Newest session first once sessions have dates, so the current one is always on top */}
+      {plan.sessions.map((s, i) => ({ s, i })).sort((x, y) => (x.s.date && y.s.date ? y.s.date.localeCompare(x.s.date) : x.i - y.i)).map(({ s, i }) => {
         const tasks = plan.tasks.filter((t) => t.sessionId === s.id);
         const shown = tasks.filter(visible);
         const p = tasks.length ? Math.round((tasks.filter((t) => t.status === "done").length / tasks.length) * 100) : 0;
@@ -200,6 +203,7 @@ export default function PlanBoard({ initial, firstName }: { initial: StrategyPla
               <div className="stack" style={{ gap: 6, alignItems: "flex-end", minWidth: 160 }}>
                 <span className="small muted">{p}% of session tasks done</span>
                 <div className="ws-bar" style={{ width: 160, height: 8 }}><span className="done" style={{ width: `${p}%` }} /></div>
+                <a className={`btn btn-sm ${s.status === "done" ? "btn-ghost" : "btn-primary"}`} href={`/p/${slug}/room/${s.id}`}>{s.status === "done" ? "Review the session" : "Open the strategy room"}</a>
                 <button type="button" className="linkbtn small" onClick={() => setReq({ targetType: "session", targetId: s.id, label: s.title })}>Request a change</button>
               </div>
             </header>
