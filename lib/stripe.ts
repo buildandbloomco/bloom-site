@@ -1,3 +1,4 @@
+import { notifyAdmin } from "@/lib/notify";
 import "server-only";
 import Stripe from "stripe";
 import { getClient, round2, saveClient } from "./data";
@@ -68,5 +69,6 @@ export async function recordCheckoutSession(session: Stripe.Checkout.Session): P
   }
   if (client.status === "draft" || client.status === "sent") client.status = "active";
   await saveClient(client);
+  await notifyAdmin(`${client.name} paid $${total.toFixed(2)}`, [`${client.name} paid $${total.toFixed(2)} by card${payer}.`, session.metadata?.optionLabel || ""], `/admin/clients/${client.id}`);
   return true;
 }

@@ -33,6 +33,8 @@ export interface PlanTask {
   comments: PlanComment[];
   /** Set when a task came from an assessment recommendation */
   domain: string;
+  /** When it was marked completed */
+  doneAt?: string;
   /** Title of the session this open item was carried over from */
   carriedFrom?: string;
 }
@@ -52,6 +54,17 @@ export interface PlanSession {
   decisions: string[];
   /** Resources you want them to look at for this session */
   resources: PlanLink[];
+  /** Length in minutes (60 when not set) */
+  minutes?: number;
+  /** Video call link (Zoom, Google Meet) */
+  link?: string;
+  /** When a calendar invite was last emailed, and to whom */
+  invitedAt?: string;
+  invitedTo?: string;
+  /** Goes up each time the invite is re-sent, so calendars update the same event */
+  inviteSeq?: number;
+  /** The session date a reminder email was already sent for */
+  remindedFor?: string;
 }
 
 export interface PlanRequest {

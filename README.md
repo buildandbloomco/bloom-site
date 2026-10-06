@@ -247,3 +247,44 @@ Role breakdowns are hidden for any group with fewer than 3 responses. Team comme
 - **Recap:** "Save recap to their plan" copies the focus, decisions, and notes to the session on their strategy plan. "Close session" also locks the room for the client. "Print or save as PDF" makes a copy to send.
 - **Private notes** on the Decisions step are only ever sent to you.
 - The room checks for changes every second and a half while it is open, which uses your database's request allowance faster than the rest of the site. Close the tab when the session ends.
+
+## Scheduling, calendar, and meeting invites
+
+- **On each session** (Meeting view): set the date, time, length, and a Zoom or Google Meet link. "Add to my calendar" downloads the event for your own calendar. Sessions with a date also show on Admin > Calendar.
+- **Schedule the next session** from the Meeting view, or from the Recap step in the strategy room before the client leaves.
+- **What the client gets in their portal:** the date and time, "Add to my calendar", and "Join the call", on their workspace box, strategy plan, and inside the strategy room.
+- **Copy invite message** gives you a ready-to-paste note with the time, the call link, and their strategy room link. This works with no setup.
+- All times are Eastern.
+
+### Turning on email invites (one-time setup)
+
+Email invites send the client a real calendar invitation with Yes and No buttons. They need an email sending service. The site is built for Resend, which has a free plan.
+
+1. Create an account at resend.com.
+2. In Resend, add your domain and add the DNS records it shows you wherever your domain is managed. Wait until Resend marks the domain verified.
+3. In Resend, create an API key and copy it.
+4. In Vercel, open your project > Settings > Environment Variables and add:
+   - `RESEND_API_KEY` = the key you copied
+   - `EMAIL_FROM` = `Build & Bloom Collective <hello@yourdomain.com>` (use an address on the domain you verified)
+5. Redeploy. The "Email calendar invite" button on each session turns on.
+
+Replies go to the email address in Admin > Settings. Sending the invite again after changing the time updates the same event on their calendar instead of adding a second one.
+
+## Agreements, files, alerts, reminders, reviews, and backup
+
+**Agreements.** Open a client's Meeting view, then Agreements. "New agreement" starts from a template you can edit. "Save and send" puts it at the top of their portal. They type their full name and check a box to sign. You get their name, title, date and time, and a locked copy of the exact text. Check "Must be signed before they can pay by card" to hold online payment until it is signed. A signed agreement cannot be edited. The template is a starting point, not legal advice: have a lawyer review it.
+
+**Shared files.** Clients upload documents in the Files section of their portal (PDF, Word, Excel, PowerPoint, images, text, up to 50 MB each). You upload and remove files from the Shared files box on the Meeting view. This uses the same Blob store as course media. File links are long and unguessable but not password protected, so do not use this for records with protected health information.
+
+**Alerts to you.** Once email is set up (see Scheduling above), you get an email when a client signs an agreement, uploads a file, comments on a task, sends a change request, submits the leader questionnaire, confirms a consult summary, asks about add-ons, or pays by card, and when someone books, sends an inquiry, or requests a guide. Alerts go to the email in Settings. To send them somewhere else, add `NOTIFY_EMAIL` in Vercel.
+
+**Session reminders.** Clients get an email the day before a strategy session with the time, call link, and their open tasks. To turn this on:
+1. In Vercel, Settings, Environment Variables, add `CRON_SECRET` with any long random text (30 or more letters and numbers).
+2. Redeploy. The `vercel.json` file in this project tells Vercel to run the reminder check once a day at 9 AM Eastern (8 AM in winter).
+The client needs an email on their client page, and the session needs a date. Each session is reminded once.
+
+**Scorecard over time.** The numbers you enter on the Scorecard tab of each strategy room are charted across sessions on the client's plan page and on your Meeting view. Keep the measure names the same from session to session so they line up.
+
+**Progress review.** On the Meeting view, click "Progress review". Pick the dates (it starts at the last 90 days), write "Where things stand" and "What comes next", then print it, or share it to their portal. It pulls sessions, wins, decisions, completed tasks, open tasks, and the scorecard. Tasks completed before this update have no completion date and are not counted.
+
+**Backup.** Admin, Settings, "Download full backup" gives you one file with everything in the portal. Save one about once a month. The link at the bottom of a Meeting view downloads one client only. Access codes are not included, and uploaded files are listed by link, not copied.

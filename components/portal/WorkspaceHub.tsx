@@ -39,7 +39,8 @@ export default function WorkspaceHub({ slug, plan, assessment, today }: { slug: 
                 <div className="stack" style={{ gap: 2 }}>
                   <span className="tiny muted" style={{ textTransform: "uppercase", letterSpacing: ".08em" }}>Next session</span>
                   <strong>{next.title}</strong>
-                  <span className="small muted">{next.date ? `${longDate(next.date)}${next.start ? ` · ${fmtTime(next.start)}` : ""}` : "Date to be set"}</span>
+                  <span className="small muted">{next.date ? `${longDate(next.date)}${next.start ? ` · ${fmtTime(next.start)} ET` : ""}` : "Date to be set"}</span>
+                  {next.date && <span className="small"><a href={`/api/portal/plan/ics?sid=${next.id}`}>Add to my calendar</a>{next.link ? <> · <a href={next.link} target="_blank" rel="noreferrer">Join the call</a></> : null}</span>}
                 </div>
               )}
               <div className="stack" style={{ gap: 6 }}>

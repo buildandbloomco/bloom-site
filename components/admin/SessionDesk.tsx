@@ -10,7 +10,7 @@ const nice = (d: string) => (d ? new Date(d + "T12:00:00").toLocaleDateString("e
 const STATUSES: TaskStatus[] = ["todo", "doing", "done"];
 
 /** The session form you fill in live. Saves on its own. Everything here shows in the client's portal except nothing private lives here. */
-export default function SessionDesk({ clientId, slug, initial, today }: { clientId: string; slug: string; initial: StrategyPlan; today: string }) {
+export default function SessionDesk({ clientId, slug, initial, today, clientEmail, firstName, emailReady, origin }: { clientId: string; slug: string; initial: StrategyPlan; today: string; clientEmail: string; firstName: string; emailReady: boolean; origin: string }) {
   const [p, setP] = useState(initial);
   const [status, setStatus] = useState<"saved" | "pending" | "saving" | "error">("saved");
   const [activeId, setActiveId] = useState<string>(currentSession(initial)?.id ?? "");
@@ -21,6 +21,8 @@ export default function SessionDesk({ clientId, slug, initial, today }: { client
   const [draft, setDraft] = useState<{ title: string; owner: Owner; due: string }>({ title: "", owner: "client", due: "" });
   const [decision, setDecision] = useState("");
   const [agenda, setAgenda] = useState("");
+  const [next, setNext] = useState({ date: "", start: "", link: "" });
+  const [inv, setInv] = useState({ extra: "", note: "", msg: "", busy: false });
   const latest = useRef(p);
   const dirty = useRef(false);
   const url = `/api/admin/clients/${clientId}/plan`;
@@ -70,6 +72,34 @@ export default function SessionDesk({ clientId, slug, initial, today }: { client
     latest.current = d.plan;
     setActiveId(d.sessionId);
     setMsg(d.carried ? `New session started. ${d.carried} open item${d.carried === 1 ? "" : "s"} carried forward.` : "New session started.");
+  }
+
+  async function sessionCall(body: Record<string, unknown>, done: (d: { carried: number; sessionId: string }) => string) {
+    setBusy(true);
+    setMsg("");
+    await save();
+    const res = await fetch(`${url}/session`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const d = await res.json().catch(() => ({}));
+    setBusy(false);
+    if (!res.ok) return setMsg(d.error || "That didn't work.");
+    setP(d.plan);
+    latest.current = d.plan;
+    setMsg(done(d));
+    return d as { sessionId: string };
+  }
+
+  async function sendInvite(sid: string) {
+    setInv((x) => ({ ...x, busy: true, msg: "" }));
+    await save();
+    const res = await fetch(`${url}/invite`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sid, extra: inv.extra, note: inv.note }) });
+    const d = await res.json().catch(() => ({}));
+    setInv((x) => ({ ...x, busy: false, msg: res.ok ? `Invite sent to ${d.invitedTo}.` : d.error || "Could not send." }));
+    if (res.ok) setP((prev) => { const n = structuredClone(prev); const x = n.sessions.find((y) => y.id === sid); if (x) { x.invitedAt = d.invitedAt; x.invitedTo = d.invitedTo; x.inviteSeq = (x.inviteSeq ?? 0) + 1; } latest.current = n; return n; });
+  }
+
+  const t12 = (t: string) => { const [h, m] = t.split(":").map(Number); return `${((h + 11) % 12) + 1}:${String(m).padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`; };
+  function inviteText(x: PlanSession) {
+    return [`Hi ${firstName || "there"},`, "", `Our next strategy session is ${nice(x.date)}${x.start ? ` at ${t12(x.start)} Eastern` : ""}${x.minutes ? ` (${x.minutes} minutes)` : ""}.`, x.goal ? `Focus: ${x.goal}` : "", x.link ? `Join the call: ${x.link}` : "", `Your strategy room: ${origin}/p/${slug}/room/${x.id}`, `Sign in with your portal code at ${origin}/portal first.`, "", "Talk soon,", "Jadon"].filter((l, i, a) => l !== "" || a[i - 1] !== "").join("\n");
   }
 
   const s = p.sessions.find((x) => x.id === activeId) ?? null;
@@ -154,6 +184,35 @@ export default function SessionDesk({ clientId, slug, initial, today }: { client
               <button type="button" className={`btn btn-sm ${s.status === "done" ? "btn-dark" : "btn-ghost"}`} onClick={() => setS((x) => void (x.status = x.status === "done" ? "planned" : "done"))}>{s.status === "done" ? "Completed ✓" : "Mark complete"}</button>
             </div>
           </div>
+          <div className="rm-sched" style={{ display: "grid", gap: 10, background: "var(--cream)", borderRadius: 14, padding: 14 }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "flex-end" }}>
+              <label style={{ flex: "1 1 280px" }} className="small">Meeting link <span className="hint">Zoom or Google Meet</span><input type="url" placeholder="https://" value={s.link ?? ""} onChange={(e) => setS((x) => void (x.link = e.target.value.trim()))} /></label>
+              <label style={{ width: "auto" }} className="small">Length
+                <select value={s.minutes ?? 60} onChange={(e) => setS((x) => void (x.minutes = Number(e.target.value)))} style={{ width: "auto" }}>{[30, 45, 60, 90, 120, 180].map((m) => <option key={m} value={m}>{m} minutes</option>)}</select>
+              </label>
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
+              <button type="button" className="btn btn-sm btn-dark" disabled={inv.busy || !s.date || !s.start || !emailReady} title={emailReady ? "" : "Email isn't set up yet"} onClick={() => sendInvite(s.id)}>{inv.busy ? "Sending..." : s.invitedAt ? "Send updated invite" : "Email calendar invite"}</button>
+              <button type="button" className="btn btn-sm btn-ghost" disabled={!s.date} onClick={async () => { try { await navigator.clipboard.writeText(inviteText(s)); setInv((x) => ({ ...x, msg: "Invite message copied. Paste it into an email or text." })); } catch { setInv((x) => ({ ...x, msg: inviteText(s) })); } }}>Copy invite message</button>
+              {s.date && <a className="btn btn-sm btn-ghost" href={`${url}/ics?sid=${s.id}`}>Add to my calendar</a>}
+              {s.link && <a className="small" href={s.link} target="_blank" rel="noreferrer">Join the call</a>}
+            </div>
+            {emailReady ? (
+              <details>
+                <summary className="small" style={{ cursor: "pointer" }}>Invite goes to {clientEmail || "no email on file yet"}. Add people or a note</summary>
+                <div className="stack" style={{ gap: 8, marginTop: 8 }}>
+                  <input type="text" placeholder="Other emails, separated by commas" value={inv.extra} onChange={(e) => setInv({ ...inv, extra: e.target.value })} />
+                  <textarea rows={2} placeholder="A note to include (optional)" value={inv.note} onChange={(e) => setInv({ ...inv, note: e.target.value })} />
+                </div>
+              </details>
+            ) : <span className="small muted">Email invites aren&rsquo;t turned on yet (see the README). Until then, copy the invite message and send it yourself. The client can add the session to their calendar from their portal.</span>}
+            {!s.start && s.date && <span className="small muted">Add a time to send an invite.</span>}
+            {s.invitedAt && <span className="small ok-text">Invite sent {new Date(s.invitedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })} to {s.invitedTo}</span>}
+            {inv.msg && <span className="small" role="status" style={{ whiteSpace: "pre-line" }}>{inv.msg}</span>}
+            {p.sessions.some((x) => x.id !== s.id && x.date && (!s.date || x.date <= s.date) && p.tasks.some((t) => t.sessionId === x.id && t.status !== "done")) && s.status !== "done" && (
+              <button type="button" className="linkbtn small" style={{ justifySelf: "start" }} disabled={busy} onClick={() => sessionCall({ carryInto: s.id }, (d) => `${d.carried} open item${d.carried === 1 ? "" : "s"} carried into this session.`)}>Carry open items from the last session into this one</button>
+            )}
+          </div>
           <label>Focus for this session<input type="text" value={s.goal} placeholder="What we are here to move forward" onChange={(e) => setS((x) => void (x.goal = e.target.value))} /></label>
 
           <div className="stack" style={{ gap: 6 }}>
@@ -208,6 +267,17 @@ export default function SessionDesk({ clientId, slug, initial, today }: { client
           </div>
         </section>
       )}
+
+      <section className="panel">
+        <h3>Schedule the next session</h3>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "flex-end" }}>
+          <label style={{ width: "auto" }} className="small">Date<input type="date" value={next.date} min={today} onChange={(e) => setNext({ ...next, date: e.target.value })} /></label>
+          <label style={{ width: "auto" }} className="small">Time (Eastern)<input type="time" value={next.start} onChange={(e) => setNext({ ...next, start: e.target.value })} /></label>
+          <label style={{ flex: "1 1 240px" }} className="small">Meeting link<input type="url" placeholder="https://" value={next.link} onChange={(e) => setNext({ ...next, link: e.target.value.trim() })} /></label>
+          <button type="button" className="btn btn-sm btn-primary" disabled={busy || !next.date} onClick={async () => { const d = await sessionCall({ schedule: true, ...next, link: next.link || s?.link || "", minutes: s?.minutes ?? 60 }, () => "Scheduled. It is on your calendar and in their portal. Open it below to send the invite."); if (d) { setActiveId(d.sessionId); setNext({ date: "", start: "", link: "" }); window.scrollTo({ top: 0, behavior: "smooth" }); } }}>Schedule</button>
+        </div>
+        <p className="tiny muted" style={{ margin: 0 }}>This adds a future session without closing the current one. Leave the link blank to reuse this session&rsquo;s link.</p>
+      </section>
 
       {elsewhere.length > 0 && (
         <section className="panel">

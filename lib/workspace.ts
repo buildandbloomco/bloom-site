@@ -71,8 +71,12 @@ export async function sanitizePlan(b: Partial<StrategyPlan>, prev: StrategyPlan,
       agenda: (Array.isArray(s.agenda) ? s.agenda : []).slice(0, 40).map((a) => ({ id: str(a.id, 40) || rid(), text: str(a.text, 500), by: (a.by === "client" ? "client" : "us") as Owner })).filter((a) => a.text.trim()),
       decisions: (Array.isArray(s.decisions) ? s.decisions : []).map((d) => str(d, 500)).filter((d) => d.trim()).slice(0, 40),
       resources,
+      minutes: Math.min(480, Math.max(15, Math.round(Number(s.minutes) || 60))),
+      link: /^https:\/\//i.test(str(s.link)) ? str(s.link, 500).trim() : "",
+      invitedAt: str(s.invitedAt, 40), invitedTo: str(s.invitedTo, 400), inviteSeq: Math.max(0, Math.round(Number(s.inviteSeq) || 0)), remindedFor: str(s.remindedFor, 10),
     });
   }
+  const prevDone = new Map(prev.tasks.filter((t) => t.doneAt).map((t) => [t.id, t.doneAt as string]));
   const tasks: PlanTask[] = [];
   for (const t of (Array.isArray(b.tasks) ? b.tasks : prev.tasks).slice(0, 300)) {
     tasks.push({
@@ -83,6 +87,7 @@ export async function sanitizePlan(b: Partial<StrategyPlan>, prev: StrategyPlan,
       comments: (Array.isArray(t.comments) ? t.comments : []).slice(-60).map((c) => ({ id: str(c.id, 40) || rid(), by: c.by === "client" ? "client" : "us", text: str(c.text, 2000), at: str(c.at, 40) || new Date().toISOString() })),
       domain: str(t.domain, 40),
       carriedFrom: str(t.carriedFrom, 200),
+      doneAt: t.status === "done" ? str(t.doneAt, 40) || prevDone.get(str(t.id, 40)) || new Date().toISOString() : "",
     });
   }
   return {
@@ -195,12 +200,12 @@ export { ITEM_COUNT, OPEN_QUESTIONS, ROLE_GROUPS };
 /** Every client's open plan tasks and sessions, for the main calendar */
 export async function planCalendarItems() {
   const [plans, clients] = await Promise.all([listPlans(), listClients()]);
-  const out: { id: string; clientId: string; date: string; start: string; title: string; kind: "session" | "deliverable"; href: string; detail: string }[] = [];
+  const out: { id: string; clientId: string; date: string; start: string; link?: string; title: string; kind: "session" | "deliverable"; href: string; detail: string }[] = [];
   for (const p of plans) {
     if (!p.enabled) continue;
     const c = clients.find((x) => x.id === p.clientId);
     if (!c || c.status === "archived") continue;
-    for (const s of p.sessions) if (s.date && s.status !== "done") out.push({ id: `ps-${s.id}`, clientId: c.id, date: s.date, start: s.start, title: `${c.name}: ${s.title}`, kind: "session", href: `/admin/clients/${c.id}/plan`, detail: "Strategy session" });
+    for (const s of p.sessions) if (s.date && s.status !== "done") out.push({ id: `ps-${s.id}`, clientId: c.id, date: s.date, start: s.start, link: s.link || "", title: `${c.name}: ${s.title}`, kind: "session", href: `/admin/clients/${c.id}/desk`, detail: "Strategy session" });
     for (const t of p.tasks) if (t.due && t.status !== "done" && t.owner === "us") out.push({ id: `pt-${t.id}`, clientId: c.id, date: t.due, start: "", title: `${c.name}: ${t.title}`, kind: "deliverable", href: `/admin/clients/${c.id}/plan`, detail: "Your plan task" });
   }
   return out;

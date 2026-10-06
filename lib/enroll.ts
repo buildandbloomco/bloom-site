@@ -1,4 +1,5 @@
 import "server-only";
+import { notifyAdmin } from "./notify";
 import { blankClient, getClient, getSettings, listClients, saveClient, setClientCode, uniqueSlug } from "./data";
 import { generateCode, newId } from "./crypto";
 import { firstName } from "./format";
@@ -98,6 +99,7 @@ export async function recordEnrollmentPayment(enrollmentId: string, amount: numb
   }
   if (!e.payments.some((p) => p.stripeSessionId === stripeRef)) {
     e.payments.push({ id: newId(), amount, date: new Date().toISOString().slice(0, 10), method: "Stripe", note, stripeSessionId: stripeRef });
+    await notifyAdmin(`Course payment: $${amount.toFixed(2)}`, [`${e.learnerName || "A learner"} paid $${amount.toFixed(2)}. ${note}`], "/admin/courses");
   }
   await activate(e);
   await saveEnrollment(e);

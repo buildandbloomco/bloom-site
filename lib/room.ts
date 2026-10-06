@@ -122,3 +122,40 @@ export async function publishRecap(client: Client, sid: string, close: boolean) 
 export function sessionTasks(tasks: PlanTask[], sid: string) {
   return tasks.filter((t) => t.sessionId === sid).map((t) => ({ id: t.id, title: t.title, owner: t.owner, due: t.due, status: t.status, createdBy: t.createdBy, carriedFrom: t.carriedFrom ?? "" }));
 }
+
+/** The scorecard across every session, oldest first, for showing change over time */
+export interface ScoreSeries { name: string; points: { date: string; label: string; value: number; raw: string }[] }
+const num = (raw: string) => { const m = String(raw).replace(/,/g, "").match(/-?\d+(\.\d+)?/); if (!m) return null; const n = Number(m[0]); return /\dk\b/i.test(raw) ? n * 1000 : /\dm\b/i.test(raw) ? n * 1000000 : n; };
+export async function scorecardHistory(clientId: string, from = "", to = "9999"): Promise<ScoreSeries[]> {
+  const plan = await getPlan(clientId);
+  const sessions = plan.sessions.filter((s) => s.date && s.date >= from && s.date <= to).sort((a, b) => a.date.localeCompare(b.date));
+  const out = new Map<string, ScoreSeries>();
+  for (const s of sessions) {
+    const room = await readRoom(clientId, s.id);
+    for (const e of Object.values(room)) {
+      const i = e.v as RoomItem;
+      if (!i || typeof i !== "object" || i.kind !== "metric" || i.deleted || !i.text?.trim()) continue;
+      const v = num(i.value ?? "");
+      if (v === null) continue;
+      const k = i.text.trim().toLowerCase();
+      if (!out.has(k)) out.set(k, { name: i.text.trim(), points: [] });
+      out.get(k)!.points.push({ date: s.date, label: s.title, value: v, raw: i.value ?? "" });
+    }
+  }
+  return [...out.values()];
+}
+
+/** Everything written in the rooms for a date range, for the review report */
+export async function roomDigest(clientId: string, from: string, to: string) {
+  const plan = await getPlan(clientId);
+  const sessions = plan.sessions.filter((s) => s.date && s.date >= from && s.date <= to).sort((a, b) => a.date.localeCompare(b.date));
+  const wins: string[] = [], decisions: string[] = [], chosen: string[] = [];
+  for (const s of sessions) {
+    const items = Object.values(await readRoom(clientId, s.id)).map((e) => e.v as RoomItem).filter((i) => i && typeof i === "object" && !i.deleted && i.text?.trim()).sort((a, b) => a.o - b.o);
+    wins.push(...items.filter((i) => i.kind === "win").map((i) => i.text));
+    const d = items.filter((i) => i.kind === "decision").map((i) => i.text);
+    decisions.push(...(d.length ? d : s.decisions));
+    chosen.push(...items.filter((i) => i.kind === "idea" && i.stage === "chosen").map((i) => i.text));
+  }
+  return { sessions, wins: [...new Set(wins)], decisions: [...new Set(decisions)], chosen: [...new Set(chosen)] };
+}

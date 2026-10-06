@@ -49,7 +49,7 @@ export async function calendarItems(): Promise<CalItem[]> {
   // Strategy plan sessions (skipped when a real appointment is already booked that day) and your plan tasks
   for (const x of await planCalendarItems()) {
     if (x.kind === "session" && appts.some((a) => a.clientId === x.clientId && a.date === x.date)) continue;
-    items.push({ id: x.id, date: x.date, start: x.start, end: "", title: x.title, kind: x.kind, detail: x.detail, href: x.href, apptId: "", link: "" });
+    items.push({ id: x.id, date: x.date, start: x.start, end: "", title: x.title, kind: x.kind, detail: x.detail, href: x.href, apptId: "", link: x.link || "" });
   }
   return items.filter((i) => i.date).sort((a, b) => (a.date + (a.start || "00")).localeCompare(b.date + (b.start || "00")));
 }

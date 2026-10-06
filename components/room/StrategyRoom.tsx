@@ -136,7 +136,7 @@ function MindMap() {
 const TABS = [["checkin", "Check-in"], ["focus", "Focus"], ["ideas", "Brainstorm"], ["map", "Mind map"], ["evaluate", "Evaluate"], ["canvas", "Canvases"], ["plan", "Roadmap"], ["decide", "Decisions"], ["recap", "Recap"]] as const;
 type Tab = (typeof TABS)[number][0];
 
-export default function StrategyRoom({ sid, clientId, role, names, title, date, closed, backHref }: { sid: string; clientId?: string; role: Role; names: Record<Role, string>; title: string; date: string; closed: boolean; backHref: string }) {
+export default function StrategyRoom({ sid, clientId, role, names, title, date, closed, backHref, link = "", calHref = "" }: { sid: string; clientId?: string; role: Role; names: Record<Role, string>; title: string; date: string; closed: boolean; backHref: string; link?: string; calHref?: string }) {
   const [entries, setEntries] = useState<Record<string, Entry>>({});
   const [tasks, setTasks] = useState<Task[]>([]);
   const [other, setOther] = useState({ here: false, editing: "" });
@@ -288,6 +288,8 @@ export default function StrategyRoom({ sid, clientId, role, names, title, date, 
             <div className="rm-who" role="status">
               <span><span className="rm-dot on" />{names[role]} (you)</span>
               <span><span className={`rm-dot${other.here ? " on" : ""}`} />{otherName} {other.here ? "is here" : "is not in the room"}</span>
+              {link && !isClosed && <a className="btn btn-sm btn-dark rm-noprint" href={link} target="_blank" rel="noreferrer">Join the call</a>}
+              {calHref && !isClosed && <a className="rm-noprint" href={calHref}>Add to my calendar</a>}
               <span>{net === "live" ? "Live · saved" : net === "saving" ? "Saving..." : net === "offline" ? "Reconnecting..." : "Connecting..."}</span>
             </div>
           </div>
@@ -469,6 +471,7 @@ export default function StrategyRoom({ sid, clientId, role, names, title, date, 
               </div>
             </div>
             {msg && <p className="ok-text small rm-noprint">{msg}</p>}
+            {role === "us" && clientId && <NextSession clientId={clientId} link={link} />}
             <div>
               <p className="eyebrow">{title}{nice ? ` · ${nice}` : ""}</p>
               {r.field("focus") && <><h4>The question</h4><p>{r.field("focus")}</p></>}
@@ -490,6 +493,34 @@ export default function StrategyRoom({ sid, clientId, role, names, title, date, 
         )}
       </div>
     </Ctx.Provider>
+  );
+}
+
+/** Book the next session before anyone leaves the room */
+function NextSession({ clientId, link }: { clientId: string; link: string }) {
+  const [f, setF] = useState({ date: "", start: "", invite: true });
+  const [state, setState] = useState("");
+  async function go() {
+    setState("Scheduling...");
+    const res = await fetch(`/api/admin/clients/${clientId}/plan/session`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ schedule: true, date: f.date, start: f.start, link }) });
+    const d = await res.json().catch(() => ({}));
+    if (!res.ok) return setState(d.error || "Could not schedule.");
+    if (!f.invite || !f.start) return setState("Scheduled. It shows in their portal and on your calendar.");
+    const iv = await fetch(`/api/admin/clients/${clientId}/plan/invite`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sid: d.sessionId }) });
+    const j = await iv.json().catch(() => ({}));
+    setState(iv.ok ? `Scheduled, and the invite was emailed to ${j.invitedTo}.` : `Scheduled. The invite was not emailed: ${j.error || "unknown error"}`);
+  }
+  return (
+    <div className="rm-box rm-noprint">
+      <h4>Schedule the next session</h4>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "flex-end" }}>
+        <label style={{ width: "auto" }} className="small">Date<input type="date" value={f.date} onChange={(e) => setF({ ...f, date: e.target.value })} /></label>
+        <label style={{ width: "auto" }} className="small">Time (Eastern)<input type="time" value={f.start} onChange={(e) => setF({ ...f, start: e.target.value })} /></label>
+        <label style={{ flexDirection: "row", alignItems: "center", gap: 6, fontWeight: 400, width: "auto" }} className="small"><input type="checkbox" checked={f.invite} onChange={(e) => setF({ ...f, invite: e.target.checked })} style={{ width: "auto" }} /> Email them the invite</label>
+        <button type="button" className="btn btn-sm btn-primary" disabled={!f.date} onClick={go}>Schedule</button>
+      </div>
+      {state && <span className="small" role="status">{state}</span>}
+    </div>
   );
 }
 

@@ -203,6 +203,8 @@ export default function PlanBoard({ initial, firstName, slug }: { initial: Strat
               <div className="stack" style={{ gap: 6, alignItems: "flex-end", minWidth: 160 }}>
                 <span className="small muted">{p}% of session tasks done</span>
                 <div className="ws-bar" style={{ width: 160, height: 8 }}><span className="done" style={{ width: `${p}%` }} /></div>
+                {s.status !== "done" && s.link && <a className="btn btn-sm btn-dark" href={s.link} target="_blank" rel="noreferrer">Join the call</a>}
+                {s.status !== "done" && s.date && <a className="linkbtn small" href={`/api/portal/plan/ics?sid=${s.id}`}>Add to my calendar</a>}
                 <a className={`btn btn-sm ${s.status === "done" ? "btn-ghost" : "btn-primary"}`} href={`/p/${slug}/room/${s.id}`}>{s.status === "done" ? "Review the session" : "Open the strategy room"}</a>
                 <button type="button" className="linkbtn small" onClick={() => setReq({ targetType: "session", targetId: s.id, label: s.title })}>Request a change</button>
               </div>
