@@ -16,7 +16,9 @@ export default function WorkspaceHub({ slug, plan, assessment, today }: { slug: 
   const showPlan = !!plan?.enabled;
   const showAssess = !!assessment?.enabled;
   if (!showPlan && !showAssess) return null;
-  const next = plan?.sessions.filter((s) => s.status !== "done").sort((a, b) => (a.date || "9999").localeCompare(b.date || "9999"))[0];
+  const open = plan?.sessions.filter((s) => s.status !== "done") ?? [];
+  // The next one on the calendar. A session whose date has passed is not "next".
+  const next = open.filter((s) => s.date && s.date >= today).sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start))[0] ?? open.find((s) => !s.date);
   const mine = (plan?.tasks ?? []).filter((t) => t.owner === "client" && t.status !== "done")
     .sort((a, b) => (a.due || "9999").localeCompare(b.due || "9999")).slice(0, 3);
   const replies = (plan?.requests ?? []).filter((r) => r.status === "resolved" && r.reply).length;

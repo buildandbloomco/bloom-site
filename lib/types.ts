@@ -276,6 +276,8 @@ export interface Client {
   billing?: "standard" | "none";
   /** Small business or organization. Sets which add-on prices they see and pay in the portal */
   tier?: "business" | "org" | "";
+  /** Guidebooks shown in their portal. Not set = just the client guidebook */
+  guideSlugs?: string[];
   codeEnc: string;
   codeIndex: string;
   welcome: string;

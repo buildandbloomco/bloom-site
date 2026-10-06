@@ -317,3 +317,14 @@ Open a client's Meeting view and click "Systems build" in the "Proposal and agre
 4. **Accounts in their name.** A checklist with what each costs: domain, GitHub, Vercel Pro ($20 a month), Claude Pro ($20 a month), Stripe, and email sending. These are paid by the client directly, about $40 a month, and are shown on the Systems page and the overview PDF. If Vercel or Claude change their prices, update `ACCOUNTS` and `RUNNING_COSTS` in `lib/build-def.ts` and the wording on `app/(site)/systems/page.tsx`.
 5. **Keep them posted.** Change the stage (Discovery, Design, Build, Your review, Launch), set a target date, add a preview link, and post short updates. They see all of it on their build page.
 6. **Add-on requests.** Clients pick from the build add-ons (Admin, Services, the ones that start with a build name such as Online booking or Staff logins) or describe something else. You get an email, reply with a price and timing, and set the status. Requesting never charges them. Add the agreed amount to their proposal or record it as a payment line yourself.
+
+## How the client portal home is laid out
+
+The portal home is built to show a client one clear next step, not everything at once.
+
+- **Top: "what needs you."** Only things waiting on them: accept the proposal, sign an agreement, pay the retainer, confirm a consult summary, finish a questionnaire, tasks due in the next two weeks. If nothing is waiting it says they are caught up. Next to it is their next session with the call link.
+- **Then the work:** sessions and plan, build, progress review, courses, files, booking.
+- **Lower down:** package, investment, and payment. Then workshops and resources (collapsed until they open it) and guidebooks.
+- **"Here is how we begin"** shows only until the client is active.
+- **Menu:** Sessions, Files, Book, Billing, plus Build, Proposal, or Courses only when they apply.
+- **Guidebooks:** each client sees only the client guidebook unless you check others in "Guidebooks in their portal" on their Meeting view.
