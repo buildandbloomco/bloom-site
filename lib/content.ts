@@ -3,6 +3,7 @@ import { kv } from "./kv";
 import { newId } from "./crypto";
 import seed from "./content-seed.json";
 import seed2 from "./content-seed-2.json";
+import seed3 from "./content-seed-3.json";
 import { CONTENT_STATUSES, CONTENT_TYPES, type ContentMedia, type ContentPost } from "./content-types";
 
 const K = { posts: "bb:content:posts", mig: "bb:mig:content1" };
@@ -29,6 +30,16 @@ function ensureSeed() {
         await kv().hset(K.posts, p.id, p);
       }
       await kv().set("bb:mig:content2", now);
+    }).then(async () => {
+      // Third batch: the custom portals and systems launch
+      if (await kv().get("bb:mig:content3")) return;
+      const now = new Date().toISOString();
+      for (const s of seed3 as Omit<ContentPost, "id" | "status" | "createdAt" | "updatedAt">[]) {
+        const p: ContentPost = { ...s, id: newId(), status: s.media.length ? "ready" : "idea", createdAt: now, updatedAt: now } as ContentPost;
+        delete (p as unknown as Record<string, unknown>).key;
+        await kv().hset(K.posts, p.id, p);
+      }
+      await kv().set("bb:mig:content3", now);
     }).catch((e) => {
       seeding = null;
       throw e;

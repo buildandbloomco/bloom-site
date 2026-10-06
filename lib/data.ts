@@ -2,7 +2,7 @@ import "server-only";
 import { kv } from "./kv";
 import { codeIndex, encryptCode, newId, normalizeCode } from "./crypto";
 import { DEFAULT_CATALOG, DEFAULT_SETTINGS, NEW_ORG_SERVICES } from "./seed";
-import type { Catalog, Client, PublicClient, Settings } from "./types";
+import type { Catalog, Client, PublicClient, Service, Settings } from "./types";
 import { normalizeConsult } from "./consult";
 
 const K = {
@@ -143,6 +143,8 @@ export async function getCatalog(): Promise<Catalog> {
   await ensureSeeded();
   await migrateV2();
   await migratePricing();
+  await migrateSystems();
+  await migrateSystemAddOns();
   const cat = (await kv().get<Catalog>(K.catalog)) ?? DEFAULT_CATALOG;
   for (const s of cat.services) {
     s.showOnSite ??= s.kind === "core";
@@ -217,6 +219,65 @@ function migratePricing() {
     });
   }
   return pricing;
+}
+/** One-time: add the custom portal and systems builds. Prices are suggestions you can change under Services. */
+export const SYSTEMS_SERVICES: Service[] = [
+  { id: "systems-landing", name: "Landing Page Build", kind: "core", lane: "both", active: true, showOnSite: true, showPrice: false, unit: "one time", price: 2000, priceOrg: 3250,
+    description: "One branded page that explains what you do and turns visitors into inquiries, with a contact form and booking link, set up on your own domain." },
+  { id: "systems-portal", name: "Proposal and Payment Portal", kind: "core", lane: "both", active: true, showOnSite: true, showPrice: false, unit: "one time", price: 5500, priceOrg: 8750,
+    description: "Your own admin dashboard and client-facing proposals. Send a proposal, see when it is opened, and let clients accept, sign, and pay in one place." },
+  { id: "systems-hub", name: "Full Operations Hub", kind: "core", lane: "both", active: true, showOnSite: true, showPrice: false, unit: "one time", price: 10250, priceOrg: 20000,
+    description: "The complete system, designed around how your business runs: a private client portal, proposals, agreements, payments, calendar, follow-ups, and the tools your team uses every day." },
+  { id: "addon-care-plan", name: "Systems Care Plan", kind: "addon", lane: "both", active: true, showOnSite: true, showPrice: true, unit: "per month", price: 275, priceOrg: null,
+    description: "Ongoing care for a system we built: updates, small changes, fixes, and backups, so it keeps working as your business changes." },
+];
+let systems: Promise<void> | null = null;
+function migrateSystems() {
+  if (!systems) {
+    systems = (async () => {
+      if (await kv().get("bb:mig:systems1")) return;
+      const cat = (await kv().get<Catalog>(K.catalog)) ?? DEFAULT_CATALOG;
+      const add = SYSTEMS_SERVICES.filter((n) => !cat.services.some((s) => s.id === n.id));
+      const core = add.filter((s) => s.kind === "core"), extra = add.filter((s) => s.kind !== "core");
+      const lastCore = cat.services.map((s) => s.kind).lastIndexOf("core");
+      cat.services = [...cat.services.slice(0, lastCore + 1), ...core, ...cat.services.slice(lastCore + 1), ...extra];
+      await kv().set(K.catalog, cat);
+      await kv().set("bb:mig:systems1", true);
+    })().catch((e) => {
+      systems = null;
+      throw e;
+    });
+  }
+  return systems;
+}
+/** One-time: add-ons a client can request during a build. Prices are suggestions you can change under Services. */
+const sysAdd = (id: string, name: string, description: string, price: number, priceOrg: number, unit = "one time"): Service => ({ id: `sysadd-${id}`, name, description, price, priceOrg, unit, kind: "addon", lane: "both", active: true, showOnSite: false, showPrice: true });
+export const SYSTEM_ADDONS: Service[] = [
+  sysAdd("page", "Extra page or section", "One more page on your site, written and designed to match.", 350, 500, "per page"),
+  sysAdd("booking", "Online booking", "Let people see your open times and book without emailing back and forth.", 750, 1200),
+  sysAdd("reminders", "Email invites and reminders", "Calendar invites, day-before reminders, and alerts to you when a client does something.", 500, 800),
+  sysAdd("courses", "Courses or trainings", "Lessons, video, and a guided workbook your clients complete inside their portal.", 1500, 2500),
+  sysAdd("shop", "Shop or digital products", "Sell downloads, guides, or products with card checkout.", 1200, 2000),
+  sysAdd("staff", "Staff logins and roles", "Separate sign-ins for your team, with control over what each person can see.", 900, 1500),
+  sysAdd("content", "Content calendar", "Plan and store your social posts, captions, and graphics in one place.", 600, 1000),
+  sysAdd("training", "Team training session", "A live walkthrough for your staff, recorded so new hires can watch it later.", 300, 450, "per session"),
+  sysAdd("rush", "Rush delivery", "Move your build to the front of the line. Timeline depends on the build.", 750, 1500),
+];
+let sysAddons: Promise<void> | null = null;
+function migrateSystemAddOns() {
+  if (!sysAddons) {
+    sysAddons = (async () => {
+      if (await kv().get("bb:mig:systems2")) return;
+      const cat = (await kv().get<Catalog>(K.catalog)) ?? DEFAULT_CATALOG;
+      cat.services = [...cat.services, ...SYSTEM_ADDONS.filter((n) => !cat.services.some((s) => s.id === n.id))];
+      await kv().set(K.catalog, cat);
+      await kv().set("bb:mig:systems2", true);
+    })().catch((e) => {
+      sysAddons = null;
+      throw e;
+    });
+  }
+  return sysAddons;
 }
 export async function saveCatalog(c: Catalog) {
   await kv().set(K.catalog, c);

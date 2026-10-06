@@ -4,6 +4,7 @@ import Link from "next/link";
 export const NAV: [string, string][] = [
   ["About", "/about"],
   ["Services", "/services"],
+  ["Systems", "/systems"],
   ["Masterclass", "/masterclass"],
   ["Courses", "/courses"],
   ["Events", "/workshops"],

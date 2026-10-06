@@ -288,3 +288,32 @@ The client needs an email on their client page, and the session needs a date. Ea
 **Progress review.** On the Meeting view, click "Progress review". Pick the dates (it starts at the last 90 days), write "Where things stand" and "What comes next", then print it, or share it to their portal. It pulls sessions, wins, decisions, completed tasks, open tasks, and the scorecard. Tasks completed before this update have no completion date and are not counted.
 
 **Backup.** Admin, Settings, "Download full backup" gives you one file with everything in the portal. Save one about once a month. The link at the bottom of a Meeting view downloads one client only. Access codes are not included, and uploaded files are listed by link, not copied.
+
+## Proposals
+
+Open a client's Meeting view and click the Proposal link in the "Proposal and agreements" box (or the proposal tag on your client list).
+
+1. **Build it.** Option 1 is filled in from the client page, so after "Use as their proposal" on a consult sheet it is already there. Add an opening note and, if you want a deadline, a "Good through" date.
+2. **One option or several.** One option is a simple yes. Add up to four to show them side by side, and mark one as recommended. Check services, click "Add price lines for the checked services" to pull in your suggested prices for their client type, then adjust. A negative price line shows as a discount.
+3. **Send.** "Save and send" puts a "Your proposal is ready" card at the top of their portal. While it is waiting, the package, investment, and pay sections are hidden and card payment is held, so they only see prices on the proposal.
+4. **They accept.** They pick an option, type their name, and accept. That option becomes their package and investment, their status becomes active, you get an email, and they are walked to the next steps: sign the agreement (if you sent one), pay the retainer, kickoff.
+5. **Track it.** Your client list shows Proposal draft, sent, viewed, accepted, or expired.
+
+To change an accepted proposal, click "Revise". That clears their acceptance and they accept the new version. They can print or save the proposal as a PDF at any point, for a board or finance person.
+
+## Custom portals and systems (the service you sell)
+
+- **The page** is at `/systems`, linked in the top menu and from a banner on the Services page. The sample screens are in `public/systems` and show a made-up business.
+- **The services** were added to Admin, Services: Landing Page Build, Proposal and Payment Portal, Full Operations Hub, and the Systems Care Plan add-on, each with a small business and organization price. Change prices there. The three builds say "Priced at your consult" on the site until you check "show price" for them. The care plan shows its price like your other add-ons.
+- **Instagram posts** for the launch are on the Content calendar from December 7 to 18 under the campaign "Systems builds". Two are yours to record (a face video and a screen recording). Use the Sample Client for the screen recording, never a real client.
+
+## Build workspace (intake, progress, and add-ons for systems clients)
+
+Open a client's Meeting view and click "Systems build" in the "Proposal and agreements" box.
+
+1. **Turn it on.** Check "Show the build workspace in their portal" and pick what you are building. The questionnaire adjusts: a landing page skips the admin and client-portal questions.
+2. **Gather the information.** The questionnaire covers their business, brand (with color pickers), links, website, admin side, client side, and timing. They fill it in from their portal and it saves as they type, or click "Fill in or edit" and complete it with them during the consultation. "Read answers" gives you a clean view you can print.
+3. **Files.** Logo, photos, and brand files go in the Shared files box on the same page (needs the Blob store).
+4. **Accounts in their name.** A checklist with what each costs: domain, GitHub, Vercel Pro ($20 a month), Claude Pro ($20 a month), Stripe, and email sending. These are paid by the client directly, about $40 a month, and are shown on the Systems page and the overview PDF. If Vercel or Claude change their prices, update `ACCOUNTS` and `RUNNING_COSTS` in `lib/build-def.ts` and the wording on `app/(site)/systems/page.tsx`.
+5. **Keep them posted.** Change the stage (Discovery, Design, Build, Your review, Launch), set a target date, add a preview link, and post short updates. They see all of it on their build page.
+6. **Add-on requests.** Clients pick from the build add-ons (Admin, Services, the ones that start with a build name such as Online booking or Staff logins) or describe something else. You get an email, reply with a price and timing, and set the status. Requesting never charges them. Add the agreed amount to their proposal or record it as a payment line yourself.
