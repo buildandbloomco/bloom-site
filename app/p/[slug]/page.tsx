@@ -24,6 +24,7 @@ import { isExpired } from "@/lib/proposal-def";
 import { getBuild } from "@/lib/builds";
 import { BUILD_KINDS, STAGES, intakeProgress } from "@/lib/build-def";
 import { getReview } from "@/lib/reviews";
+import NeedsYou, { type Need, type NextUp } from "@/components/portal/NeedsYou";
 import MyCourses from "@/components/course/MyCourses";
 import { getAccess } from "@/lib/library";
 import { getCourse, listAppointments, listEnrollments } from "@/lib/courses";
@@ -100,20 +101,33 @@ export default async function Portal({
   const build = await getBuild(client.id);
   // While a proposal is waiting for an answer, the price lives on the proposal page, not here
   const proposalOpen = proposal?.status === "sent";
+  const myGuides = GUIDES.filter((g) => (client.guideSlugs ?? ["client-guidebook"]).includes(g.slug));
+  const isActive = client.status === "active" || client.status === "completed";
+  const gettingStarted = !isActive;
+  const needs: Need[] = [];
+  if (proposalOpen && proposal && !isExpired(proposal, today)) needs.push({ label: "Review and accept your proposal", detail: proposal.expires ? `Good through ${longDate(proposal.expires)}` : proposal.options.length > 1 ? `${proposal.options.length} options to choose from` : undefined, href: `/p/${slug}/proposal`, cta: "Review" });
+  if (!proposalOpen) for (const a of toSign) needs.push({ label: `Sign: ${a.title}`, detail: "About two minutes", href: `/p/${slug}/agreements/${a.id}`, cta: "Read and sign" });
+  if (hasInvestment && client.investment.retainer > 0 && paid < client.investment.retainer) needs.push({ label: `Pay your ${money(client.investment.retainer)} retainer`, detail: toSign.some((a) => a.requiredToPay) ? "After your agreement is signed" : undefined, href: "#pay", cta: "Go to payment" });
+  for (const c of pub.consults.filter((x) => x.shared && !x.clientConfirmedAt).slice(0, 1)) needs.push({ label: "Confirm your consultation summary", detail: "Check that we heard you right", href: "#consult", cta: "Review" });
+  if (build.enabled && !build.intakeSubmittedAt) needs.push({ label: "Finish your build questionnaire", detail: `${intakeProgress(build).percent}% done. It saves as you go.`, href: `/p/${slug}/build#questions`, cta: "Continue" });
+  if (assessment?.enabled && assessment.status === "leader" && !assessment.leaderSubmittedAt) needs.push({ label: "Complete your leader questionnaire", detail: "About 15 minutes", href: `/p/${slug}/assessment`, cta: "Start" });
+  const soon = new Date(`${today}T12:00:00Z`); soon.setUTCDate(soon.getUTCDate() + 14);
+  const dueTasks = plan.enabled ? plan.tasks.filter((t) => t.owner === "client" && t.status !== "done" && t.due && t.due <= soon.toISOString().slice(0, 10)).sort((a, b) => a.due.localeCompare(b.due)) : [];
+  for (const t of dueTasks.slice(0, 2)) needs.push({ label: t.title, detail: t.due < today ? `Was due ${shortDate(t.due)}` : `Due ${shortDate(t.due)}`, href: `/p/${slug}/plan`, cta: "Open" });
+  if (dueTasks.length > 2) needs.push({ label: `${dueTasks.length - 2} more ${dueTasks.length - 2 === 1 ? "task" : "tasks"} due soon`, href: `/p/${slug}/plan`, cta: "See all" });
+  const upSession = plan.enabled ? plan.sessions.filter((x) => x.status !== "done" && x.date && x.date >= today).sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start))[0] : undefined;
+  const upAppt = myAppts[0];
+  const nextUp: NextUp | null = upSession && (!upAppt || upSession.date <= upAppt.date)
+    ? { title: upSession.title, when: `${longDate(upSession.date)}${upSession.start ? ` at ${fmtTime(upSession.start)} ET` : ""}`, joinUrl: upSession.link || undefined, roomUrl: `/p/${slug}/room/${upSession.id}` }
+    : upAppt ? { title: upAppt.title || "Session", when: `${longDate(upAppt.date)}${upAppt.start ? ` at ${fmtTime(upAppt.start)} ET` : ""}`, joinUrl: upAppt.link || undefined } : null;
   const nav = [
+    hasWorkspace && plan.enabled ? ["Sessions", `/p/${slug}/plan`] : null,
     build.enabled ? ["Your build", `/p/${slug}/build`] : null,
-    hasWorkspace ? ["Workspace", "#workspace"] : null,
+    holdPay ? ["Your proposal", `/p/${slug}/proposal`] : null,
     myCourses.length ? ["Courses", "#courses"] : null,
-    showWork ? ["Your work", "#work"] : null,
-    pub.consults.length ? ["Consult notes", "#consult"] : null,
-    holdPay ? ["Your proposal", `/p/${slug}/proposal`] : ["Your package", "#package"],
-    hasInvestment ? ["Investment", "#investment"] : null,
-    addOns.length && !noPay && !holdPay ? ["Add-ons", "#addons"] : null,
-    noPay || holdPay ? null : ["Pay", "#pay"],
-    library.length ? ["Library", "#library"] : null,
     ["Files", "#files"],
-    client.showBooking ? ["Book a session", "#book"] : null,
-    ["Next steps", "#next"],
+    client.showBooking ? ["Book", "#book"] : null,
+    noPay || holdPay ? null : ["Billing", hasInvestment ? "#investment" : "#pay"],
   ].filter(Boolean) as [string, string][];
 
   return (
@@ -141,26 +155,22 @@ export default async function Portal({
         <section className="hero">
           <div className="wrap hero-grid">
             <div>
-              <p className="eyebrow">Prepared for {client.name}</p>
+              <p className="eyebrow">{isActive ? client.name : `Prepared for ${client.name}`}</p>
               <h1 style={{ marginTop: 16 }}>
-                {client.package.title || "Your proposal"}
+                {isActive ? `Welcome back, ${first.split(" ")[0]}` : client.package.title || "Your proposal"}
               </h1>
               <span className="rule" aria-hidden="true" />
               <div className="boxed lede">
                 <p>
                   {client.welcome ||
-                    `Welcome, ${first}. Everything for our work together lives here: your package, investment, add-ons, resources, and next steps.`}
+                    (isActive ? "Everything for our work together lives here. Start with what needs you below. The rest is here whenever you want it." : `Welcome, ${first}. Everything for our work together lives here: your proposal, next steps, and a way to reach us.`)}
                 </p>
               </div>
               <div className="row cta">
-                {hasWorkspace ? (
-                  <a className="btn btn-primary" href="#workspace">Open your workspace</a>
-                ) : showWork ? (
-                  <a className="btn btn-primary" href="#work">View your work</a>
-                ) : (
-                  holdPay ? <a className="btn btn-primary" href="#next">Next steps</a> : <a className="btn btn-primary" href="#package">Explore your package</a>
-                )}
-                {holdPay ? <a className="btn btn-ghost" href={`/p/${slug}/proposal`}>Review your proposal</a> : noPay ? <a className="btn btn-ghost" href="#next">Next steps</a> : <a className="btn btn-ghost" href="#pay">Pay your part</a>}
+                {holdPay ? <a className="btn btn-primary" href={`/p/${slug}/proposal`}>Review your proposal</a>
+                  : hasWorkspace && plan.enabled ? <a className="btn btn-primary" href={`/p/${slug}/plan`}>Open your sessions</a>
+                  : <a className="btn btn-primary" href="#today">See what is next</a>}
+                {client.showBooking && <a className="btn btn-ghost" href="#book">Book a session</a>}
               </div>
             </div>
             <div className="arch-frame" aria-hidden="true">
@@ -173,33 +183,7 @@ export default async function Portal({
           </div>
         </section>
 
-        {proposalOpen && proposal && (
-          <section className="section" style={{ paddingBottom: 0 }}>
-            <div className="wrap">
-              <div className="dark-card row between" style={{ gap: 20, flexWrap: "wrap" }}>
-                <div className="stack" style={{ gap: 6, maxWidth: 640 }}>
-                  <span className="eyebrow gold">Your proposal is ready</span>
-                  <p style={{ margin: 0, color: "var(--on-dark-2)" }}>
-                    {isExpired(proposal, today) ? "This proposal has expired. Reach out and we will send an updated one." : proposal.options.length > 1 ? `${proposal.options.length} ways we can work together. Review them and choose the one that fits.` : "Review what is included and the investment, then accept to get started."}
-                    {proposal.expires && !isExpired(proposal, today) ? ` Good through ${longDate(proposal.expires)}.` : ""}
-                  </p>
-                </div>
-                <a className="btn btn-gold" href={`/p/${slug}/proposal`}>Review your proposal</a>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {toSign.length > 0 && !proposalOpen && (
-          <section className="section" style={{ paddingBottom: 0 }}>
-            <div className="wrap">
-              <div className="banner warn row between" style={{ margin: 0, gap: 14, flexWrap: "wrap" }}>
-                <span><strong>Please sign: {toSign.map((a) => a.title).join(", ")}.</strong>{toSign.some((a) => a.requiredToPay) && !noPay ? " This needs your signature before you can pay online." : " It takes about two minutes."}</span>
-                <a className="btn btn-sm btn-dark" href={`/p/${slug}/agreements/${toSign[0].id}`}>Read and sign</a>
-              </div>
-            </div>
-          </section>
-        )}
+        <NeedsYou first={first.split(" ")[0]} needs={needs} next={nextUp} />
 
         <WorkspaceHub slug={slug} plan={plan} assessment={assessment} today={today} />
 
@@ -232,20 +216,7 @@ export default async function Portal({
           </section>
         )}
 
-        <section className="section" id="guidebooks" style={{ paddingBottom: 0 }}>
-          <div className="wrap stack" style={{ gap: 16 }}>
-            <p className="eyebrow">Your guidebooks</p>
-            <div className="ws-hub" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}>
-              {[...GUIDES].sort((a, b) => (a.slug === "client-guidebook" ? -1 : b.slug === "client-guidebook" ? 1 : 0)).map((g) => (
-                <div className="ws-card" key={g.slug}>
-                  <h3>{g.title}</h3>
-                  <p className="small" style={{ margin: 0 }}>{g.tagline}</p>
-                  <a className="btn btn-sm btn-dark" style={{ alignSelf: "flex-start" }} href={g.file} target="_blank" rel="noopener noreferrer">Open the guidebook (PDF)</a>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        {myCourses.length > 0 && <MyCourses items={myCourses} />}
 
         {hasLibrary && (
           <section className="section" id="wellness-library" style={{ paddingBottom: 0 }}>
@@ -261,7 +232,6 @@ export default async function Portal({
             </div>
           </section>
         )}
-        {myCourses.length > 0 && <MyCourses items={myCourses} />}
 
         {showWork && <YourWork client={pub} />}
 
@@ -269,8 +239,104 @@ export default async function Portal({
           <ConsultSummary consults={pub.consults} services={catalog.services} contactName={client.contactName} />
         )}
 
+        {/* NEXT STEPS: only while they are getting started */}
+        {client.nextSteps.length > 0 && gettingStarted && (
+          <section className="section alt" id="next">
+            <div className="wrap narrow">
+              <div className="section-head">
+                <p className="eyebrow">Next steps</p>
+                <h2>Here is how we begin</h2>
+              </div>
+              <ol className="steps">
+                {client.nextSteps.map((s, i) => <li key={i}>{s}</li>)}
+              </ol>
+            </div>
+          </section>
+        )}
+
+        {/* FILES AND AGREEMENTS */}
+        <section className="section" id="files">
+          <div className="wrap">
+            <div className="section-head">
+              <p className="eyebrow">Files and agreements</p>
+              <h2>Everything we share, in one place</h2>
+            </div>
+            <div className={myAgreements.length ? "grid-2" : "stack"}>
+              <div className="card stack" style={{ gap: 12 }}>
+                <h3 style={{ margin: 0 }}>Shared files</h3>
+                <p className="small muted" style={{ margin: 0 }}>Send us documents we ask for, and find the ones we send you.</p>
+                <SharedFiles initial={files} as="client" clientId={client.id} />
+              </div>
+              {myAgreements.length > 0 && (
+                <div className="card stack" style={{ gap: 12 }}>
+                  <h3 style={{ margin: 0 }}>Agreements</h3>
+                  {myAgreements.map((a) => (
+                    <div className="file-row" key={a.id}>
+                      <div className="stack" style={{ gap: 2 }}>
+                        <strong>{a.title}</strong>
+                        <span className="tiny muted">{a.status === "signed" ? `Signed by ${a.signedName} on ${shortDate(a.signedAt ?? "")}` : "Waiting for your signature"}</span>
+                      </div>
+                      <a className={`btn btn-sm ${a.status === "signed" ? "btn-ghost" : "btn-primary"}`} href={`/p/${slug}/agreements/${a.id}`}>{a.status === "signed" ? "View" : "Read and sign"}</a>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* BOOK */}
+        {client.showBooking && (
+          <section className="section" id="book">
+            <div className="wrap">
+              <div className="section-head">
+                <p className="eyebrow">Book a session</p>
+                <h2>Let us talk it through</h2>
+                <p className="muted">
+                  Book a free consult, a kickoff, or a check-in. Pick a time that works for you.
+                </p>
+              </div>
+              {myAppts.length > 0 && (
+                <div className="card stack" style={{ gap: 10, marginBottom: 20 }}>
+                  <h3 style={{ margin: 0 }}>Your upcoming sessions</h3>
+                  {myAppts.map((x) => (
+                    <div key={x.id} className="row between" style={{ borderTop: "1px solid var(--line)", paddingTop: 10 }}>
+                      <span><strong>{longDate(x.date)}</strong>{x.start ? ` at ${fmtTime(x.start)} ET` : ""}</span>
+                      <span className="row" style={{ gap: 10 }}>
+                        {x.link && <a className="btn btn-sm btn-dark" href={x.link} target="_blank" rel="noopener noreferrer">Join</a>}
+                        {x.token && <a className="linkbtn small" href={`/book/confirmed?id=${x.id}&t=${x.token}`}>Details or reschedule</a>}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {settings.booking.enabled ? (
+                <div className="card row between" style={{ padding: 32 }}>
+                  <div className="stack" style={{ gap: 6, maxWidth: 560 }}>
+                    <h3>Book a session</h3>
+                    <p className="muted">A kickoff, working session, or check-in. See open times and book in a minute.</p>
+                  </div>
+                  <a className="btn btn-primary" href="/book?type=session">Pick a time</a>
+                </div>
+              ) : settings.bookingEmbed ? (
+                <iframe className="embed" src={settings.bookingUrl} title="Book a session" loading="lazy" />
+              ) : (
+                <div className="card row between" style={{ padding: 32 }}>
+                  <div className="stack" style={{ gap: 6, maxWidth: 560 }}>
+                    <h3>Free consult</h3>
+                    <p className="muted">Opens our booking calendar in a new tab.</p>
+                  </div>
+                  <a className="btn btn-primary" {...bookProps(settings)}>
+                    Book a time
+                  </a>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
         {/* PACKAGE */}
-        {!holdPay && <section className="section" id="package">
+        {!holdPay && (included.length > 0 || client.package.customItems.length > 0) && <section className="section" id="package">
           <div className="wrap">
             <div className="section-head">
               <p className="eyebrow">Your package</p>
@@ -361,14 +427,11 @@ export default async function Portal({
 
         {/* LIBRARY */}
         {library.length > 0 && (
-          <section className="section alt" id="library">
+          <section className="section" id="library" style={{ paddingBottom: 24 }}>
             <div className="wrap">
-              <div className="section-head">
-                <p className="eyebrow">Your library</p>
-                <h2>Workshops, tools, and resources</h2>
-                <p className="muted">Everything you have access to, in one place. Bookmark this page.</p>
-              </div>
-              <div className="stack" style={{ gap: 40 }}>
+              <details className="card">
+              <summary style={{ cursor: "pointer", fontWeight: 600 }}>Workshops, tools, and resources ({library.length})</summary>
+              <div className="stack" style={{ gap: 40, marginTop: 20 }}>
                 {workshops.length > 0 && (
                   <div className="stack">
                     <h3>Workshops & trainings</h3>
@@ -406,102 +469,23 @@ export default async function Portal({
                   </div>
                 )}
               </div>
+              </details>
             </div>
           </section>
         )}
 
-        {/* FILES AND AGREEMENTS */}
-        <section className="section" id="files">
-          <div className="wrap">
-            <div className="section-head">
-              <p className="eyebrow">Files and agreements</p>
-              <h2>Everything we share, in one place</h2>
-            </div>
-            <div className={myAgreements.length ? "grid-2" : "stack"}>
-              <div className="card stack" style={{ gap: 12 }}>
-                <h3 style={{ margin: 0 }}>Shared files</h3>
-                <p className="small muted" style={{ margin: 0 }}>Send us documents we ask for, and find the ones we send you.</p>
-                <SharedFiles initial={files} as="client" clientId={client.id} />
-              </div>
-              {myAgreements.length > 0 && (
-                <div className="card stack" style={{ gap: 12 }}>
-                  <h3 style={{ margin: 0 }}>Agreements</h3>
-                  {myAgreements.map((a) => (
-                    <div className="file-row" key={a.id}>
-                      <div className="stack" style={{ gap: 2 }}>
-                        <strong>{a.title}</strong>
-                        <span className="tiny muted">{a.status === "signed" ? `Signed by ${a.signedName} on ${shortDate(a.signedAt ?? "")}` : "Waiting for your signature"}</span>
-                      </div>
-                      <a className={`btn btn-sm ${a.status === "signed" ? "btn-ghost" : "btn-primary"}`} href={`/p/${slug}/agreements/${a.id}`}>{a.status === "signed" ? "View" : "Read and sign"}</a>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* BOOK */}
-        {client.showBooking && (
-          <section className="section" id="book">
+        {myGuides.length > 0 && (
+          <section className="section" id="guidebooks" style={{ paddingTop: 0 }}>
             <div className="wrap">
-              <div className="section-head">
-                <p className="eyebrow">Book a session</p>
-                <h2>Let us talk it through</h2>
-                <p className="muted">
-                  Book a free consult, a kickoff, or a check-in. Pick a time that works for you.
-                </p>
-              </div>
-              {myAppts.length > 0 && (
-                <div className="card stack" style={{ gap: 10, marginBottom: 20 }}>
-                  <h3 style={{ margin: 0 }}>Your upcoming sessions</h3>
-                  {myAppts.map((x) => (
-                    <div key={x.id} className="row between" style={{ borderTop: "1px solid var(--line)", paddingTop: 10 }}>
-                      <span><strong>{longDate(x.date)}</strong>{x.start ? ` at ${fmtTime(x.start)} ET` : ""}</span>
-                      <span className="row" style={{ gap: 10 }}>
-                        {x.link && <a className="btn btn-sm btn-dark" href={x.link} target="_blank" rel="noopener noreferrer">Join</a>}
-                        {x.token && <a className="linkbtn small" href={`/book/confirmed?id=${x.id}&t=${x.token}`}>Details or reschedule</a>}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {settings.booking.enabled ? (
-                <div className="card row between" style={{ padding: 32 }}>
-                  <div className="stack" style={{ gap: 6, maxWidth: 560 }}>
-                    <h3>Book a session</h3>
-                    <p className="muted">A kickoff, working session, or check-in. See open times and book in a minute.</p>
+              <div className="card stack" style={{ gap: 4 }}>
+                <h3 style={{ margin: "0 0 6px" }}>Guidebooks</h3>
+                {myGuides.map((g) => (
+                  <div className="file-row" key={g.slug}>
+                    <div className="stack" style={{ gap: 2, flex: "1 1 240px" }}><strong>{g.title}</strong><span className="small muted">{g.tagline}</span></div>
+                    <a className="btn btn-sm btn-ghost" href={g.file} target="_blank" rel="noopener noreferrer">Open (PDF)</a>
                   </div>
-                  <a className="btn btn-primary" href="/book?type=session">Pick a time</a>
-                </div>
-              ) : settings.bookingEmbed ? (
-                <iframe className="embed" src={settings.bookingUrl} title="Book a session" loading="lazy" />
-              ) : (
-                <div className="card row between" style={{ padding: 32 }}>
-                  <div className="stack" style={{ gap: 6, maxWidth: 560 }}>
-                    <h3>Free consult</h3>
-                    <p className="muted">Opens our booking calendar in a new tab.</p>
-                  </div>
-                  <a className="btn btn-primary" {...bookProps(settings)}>
-                    Book a time
-                  </a>
-                </div>
-              )}
-            </div>
-          </section>
-        )}
-
-        {/* NEXT STEPS */}
-        {client.nextSteps.length > 0 && (
-          <section className="section alt" id="next">
-            <div className="wrap narrow">
-              <div className="section-head">
-                <p className="eyebrow">Next steps</p>
-                <h2>Here is how we begin</h2>
+                ))}
               </div>
-              <ol className="steps">
-                {client.nextSteps.map((s, i) => <li key={i}>{s}</li>)}
-              </ol>
             </div>
           </section>
         )}

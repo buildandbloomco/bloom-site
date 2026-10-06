@@ -22,6 +22,8 @@ import { getBuild } from "@/lib/builds";
 import { STAGES } from "@/lib/build-def";
 import { getProposal } from "@/lib/proposals";
 import { proposalState } from "@/lib/proposal-def";
+import GuideAssign from "@/components/admin/GuideAssign";
+import { GUIDES } from "@/lib/guides";
 import PrivateNotes from "@/components/admin/PrivateNotes";
 
 export const dynamic = "force-dynamic";
@@ -168,6 +170,11 @@ export default async function ClientDesk({ params }: { params: Promise<{ id: str
               <Link className="small" href={`/admin/clients/${id}/consult/${consult.id}`}>Open the sheet</Link>
             </section>
           )}
+
+          <section className="panel">
+            <h3>Guidebooks in their portal</h3>
+            <GuideAssign clientId={id} guides={GUIDES.map((g) => ({ slug: g.slug, title: g.title }))} initial={client.guideSlugs ?? ["client-guidebook"]} />
+          </section>
 
           <section className="panel">
             <h3>Private notes</h3>
