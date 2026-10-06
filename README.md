@@ -230,3 +230,20 @@ Role breakdowns are hidden for any group with fewer than 3 responses. Team comme
 - To sell it on its own, add a priced package and set the course to Published and "Show on website".
 - **Media on any lesson:** paste a YouTube, Vimeo, Loom, or Drive link, or use "Upload a video or audio file". Uploaded files play right on the lesson page. "Upload a download" attaches a PDF or image.
 - The workshop's Instagram campaign (12 posts, November 16 to December 4) loads into Admin > Content with its graphics attached. The free Hard Conversation Planner is at `/guides/conversation-planner`.
+
+## Meeting view and strategy sessions
+
+- **Meeting view:** on the Clients list, click "Meeting view" under a client's name (or "Open meeting view" on their page). It is one page with the session form, open items, progress, what is waiting on you, payments, assessment, courses, consult notes, and private notes.
+- **New session:** pick the date and click "+ New session" each time you meet. Open items from the last session carry forward and the last session is marked complete. Uncheck the box to start clean.
+- **Status of things:** each item is Not started, In progress, or Completed, and belongs to you or the client. Everything in the session form saves on its own and shows in the client's portal under their strategy plan, newest session first. Private notes never show.
+- **Existing clients who do not pay through the site:** when you create the client, check "Existing client, no payment needed". For a client you already made, set Payment to "No payment needed" on their client page. Their portal then has no investment or payment sections.
+
+## The strategy room (live sessions)
+
+- **Open it:** in a client's Meeting view, click "Open strategy room" on the session. The client opens the same room from their portal ("Open the strategy room" on their workspace box or strategy plan).
+- **Live:** what either of you types shows on the other screen in about two seconds. A green dot shows when the other person is in the room, and a box is outlined while they are typing in it. If you both type in the same box at the same moment, the last edit wins, so take turns inside one box.
+- **Nine steps:** Check-in (wins, what feels heavy, scorecard), Focus, Brainstorm (idea notes with voting), Mind map, Evaluate (impact and effort), Canvases, Roadmap and action items, Decisions, Recap.
+- **Carry-forward:** a new session's room starts with last session's open ideas, parking lot, and scorecard (with last time's numbers filled in).
+- **Recap:** "Save recap to their plan" copies the focus, decisions, and notes to the session on their strategy plan. "Close session" also locks the room for the client. "Print or save as PDF" makes a copy to send.
+- **Private notes** on the Decisions step are only ever sent to you.
+- The room checks for changes every second and a half while it is open, which uses your database's request allowance faster than the rest of the site. Close the tab when the session ends.

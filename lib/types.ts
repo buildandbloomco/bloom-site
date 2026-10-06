@@ -272,6 +272,8 @@ export interface Client {
   contactName: string;
   email: string;
   status: ClientStatus;
+  /** "none" = an existing client who pays you outside the site. Their portal hides the investment and payment sections */
+  billing?: "standard" | "none";
   /** Small business or organization. Sets which add-on prices they see and pay in the portal */
   tier?: "business" | "org" | "";
   codeEnc: string;

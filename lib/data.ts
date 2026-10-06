@@ -115,6 +115,7 @@ export function normalizeClient(c: Client): Client {
   if (!Array.isArray(c.consults)) c.consults = [];
   c.consults = c.consults.map(normalizeConsult);
   if (c.tier !== "business" && c.tier !== "org") c.tier = "";
+  if (c.billing !== "none") c.billing = "standard";
   delete c.links;
   return c;
 }

@@ -82,6 +82,7 @@ export async function sanitizePlan(b: Partial<StrategyPlan>, prev: StrategyPlan,
       link: await resolveLink(t.link ?? blankLink(), client), createdBy: t.createdBy === "client" ? "client" : "us",
       comments: (Array.isArray(t.comments) ? t.comments : []).slice(-60).map((c) => ({ id: str(c.id, 40) || rid(), by: c.by === "client" ? "client" : "us", text: str(c.text, 2000), at: str(c.at, 40) || new Date().toISOString() })),
       domain: str(t.domain, 40),
+      carriedFrom: str(t.carriedFrom, 200),
     });
   }
   return {

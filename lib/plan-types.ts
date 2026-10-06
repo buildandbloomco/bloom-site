@@ -33,6 +33,8 @@ export interface PlanTask {
   comments: PlanComment[];
   /** Set when a task came from an assessment recommendation */
   domain: string;
+  /** Title of the session this open item was carried over from */
+  carriedFrom?: string;
 }
 
 export interface PlanSession {
@@ -76,6 +78,15 @@ export interface StrategyPlan {
   /** Let the client add their own tasks and agenda items */
   clientCanAdd: boolean;
   updatedAt: string;
+}
+
+export const STATUS_LABEL: Record<TaskStatus, string> = { todo: "Not started", doing: "In progress", done: "Completed" };
+
+/** The session you are working in now: the newest one that isn't marked complete, else the newest */
+export function currentSession(plan: Pick<StrategyPlan, "sessions">): PlanSession | null {
+  const byDate = [...plan.sessions].sort((a, b) => (a.date || "0").localeCompare(b.date || "0"));
+  const dated = byDate.filter((s) => s.date);
+  return [...dated].reverse().find((s) => s.status !== "done") ?? dated[dated.length - 1] ?? plan.sessions.find((s) => s.status !== "done") ?? plan.sessions[plan.sessions.length - 1] ?? null;
 }
 
 export const blankLink = (): PlanLink => ({ type: "", refId: "", label: "", url: "" });
