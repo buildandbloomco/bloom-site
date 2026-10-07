@@ -15,7 +15,7 @@ import { emailReady } from "@/lib/invite";
 import { siteOrigin } from "@/lib/http";
 import SharedFiles from "@/components/SharedFiles";
 import ScoreTrend from "@/components/ScoreTrend";
-import { listAgreements } from "@/lib/agreements";
+import { listAgreements, signedIsStale } from "@/lib/agreements";
 import { listFiles } from "@/lib/files";
 import { scorecardHistory } from "@/lib/room";
 import { getBuild } from "@/lib/builds";
@@ -42,6 +42,7 @@ export default async function ClientDesk({ params }: { params: Promise<{ id: str
     getPlan(id), getCatalog(), getAssessment(id), listResponses(id), listEnrollments({ clientId: id }), listAppointments(), getAccess(id),
   ]);
   const [agreements, files, scores] = await Promise.all([listAgreements(id), listFiles(id), scorecardHistory(id)]);
+  const agreementStale = await signedIsStale(client, agreements);
   const propState = proposalState(await getProposal(id), today);
   const build = await getBuild(id);
   const zelle = (await listNotices(id)).filter((n) => n.status === "pending");
@@ -119,6 +120,7 @@ export default async function ClientDesk({ params }: { params: Promise<{ id: str
             <Row k="Proposal" v={<Link href={`/admin/clients/${id}/proposal`}>{propState ? propState.label.replace("Proposal ", "").replace(/^./, (m) => m.toUpperCase()) : "Create one"}</Link>} />
             {agreements.length === 0 && <p className="small muted" style={{ margin: 0 }}>None yet.</p>}
             {agreements.map((a) => <Row key={a.id} k={a.title} v={a.status === "signed" ? `Signed ${shortDate(a.signedAt ?? "")}` : a.status === "sent" ? "Waiting for signature" : "Draft"} />)}
+            {agreementStale && <span className="small" style={{ color: "var(--rust-dark)" }}>Their services changed since they signed. Write an updated agreement.</span>}
             <Link className="small" href={`/admin/clients/${id}/agreements`}>{agreements.length ? "Open agreements" : "Create an agreement"}</Link>
           </section>
 

@@ -1,3 +1,4 @@
+import { syncAgreement } from "@/lib/agreements";
 import { getCatalog, getClient, saveClient } from "@/lib/data";
 import { error, json, requireAdmin } from "@/lib/http";
 import { buildQuote } from "@/lib/tier";
@@ -25,5 +26,6 @@ export async function POST(_req: Request, ctx: { params: Promise<{ id: string; c
   if (sheet.tier) c.tier = sheet.tier;
   sheet.quote.appliedAt = new Date().toISOString();
   await saveClient(c);
+  await syncAgreement(c);
   return json({ ok: true, total: q.total, appliedAt: sheet.quote.appliedAt });
 }

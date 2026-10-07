@@ -24,9 +24,17 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
       const title = String(b.title ?? "").trim().slice(0, 160);
       const body = String(b.body ?? "").slice(0, 40000);
       if (!title || !body.trim()) return error("Add a title and the agreement text.");
+      if (body !== a.body) a.customized = true; // your wording now, so it is not rewritten automatically
       a.title = title; a.body = body; a.requiredToPay = !!b.requiredToPay;
       if (b.send === true) { a.status = "sent"; a.sentAt = now; }
       if (b.send === false) { a.status = "draft"; a.sentAt = null; }
+      break;
+    }
+    case "rebuild": {
+      if (!a) return error("Not found.", 404);
+      if (a.status === "signed") return error("This agreement is signed and locked.");
+      const fresh = await draftAgreement(client);
+      a.body = fresh.body; a.source = fresh.source; a.auto = true; a.customized = false; a.updatedAt = now;
       break;
     }
     case "delete": {
