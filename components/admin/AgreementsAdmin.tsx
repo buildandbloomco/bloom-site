@@ -5,7 +5,7 @@ import type { Agreement } from "@/lib/agreements";
 
 const when = (iso: string | null) => (iso ? new Date(iso).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short", timeZone: "America/New_York" }) + " ET" : "");
 
-export default function AgreementsAdmin({ clientId, slug, initial }: { clientId: string; slug: string; initial: Agreement[] }) {
+export default function AgreementsAdmin({ clientId, slug, initial, stale }: { clientId: string; slug: string; initial: Agreement[]; stale: boolean }) {
   const [list, setList] = useState(initial);
   const [open, setOpen] = useState<string | null>(initial.find((a) => a.status === "draft")?.id ?? null);
   const [msg, setMsg] = useState("");
@@ -28,6 +28,9 @@ export default function AgreementsAdmin({ clientId, slug, initial }: { clientId:
         <button type="button" className="btn btn-dark" disabled={busy} onClick={async () => { const l = await call({ action: "create" }, "Draft written from your template with their services and pricing. Read it over, then send."); if (l) setOpen(l[0].id); }}>+ New agreement</button>
         {msg && <span className="small" role="status">{msg}</span>}
       </div>
+      {stale && !list.some((a) => a.status !== "signed") && (
+        <div className="banner warn" style={{ margin: 0 }}>Their services or pricing have changed since they signed. A signed agreement is never changed, so click <strong>New agreement</strong> to write an updated one for them to sign.</div>
+      )}
       {list.length === 0 && <p className="muted">No agreements yet. One is written automatically when this client becomes active. To make one now, click New agreement.</p>}
       {list.map((a) => {
         const locked = a.status === "signed";
@@ -56,6 +59,11 @@ export default function AgreementsAdmin({ clientId, slug, initial }: { clientId:
               </div>
             ) : (
               <div className="stack" style={{ gap: 12 }}>
+                <p className="small muted" style={{ margin: 0 }}>
+                  {a.customized ? "You edited the wording, so this one no longer updates on its own when their services change."
+                    : `This updates on its own when you change their services or pricing, until it is signed.${a.updatedAt ? ` Last updated ${when(a.updatedAt)}.` : ""}`}
+                  {" "}<button type="button" className="linkbtn" disabled={busy} onClick={() => (!a.customized || confirm("Rewrite this agreement from their client page? Your wording changes will be replaced.")) && call({ action: "rebuild", id: a.id }, "Rewritten from their current services and pricing.")}>Rewrite it from their client page now</button>
+                </p>
                 <label>Title<input type="text" value={a.title} maxLength={160} onChange={(e) => edit(a.id, { title: e.target.value })} /></label>
                 <label>Agreement text <span className="hint">Plain text. Blank lines make paragraphs.</span><textarea rows={22} value={a.body} onChange={(e) => edit(a.id, { body: e.target.value })} /></label>
                 <label className="row" style={{ gap: 8, alignItems: "flex-start" }}>

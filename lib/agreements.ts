@@ -18,6 +18,14 @@ export interface Agreement {
   signedIp: string;
   /** Fingerprint of the exact text that was signed */
   signedHash: string;
+  /** Written from your template (not typed by hand) */
+  auto?: boolean;
+  /** You changed the wording yourself, so it is no longer rewritten automatically */
+  customized?: boolean;
+  /** Fingerprint of the client details it was written from: name, services, and pricing */
+  source?: string;
+  /** When it was last rewritten to match the client page */
+  updatedAt?: string;
 }
 
 const KEY = "bb:agreements";
@@ -45,6 +53,42 @@ export async function getContractSettings(): Promise<ContractSettings> {
 }
 export async function saveContractSettings(c: ContractSettings) { await kv().set(SETTINGS_KEY, c); }
 
+/** A fingerprint of everything on the client page that the agreement is written from */
+export function agreementSource(client: Client, planEnabled: boolean): string {
+  const p = client.package, i = client.investment;
+  return createHash("sha256").update(JSON.stringify([client.name, p.serviceIds, p.customItems, p.format, p.duration, i.total, i.retainer, i.lineItems, client.billing ?? "standard", planEnabled])).digest("hex").slice(0, 24);
+}
+const isAuto = (a: Agreement) => a.auto ?? a.title === "Client Services Agreement";
+
+/**
+ * Keep unsigned agreements in step with the client page. Call after anything changes a client's services or pricing.
+ * Signed agreements are never touched, and neither is one whose wording you edited by hand.
+ */
+export async function syncAgreement(client: Client): Promise<number> {
+  try {
+    const list = await listAgreements(client.id);
+    if (!list.some((a) => a.status !== "signed")) return 0;
+    const cur = agreementSource(client, !!(await getPlan(client.id)).enabled);
+    let n = 0;
+    for (const a of list) {
+      if (a.status === "signed" || !isAuto(a) || a.customized || a.source === cur) continue;
+      const fresh = await draftAgreement(client);
+      a.body = fresh.body; a.source = cur; a.auto = true; a.updatedAt = new Date().toISOString();
+      n++;
+    }
+    if (n) await saveAgreements(client.id, list);
+    return n;
+  } catch {
+    return 0;
+  }
+}
+/** True when the client's services or pricing have changed since their latest signed agreement */
+export async function signedIsStale(client: Client, list: Agreement[]): Promise<boolean> {
+  const signed = list.filter((a) => a.status === "signed" && a.source).sort((a, b) => (b.signedAt ?? "").localeCompare(a.signedAt ?? ""))[0];
+  if (!signed || list.some((a) => a.status !== "signed")) return false; // a new one is already in progress
+  return signed.source !== agreementSource(client, !!(await getPlan(client.id)).enabled);
+}
+
 /** Write this client's agreement from your template, their package, and their pricing */
 export async function draftAgreement(client: Client, cs?: ContractSettings): Promise<Agreement> {
   const [settings, catalog, plan, conf] = await Promise.all([getSettings(), getCatalog(), getPlan(client.id), cs ?? getContractSettings()]);
@@ -61,7 +105,7 @@ export async function draftAgreement(client: Client, cs?: ContractSettings): Pro
   } else fees = "Your fees are the amounts shown in the proposal in your client portal.";
   const date = new Date().toLocaleDateString("en-US", { timeZone: "America/New_York", month: "long", day: "numeric", year: "numeric" });
   const body = buildContract(conf.template, { brand: settings.brandName, client: client.name, date, state: conf.state, scope: [...scope, ...extras], fees, serviceIds: client.package.serviceIds, hasPlan: !!plan.enabled });
-  return { id: newId(), title: "Client Services Agreement", body, status: "draft", requiredToPay: client.billing === "none" ? false : conf.requiredToPay, createdAt: new Date().toISOString(), sentAt: null, signedAt: null, signedName: "", signedTitle: "", signedIp: "", signedHash: "" };
+  return { id: newId(), title: "Client Services Agreement", body, status: "draft", requiredToPay: client.billing === "none" ? false : conf.requiredToPay, createdAt: new Date().toISOString(), sentAt: null, signedAt: null, signedName: "", signedTitle: "", signedIp: "", signedHash: "", auto: true, source: agreementSource(client, !!plan.enabled) };
 }
 
 /**

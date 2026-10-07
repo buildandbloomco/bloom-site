@@ -335,6 +335,8 @@ When a client becomes active, a Client Services Agreement is written for them an
 
 - **What gets filled in:** their name, the date, their services, their total, retainer, and price lines, plus extra terms that match their services (strategy sessions, operations support, the assessment, workshops, events, systems builds). A client set to "no payment needed" gets a line saying fees are billed as already agreed.
 - **Settings, Client contracts:** choose "Send it automatically", "Draft it for me to review", or "Off". Choose whether card and Zelle payment waits for a signature, set the governing state, and read or edit the template.
+- **It stays in step until it is signed.** When you change a client's services, custom items, format, length, or pricing, any unsigned agreement is rewritten to match. If the client has it open, they are asked to refresh before signing. An agreement whose wording you edited by hand is left alone; use "Rewrite it from their client page now" on that agreement to bring it back in step.
+- **Signed agreements never change.** If their services or pricing change after signing, their Agreements page and Meeting view tell you, and "New agreement" writes an updated one for them to sign.
 - **One per client.** A client who already has any agreement is never sent a second one automatically. To make another, use New agreement on their Agreements page.
 - **Clients who were already active before this update** do not get one automatically. Open their Agreements page and click New agreement.
 - **The extra terms for each service** live in `lib/contract-def.ts` under `SERVICE_TERMS`.
