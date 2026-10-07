@@ -10,6 +10,8 @@ export const DEFAULT_SETTINGS: Settings = {
   location: "Atlanta, GA",
   bookingUrl: "https://www.buildandbloomcollective.com/booking-calendar/brand-consulting",
   bookingEmbed: false,
+  zelle: "404-384-4809",
+  zelleName: "",
   beforeYouBook: [
     "Your retainer reserves your start date and begins the work.",
     "Add-ons can be added at any point. We will update your plan and invoice together.",

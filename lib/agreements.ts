@@ -31,34 +31,56 @@ export const fingerprint = (a: Pick<Agreement, "title" | "body">) => createHash(
 export const needsSignature = (list: Agreement[]) => list.filter((a) => a.status === "sent");
 export const blocksPayment = (list: Agreement[]) => list.some((a) => a.status === "sent" && a.requiredToPay);
 
-/** A plain starting point. Have a lawyer review your agreement before you rely on it. */
-export const AGREEMENT_TEMPLATE = (clientName: string, brand: string) => `This agreement is between ${brand} ("we") and ${clientName} ("you").
+import { newId } from "./crypto";
+import { getCatalog, getSettings } from "./data";
+import { getPlan } from "./workspace";
+import { notifyAdmin } from "./notify";
+import { money } from "./format";
+import type { Client } from "./types";
+import { buildContract, DEFAULT_CONTRACT_SETTINGS, type ContractSettings } from "./contract-def";
 
-1. Services
-We will provide the services described in your proposal in your client portal. Any change in scope will be agreed in writing in the portal or by email.
+const SETTINGS_KEY = "bb:contracts";
+export async function getContractSettings(): Promise<ContractSettings> {
+  return { ...DEFAULT_CONTRACT_SETTINGS, ...((await kv().get<Partial<ContractSettings>>(SETTINGS_KEY)) ?? {}) };
+}
+export async function saveContractSettings(c: ContractSettings) { await kv().set(SETTINGS_KEY, c); }
 
-2. Term
-This agreement begins on the date you sign it and continues until the services are complete, or until either of us ends it under section 7.
+/** Write this client's agreement from your template, their package, and their pricing */
+export async function draftAgreement(client: Client, cs?: ContractSettings): Promise<Agreement> {
+  const [settings, catalog, plan, conf] = await Promise.all([getSettings(), getCatalog(), getPlan(client.id), cs ?? getContractSettings()]);
+  const names = client.package.serviceIds.map((id) => catalog.services.find((s) => s.id === id)?.name).filter((n): n is string => !!n);
+  const scope = [...names, ...client.package.customItems.map((i) => (i.detail ? `${i.title}: ${i.detail}` : i.title))];
+  if (!scope.length) scope.push(plan.enabled ? "Strategy sessions and related support, as outlined in your client portal" : "Consulting services as described in your client portal");
+  const extras = [client.package.format && `Format: ${client.package.format}`, client.package.duration && `Length of engagement: ${client.package.duration}`].filter(Boolean) as string[];
+  const inv = client.investment;
+  let fees: string;
+  if (client.billing === "none") fees = "Fees for these services are billed as we have already agreed between us. This Agreement does not change that arrangement.";
+  else if (inv.total > 0) {
+    const lines = inv.lineItems.length > 1 ? inv.lineItems.map((l) => `- ${l.label}: ${l.amount < 0 ? `-${money(-l.amount)}` : money(l.amount)}`).join("\n") + "\n\n" : "";
+    fees = `${lines}The total fee for these services is ${money(inv.total)}.${inv.retainer > 0 ? ` A retainer of ${money(inv.retainer)} is due before work begins.` : ""} ${inv.retainer > 0 && inv.retainer < inv.total ? "The remaining balance is" : "Payment is"} due as shown in your client portal.`;
+  } else fees = "Your fees are the amounts shown in the proposal in your client portal.";
+  const date = new Date().toLocaleDateString("en-US", { timeZone: "America/New_York", month: "long", day: "numeric", year: "numeric" });
+  const body = buildContract(conf.template, { brand: settings.brandName, client: client.name, date, state: conf.state, scope: [...scope, ...extras], fees, serviceIds: client.package.serviceIds, hasPlan: !!plan.enabled });
+  return { id: newId(), title: "Client Services Agreement", body, status: "draft", requiredToPay: client.billing === "none" ? false : conf.requiredToPay, createdAt: new Date().toISOString(), sentAt: null, signedAt: null, signedName: "", signedTitle: "", signedIp: "", signedHash: "" };
+}
 
-3. Fees and payment
-You agree to pay the fees shown in your proposal. A retainer, if listed, is due before work begins. Remaining balances are due as shown in your portal. Payments are non-refundable once the work they cover has been delivered.
-
-4. Your part
-You agree to provide information we need in a reasonable time, attend scheduled sessions or give at least 24 hours notice to reschedule, and name one person who can make decisions.
-
-5. Confidentiality
-We will keep your business information confidential and use it only to do this work. Anonymous team survey responses are shared with you only as group results.
-
-6. What this is not
-Our work is consulting, education, and organizational support. It is not therapy, legal advice, or financial advice. Results depend on many factors, and we do not guarantee specific outcomes.
-
-7. Ending the agreement
-Either of us may end this agreement with 14 days written notice. You will owe fees for work completed through the end date.
-
-8. Materials
-You own the final deliverables we create for you once they are paid for. We keep ownership of our methods, templates, and tools, and you may keep using what we share with you inside your organization.
-
-9. Entire agreement
-This agreement and your proposal are the full agreement between us. Changes must be in writing.
-
-By typing your name below, you agree to these terms.`;
+/**
+ * Called whenever a client becomes active. If they have no agreement yet, one is written for them
+ * and (depending on your setting) sent to their portal. Never throws, so it cannot block the thing that triggered it.
+ */
+export async function ensureAgreement(client: Client, reason: string) {
+  try {
+    if (client.status !== "active") return;
+    const conf = await getContractSettings();
+    if (conf.mode === "off") return;
+    const list = await listAgreements(client.id);
+    if (list.length) return; // they already have one, in any state
+    const a = await draftAgreement(client, conf);
+    if (conf.mode === "send") { a.status = "sent"; a.sentAt = new Date().toISOString(); }
+    await saveAgreements(client.id, [a]);
+    await notifyAdmin(conf.mode === "send" ? `Agreement sent to ${client.name}` : `Agreement drafted for ${client.name}`,
+      [`${reason} An agreement was written from your template and ${conf.mode === "send" ? "placed in their portal to sign" : "saved as a draft for you to review and send"}.`], `/admin/clients/${client.id}/agreements`);
+  } catch {
+    /* the agreement can always be created by hand from the client's Agreements page */
+  }
+}

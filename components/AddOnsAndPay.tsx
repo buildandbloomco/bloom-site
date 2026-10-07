@@ -14,6 +14,9 @@ export default function AddOnsAndPay(props: {
   paymentsOn: boolean;
   beforeYouBook: string[];
   email: string;
+  zelle?: string;
+  zelleName?: string;
+  pendingZelle?: { amount: number; at: string }[];
 }) {
   const { client, addOns, paid } = props;
   const choices = useMemo(() => payChoices(client.investment, paid), [client.investment, paid]);
@@ -26,6 +29,10 @@ export default function AddOnsAndPay(props: {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [reqMsg, setReqMsg] = useState("");
+  const canZelle = !!props.zelle;
+  const [method, setMethod] = useState<"card" | "zelle">(props.paymentsOn || !canZelle ? "card" : "zelle");
+  const [zNote, setZNote] = useState("");
+  const [sent, setSent] = useState<number | null>(null);
 
   const chosen = addOns.filter((a) => selected.includes(a.id));
   const charge = buildCharge({
@@ -62,6 +69,14 @@ export default function AddOnsAndPay(props: {
     setErr("");
     if (charge.error) return setErr(charge.error);
     setBusy(true);
+    if (method === "zelle") {
+      const z = await fetch("/api/portal/zelle", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ option, customAmount: Number(custom), addOnIds: selected, name, note: zNote }) });
+      const zd = await z.json().catch(() => ({}));
+      setBusy(false);
+      if (!z.ok) return setErr(zd.error || "Something went wrong. Please try again.");
+      setSent(zd.amount);
+      return;
+    }
     const res = await fetch("/api/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -136,6 +151,10 @@ export default function AddOnsAndPay(props: {
             <div className="banner ok" role="status">Payment received. Thank you! A receipt is on its way to your email.</div>
           )}
           {props.canceled && <div className="banner warn">Payment was canceled. Nothing was charged.</div>}
+          {sent !== null && <div className="banner ok" role="status">Thank you. We have your note that you sent {money(sent)} by Zelle. Your balance will update once we confirm it arrived, usually within one business day.</div>}
+          {sent === null && (props.pendingZelle ?? []).map((z) => (
+            <div className="banner ok" key={z.at}>Your Zelle payment of {money(z.amount)} is waiting for us to confirm it arrived. Nothing more is needed from you.</div>
+          ))}
 
           <div className="pay">
             <form className="card stack" onSubmit={pay} style={{ gap: 20 }}>
@@ -146,7 +165,7 @@ export default function AddOnsAndPay(props: {
                 </label>
                 <label>
                   Email for your receipt
-                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
+                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required={method === "card"} autoComplete="email" />
                 </label>
               </div>
               <fieldset style={{ border: 0, padding: 0, margin: 0 }} className="stack">
@@ -170,12 +189,41 @@ export default function AddOnsAndPay(props: {
                   <input type="number" min={1} step="0.01" inputMode="decimal" value={custom} onChange={(e) => setCustom(e.target.value)} placeholder="500" />
                 </label>
               )}
+              {canZelle && (
+                <fieldset style={{ border: 0, padding: 0, margin: 0 }} className="stack">
+                  <legend style={{ fontWeight: 500, fontSize: "0.92rem", marginBottom: 8 }}>How would you like to pay?</legend>
+                  <div className="radio-row">
+                    <label className={`choice ${method === "card" ? "on" : ""}`}>
+                      <input type="radio" name="method" checked={method === "card"} onChange={() => setMethod("card")} />
+                      <span className="stack" style={{ gap: 2 }}><strong className="choice-title">Card</strong><span className="muted small">Pay now on secure checkout</span></span>
+                    </label>
+                    <label className={`choice ${method === "zelle" ? "on" : ""}`}>
+                      <input type="radio" name="method" checked={method === "zelle"} onChange={() => setMethod("zelle")} />
+                      <span className="stack" style={{ gap: 2 }}><strong className="choice-title">Zelle</strong><span className="muted small">Send from your bank app, then tell us here</span></span>
+                    </label>
+                  </div>
+                </fieldset>
+              )}
+              {method === "zelle" && (
+                <div className="stack" style={{ gap: 10, background: "var(--cream)", borderRadius: 12, padding: 18 }}>
+                  <ol style={{ margin: 0, paddingLeft: 20 }}>
+                    <li>Open Zelle in your bank app.</li>
+                    <li>Send <strong>{money(charge.error ? 0 : charge.total)}</strong> to <strong>{props.zelle}</strong>{props.zelleName ? <> (it should show as <strong>{props.zelleName}</strong>)</> : null}.</li>
+                    <li>Come back and click the button below so we know to look for it.</li>
+                  </ol>
+                  <label>A note for us <span className="hint">optional</span><input type="text" maxLength={500} value={zNote} onChange={(e) => setZNote(e.target.value)} placeholder="Sent from our business account" /></label>
+                </div>
+              )}
               {err && <p className="error-text" role="alert">{err}</p>}
+              {method === "zelle" ? (
+                <button className="btn btn-primary btn-block" disabled={busy || sent !== null}>{busy ? "One moment..." : sent !== null ? "Thank you, we will confirm it" : "I sent my Zelle payment"}</button>
+              ) : (
               <button className="btn btn-primary btn-block" disabled={busy || !props.paymentsOn}>
                 {busy ? "One moment..." : "Continue to secure payment"}
               </button>
+              )}
               <p className="tiny muted">
-                {props.paymentsOn
+                {method === "zelle" ? "Zelle goes straight from your bank to ours, with no card fees. Your balance updates after we confirm it arrived." : props.paymentsOn
                   ? "You will finish on Stripe's secure checkout. Pay by card or Apple Pay, or choose Klarna, Afterpay, or Affirm to split your payment where eligible."
                   : `Online payments are coming soon. Email ${props.email} and we will send an invoice.`}
               </p>

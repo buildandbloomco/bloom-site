@@ -2,6 +2,7 @@ import { notifyAdmin } from "@/lib/notify";
 import "server-only";
 import Stripe from "stripe";
 import { getClient, round2, saveClient } from "./data";
+import { ensureAgreement } from "./agreements";
 import { newId } from "./crypto";
 import { recordEnrollmentPayment } from "./enroll";
 
@@ -67,8 +68,10 @@ export async function recordCheckoutSession(session: Stripe.Checkout.Session): P
   if (packageAmount <= 0 && addOnTotal <= 0 && total > 0) {
     client.payments.push({ id: newId(), kind: "package", amount: total, description: "Stripe payment" + payer, date, method: "Stripe", stripeSessionId: session.id });
   }
-  if (client.status === "draft" || client.status === "sent") client.status = "active";
+  const becameActive = client.status === "draft" || client.status === "sent";
+  if (becameActive) client.status = "active";
   await saveClient(client);
+  if (becameActive) await ensureAgreement(client, `${client.name} made their first payment.`);
   await notifyAdmin(`${client.name} paid $${total.toFixed(2)}`, [`${client.name} paid $${total.toFixed(2)} by card${payer}.`, session.metadata?.optionLabel || ""], `/admin/clients/${client.id}`);
   return true;
 }

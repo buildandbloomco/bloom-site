@@ -25,10 +25,10 @@ export default function AgreementsAdmin({ clientId, slug, initial }: { clientId:
   return (
     <div className="stack" style={{ gap: 18 }}>
       <div className="row" style={{ gap: 12, flexWrap: "wrap" }}>
-        <button type="button" className="btn btn-dark" disabled={busy} onClick={async () => { const l = await call({ action: "create" }, "Draft created from your template. Edit it, then send."); if (l) setOpen(l[0].id); }}>+ New agreement</button>
+        <button type="button" className="btn btn-dark" disabled={busy} onClick={async () => { const l = await call({ action: "create" }, "Draft written from your template with their services and pricing. Read it over, then send."); if (l) setOpen(l[0].id); }}>+ New agreement</button>
         {msg && <span className="small" role="status">{msg}</span>}
       </div>
-      {list.length === 0 && <p className="muted">No agreements yet. Start one from the template, change anything you need, and send it to their portal to sign.</p>}
+      {list.length === 0 && <p className="muted">No agreements yet. One is written automatically when this client becomes active. To make one now, click New agreement.</p>}
       {list.map((a) => {
         const locked = a.status === "signed";
         return (

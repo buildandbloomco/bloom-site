@@ -72,6 +72,15 @@ export default function SettingsEditor({ initial, status }: { initial: Settings;
       </section>
 
       <section className="panel">
+        <h3>Zelle payments</h3>
+        <p className="small muted">Clients can choose Zelle instead of card in their portal. They see where to send it, tell you when they have sent it, and you confirm once it arrives. Leave the first box empty to turn Zelle off.</p>
+        <div className="grid-2" style={{ gap: 14 }}>
+          <label>Send Zelle to <span className="hint">phone or email</span><input type="text" value={s.zelle ?? ""} onChange={(e) => set("zelle", e.target.value)} placeholder="404-555-0100" /></label>
+          <label>Name on your Zelle <span className="hint">what they will see in their bank app</span><input type="text" value={s.zelleName ?? ""} onChange={(e) => set("zelleName", e.target.value)} placeholder="Build & Bloom Collective" /></label>
+        </div>
+      </section>
+
+      <section className="panel">
         <h3>Defaults</h3>
         <label>
           “Before you book” notes <span className="hint">Shown next to the payment summary. One per line.</span>

@@ -56,6 +56,10 @@ export interface Settings {
   beforeYouBook: string[];
   defaultNextSteps: string[];
   booking: BookingSettings;
+  /** Where clients send Zelle payments (phone or email). Empty = Zelle is not offered. */
+  zelle?: string;
+  /** The name clients will see in their bank app when they send to you */
+  zelleName?: string;
 }
 
 /** Built-in booking. All times are Eastern Time (America/New_York). */

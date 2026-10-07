@@ -328,3 +328,22 @@ The portal home is built to show a client one clear next step, not everything at
 - **"Here is how we begin"** shows only until the client is active.
 - **Menu:** Sessions, Files, Book, Billing, plus Build, Proposal, or Courses only when they apply.
 - **Guidebooks:** each client sees only the client guidebook unless you check others in "Guidebooks in their portal" on their Meeting view.
+
+## Automatic client contracts
+
+When a client becomes active, a Client Services Agreement is written for them and placed in their portal to sign. "Becomes active" means any of these: they accept a proposal, they make a first payment (card, or a Zelle payment you confirm), you change their status to active, or you add them with "Existing client, no payment needed".
+
+- **What gets filled in:** their name, the date, their services, their total, retainer, and price lines, plus extra terms that match their services (strategy sessions, operations support, the assessment, workshops, events, systems builds). A client set to "no payment needed" gets a line saying fees are billed as already agreed.
+- **Settings, Client contracts:** choose "Send it automatically", "Draft it for me to review", or "Off". Choose whether card and Zelle payment waits for a signature, set the governing state, and read or edit the template.
+- **One per client.** A client who already has any agreement is never sent a second one automatically. To make another, use New agreement on their Agreements page.
+- **Clients who were already active before this update** do not get one automatically. Open their Agreements page and click New agreement.
+- **The extra terms for each service** live in `lib/contract-def.ts` under `SERVICE_TERMS`.
+- Have a lawyer licensed in your state review the template once before you rely on it.
+
+## Zelle payments
+
+Clients can choose Card or Zelle in the pay section of their portal. With Zelle they see the amount, where to send it, and a button to tell you they sent it.
+
+- You get an email, and the notice shows under "Waiting on you" on their Meeting view.
+- **Nothing counts as paid until you click "It arrived".** Check your bank first. You can correct the amount if what arrived is different.
+- Set or change your Zelle number and the name clients will see under Settings, Zelle payments. Empty the first box to turn Zelle off.
