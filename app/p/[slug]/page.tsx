@@ -23,6 +23,7 @@ import { getProposal } from "@/lib/proposals";
 import { isExpired } from "@/lib/proposal-def";
 import { getBuild } from "@/lib/builds";
 import { BUILD_KINDS, STAGES, intakeProgress } from "@/lib/build-def";
+import { listNotices } from "@/lib/paynotices";
 import { getReview } from "@/lib/reviews";
 import NeedsYou, { type Need, type NextUp } from "@/components/portal/NeedsYou";
 import MyCourses from "@/components/course/MyCourses";
@@ -99,6 +100,7 @@ export default async function Portal({
   const toSign = myAgreements.filter((a) => a.status === "sent");
   const proposal = await getProposal(client.id);
   const build = await getBuild(client.id);
+  const pendingZelle = (await listNotices(client.id)).filter((n) => n.status === "pending");
   // While a proposal is waiting for an answer, the price lives on the proposal page, not here
   const proposalOpen = proposal?.status === "sent";
   const myGuides = GUIDES.filter((g) => (client.guideSlugs ?? ["client-guidebook"]).includes(g.slug));
@@ -107,7 +109,7 @@ export default async function Portal({
   const needs: Need[] = [];
   if (proposalOpen && proposal && !isExpired(proposal, today)) needs.push({ label: "Review and accept your proposal", detail: proposal.expires ? `Good through ${longDate(proposal.expires)}` : proposal.options.length > 1 ? `${proposal.options.length} options to choose from` : undefined, href: `/p/${slug}/proposal`, cta: "Review" });
   if (!proposalOpen) for (const a of toSign) needs.push({ label: `Sign: ${a.title}`, detail: "About two minutes", href: `/p/${slug}/agreements/${a.id}`, cta: "Read and sign" });
-  if (hasInvestment && client.investment.retainer > 0 && paid < client.investment.retainer) needs.push({ label: `Pay your ${money(client.investment.retainer)} retainer`, detail: toSign.some((a) => a.requiredToPay) ? "After your agreement is signed" : undefined, href: "#pay", cta: "Go to payment" });
+  if (hasInvestment && client.investment.retainer > 0 && paid < client.investment.retainer && !pendingZelle.length) needs.push({ label: `Pay your ${money(client.investment.retainer)} retainer`, detail: toSign.some((a) => a.requiredToPay) ? "After your agreement is signed" : undefined, href: "#pay", cta: "Go to payment" });
   for (const c of pub.consults.filter((x) => x.shared && !x.clientConfirmedAt).slice(0, 1)) needs.push({ label: "Confirm your consultation summary", detail: "Check that we heard you right", href: "#consult", cta: "Review" });
   if (build.enabled && !build.intakeSubmittedAt) needs.push({ label: "Finish your build questionnaire", detail: `${intakeProgress(build).percent}% done. It saves as you go.`, href: `/p/${slug}/build#questions`, cta: "Continue" });
   if (assessment?.enabled && assessment.status === "leader" && !assessment.leaderSubmittedAt) needs.push({ label: "Complete your leader questionnaire", detail: "About 15 minutes", href: `/p/${slug}/assessment`, cta: "Start" });
@@ -423,6 +425,9 @@ export default async function Portal({
           paymentsOn={!!process.env.STRIPE_SECRET_KEY}
           beforeYouBook={settings.beforeYouBook}
           email={settings.email}
+          zelle={settings.zelle}
+          zelleName={settings.zelleName}
+          pendingZelle={pendingZelle.map((n) => ({ amount: n.amount, at: n.at }))}
         />}
 
         {/* LIBRARY */}

@@ -4,6 +4,7 @@ import { nowET } from "@/lib/booking";
 import { clientIp, error, json } from "@/lib/http";
 import { getProposal, saveProposal } from "@/lib/proposals";
 import { isExpired, optionTotal } from "@/lib/proposal-def";
+import { ensureAgreement } from "@/lib/agreements";
 import { notifyAdmin } from "@/lib/notify";
 
 // The client says yes to their proposal and picks an option. That option becomes their package and investment.
@@ -38,6 +39,7 @@ export async function POST(req: Request) {
   client.investment.retainer = Math.min(o.retainer, client.investment.total);
   if (client.status === "draft" || client.status === "sent") client.status = "active";
   await saveClient(client);
+  await ensureAgreement(client, `${client.name} accepted their proposal.`);
   await notifyAdmin(`${client.name} accepted the proposal`, [`${name}${p.acceptedTitle ? `, ${p.acceptedTitle}` : ""} accepted "${o.name}" for ${client.name}.`, `Total $${optionTotal(o).toLocaleString("en-US")}${o.retainer ? `, retainer $${o.retainer.toLocaleString("en-US")}` : ""}.`], `/admin/clients/${client.id}/proposal`);
   return json({ ok: true });
 }

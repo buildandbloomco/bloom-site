@@ -3,8 +3,8 @@ import { requireAdmin } from "@/lib/http";
 import type { Client } from "@/lib/types";
 import type { StrategyPlan } from "@/lib/plan-types";
 
-const HASHES = ["bb:leads", "bb:courses", "bb:enrollments", "bb:appts", "bb:plans", "bb:assess", "bb:content:posts", "bb:lib:pieces", "bb:lib:members", "bb:lib:answers", "bb:lib:done", "bb:waitlist", "bb:agreements", "bb:reviews", "bb:proposals", "bb:builds"];
-const VALUES = ["bb:settings", "bb:catalog", "bb:lib:settings"];
+const HASHES = ["bb:leads", "bb:courses", "bb:enrollments", "bb:appts", "bb:plans", "bb:assess", "bb:content:posts", "bb:lib:pieces", "bb:lib:members", "bb:lib:answers", "bb:lib:done", "bb:waitlist", "bb:agreements", "bb:reviews", "bb:proposals", "bb:builds", "bb:paynotices"];
+const VALUES = ["bb:settings", "bb:catalog", "bb:lib:settings", "bb:contracts"];
 
 // A full copy of everything stored in the portal, as one file you can keep somewhere safe.
 // Add ?client=<id> for one client only. Portal access codes are left out on purpose.

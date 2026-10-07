@@ -1,6 +1,7 @@
 import { blankClient, getSettings, saveClient, setClientCode, uniqueSlug } from "@/lib/data";
 import { generateCode } from "@/lib/crypto";
 import { error, json, requireAdmin } from "@/lib/http";
+import { ensureAgreement } from "@/lib/agreements";
 import { getPlan, savePlan } from "@/lib/workspace";
 
 export async function POST(req: Request) {
@@ -31,5 +32,6 @@ export async function POST(req: Request) {
     const plan = await getPlan(client.id);
     await savePlan({ ...plan, enabled: true, title: "Your strategy sessions", focus: "What we are working on, session by session." });
   }
+  await ensureAgreement(client, "You added them as an existing client.");
   return json({ id: client.id });
 }

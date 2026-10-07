@@ -1,5 +1,6 @@
 import { deleteClient, getClient, saveClient, uniqueSlug, slugify } from "@/lib/data";
 import { error, json, requireAdmin } from "@/lib/http";
+import { ensureAgreement } from "@/lib/agreements";
 import { newId } from "@/lib/crypto";
 import type { Client, ClientStatus, Deliverable, DeliverableType, Milestone, ProjectUpdate } from "@/lib/types";
 
@@ -96,6 +97,7 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
   next.consults = fresh?.consults ?? c.consults;
   delete next.links;
   await saveClient(next);
+  if (c.status !== "active" && next.status === "active") await ensureAgreement(next, "You marked them active.");
   return json({ ok: true, slug: next.slug });
 }
 

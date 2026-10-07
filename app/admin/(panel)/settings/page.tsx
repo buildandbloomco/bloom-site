@@ -1,5 +1,7 @@
 import { getSettings } from "@/lib/data";
 import { emailReady } from "@/lib/invite";
+import ContractSettings from "@/components/admin/ContractSettings";
+import { getContractSettings } from "@/lib/agreements";
 import SettingsEditor from "@/components/admin/SettingsEditor";
 
 export const dynamic = "force-dynamic";
@@ -17,6 +19,7 @@ export default async function SettingsPage() {
         <p className="eyebrow">Admin</p>
         <h2>Settings</h2>
       </div>
+      <ContractSettings initial={await getContractSettings()} />
       <section className="panel">
         <h3>Backup</h3>
         <p className="small muted" style={{ margin: 0 }}>Download one file with every client, plan, session room, assessment, lead, course, agreement, and setting. Keep a copy somewhere safe, like your Google Drive, about once a month. Portal access codes are left out, and uploaded files are listed by link.</p>

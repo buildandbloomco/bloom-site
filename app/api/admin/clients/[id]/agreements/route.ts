@@ -1,7 +1,6 @@
-import { getClient, getSettings } from "@/lib/data";
-import { newId } from "@/lib/crypto";
+import { getClient } from "@/lib/data";
 import { error, json, requireAdmin } from "@/lib/http";
-import { AGREEMENT_TEMPLATE, listAgreements, saveAgreements, type Agreement } from "@/lib/agreements";
+import { draftAgreement, listAgreements, saveAgreements } from "@/lib/agreements";
 
 // Create, edit, send, and remove agreements for one client. A signed agreement can never be edited.
 export async function POST(req: Request, ctx: { params: Promise<{ id: string }> }) {
@@ -16,9 +15,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
   const now = new Date().toISOString();
   switch (b.action) {
     case "create": {
-      const s = await getSettings();
-      const fresh: Agreement = { id: newId(), title: "Client Services Agreement", body: AGREEMENT_TEMPLATE(client.name, s.brandName), status: "draft", requiredToPay: false, createdAt: now, sentAt: null, signedAt: null, signedName: "", signedTitle: "", signedIp: "", signedHash: "" };
-      list = [fresh, ...list].slice(0, 30);
+      list = [await draftAgreement(client), ...list].slice(0, 30);
       break;
     }
     case "save": {

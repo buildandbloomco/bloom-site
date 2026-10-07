@@ -50,6 +50,8 @@ export async function PUT(req: Request) {
     location: str(b.location, 120),
     bookingUrl: str(b.bookingUrl, 500),
     bookingEmbed: !!b.bookingEmbed,
+    zelle: str(b.zelle, 120).trim(),
+    zelleName: str(b.zelleName, 120).trim(),
     beforeYouBook: list(b.beforeYouBook),
     defaultNextSteps: list(b.defaultNextSteps),
     booking: cleanBooking(b.booking, cur.booking),

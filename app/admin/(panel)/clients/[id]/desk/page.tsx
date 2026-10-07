@@ -24,6 +24,8 @@ import { getProposal } from "@/lib/proposals";
 import { proposalState } from "@/lib/proposal-def";
 import GuideAssign from "@/components/admin/GuideAssign";
 import { GUIDES } from "@/lib/guides";
+import ZelleConfirm from "@/components/admin/ZelleConfirm";
+import { listNotices } from "@/lib/paynotices";
 import PrivateNotes from "@/components/admin/PrivateNotes";
 
 export const dynamic = "force-dynamic";
@@ -42,6 +44,7 @@ export default async function ClientDesk({ params }: { params: Promise<{ id: str
   const [agreements, files, scores] = await Promise.all([listAgreements(id), listFiles(id), scorecardHistory(id)]);
   const propState = proposalState(await getProposal(id), today);
   const build = await getBuild(id);
+  const zelle = (await listNotices(id)).filter((n) => n.status === "pending");
   const courses = (await Promise.all(enrollments.map(async (e) => ({ e, c: await getCourse(e.courseId) })))).filter((x) => x.c);
   const upcoming = appts.filter((a) => a.clientId === id && a.date >= today).sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start)).slice(0, 3);
   const openReqs = plan.requests.filter((r) => r.status === "open");
@@ -76,13 +79,14 @@ export default async function ClientDesk({ params }: { params: Promise<{ id: str
         <SessionDesk clientId={id} slug={client.slug} initial={plan} today={today} clientEmail={client.email} firstName={client.contactName} emailReady={emailReady()} origin={await siteOrigin()} />
 
         <aside className="stack" style={{ gap: 16 }}>
-          {(openReqs.length > 0 || clientComments.length > 0 || addOnReqs.length > 0) && (
+          {(openReqs.length > 0 || clientComments.length > 0 || addOnReqs.length > 0 || zelle.length > 0) && (
             <section className="panel" style={{ borderTopColor: "var(--rust)" }}>
               <h3>Waiting on you</h3>
+              {zelle.map((n) => <ZelleConfirm key={n.id} clientId={id} notice={{ id: n.id, amount: n.amount, name: n.name, label: n.label, at: n.at, note: n.note }} />)}
               {openReqs.map((r) => <div key={r.id} className="small"><strong>Change request:</strong> {r.targetLabel || "The plan"}<br /><span className="muted">{r.text}</span></div>)}
               {clientComments.map((t) => <div key={t.id} className="small"><strong>Comment on:</strong> {t.title}<br /><span className="muted">{t.comments[t.comments.length - 1].text}</span></div>)}
               {addOnReqs.map((r) => <div key={r.id} className="small"><strong>Add-on request:</strong> <span className="muted">{r.note || "See client page"}</span></div>)}
-              <Link className="small" href={`/admin/clients/${id}/plan`}>Reply in the plan editor</Link>
+              {(openReqs.length > 0 || clientComments.length > 0) && <Link className="small" href={`/admin/clients/${id}/plan`}>Reply in the plan editor</Link>}
             </section>
           )}
 
