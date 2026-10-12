@@ -349,3 +349,18 @@ Clients can choose Card or Zelle in the pay section of their portal. With Zelle 
 - You get an email, and the notice shows under "Waiting on you" on their Meeting view.
 - **Nothing counts as paid until you click "It arrived".** Check your bank first. You can correct the amount if what arrived is different.
 - Set or change your Zelle number and the name clients will see under Settings, Zelle payments. Empty the first box to turn Zelle off.
+
+## Money (high-level bookkeeping for clients)
+
+Turn it on per client: Meeting view, "Money" in the Proposal and agreements box, then check "Show Money in their portal". You see and can edit everything they see.
+
+- **Overview:** money in, money out, net, what is in each bucket, what needs a look (unsplit income, missing categories or receipts, past-due invoices, the next estimated tax date), and six months of in vs. out.
+- **Split income:** drag a deposit onto a bucket (or tap it, then tap the bucket on a phone) and choose how much goes there, or click "Split it all by my percentages". Drag a payment onto the bucket it came out of. Buckets start at Profit 5%, Owner's pay 50%, Taxes 15%, Operating expenses 30%, the Profit First starting point for businesses under $250,000. Clients can rename, add, and change them under Set up.
+- **Transactions:** add money in and out by hand, or import the CSV file from their bank (duplicates are skipped). Add a category, the bucket it was paid from, and a receipt (uses the Blob store).
+- **Budget:** a planned monthly amount per category, with actuals filled in and the difference.
+- **Invoices & bills:** what is owed to them and what they owe, with due dates. "Mark paid" records the money moving.
+- **Taxes:** the four federal estimated tax due dates (Form 1040-ES) with what they paid and when, plus their Taxes bucket balance.
+- **Month-end:** the checklist a bookkeeper runs every month.
+- **Reports:** profit and loss for the month or year to date, printable, and CSV downloads of transactions and the P&L for their accountant.
+
+Everything is entered by hand or imported from a bank file; nothing connects to a bank account. It is a planning tool, not accounting or tax advice, and the page says so.
