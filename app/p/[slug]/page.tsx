@@ -113,6 +113,7 @@ export default async function Portal({
   if (!proposalOpen) for (const a of toSign) needs.push({ label: `Sign: ${a.title}`, detail: "About two minutes", href: `/p/${slug}/agreements/${a.id}`, cta: "Read and sign" });
   if (hasInvestment && client.investment.retainer > 0 && paid < client.investment.retainer && !pendingZelle.length) needs.push({ label: `Pay your ${money(client.investment.retainer)} retainer`, detail: toSign.some((a) => a.requiredToPay) ? "After your agreement is signed" : undefined, href: "#pay", cta: "Go to payment" });
   for (const c of pub.consults.filter((x) => x.shared && !x.clientConfirmedAt).slice(0, 1)) needs.push({ label: "Confirm your consultation summary", detail: "Check that we heard you right", href: "#consult", cta: "Review" });
+  if (fin.enabled && fin.accessRequest) needs.push({ label: "Build & Bloom asked to review your Money", detail: "Your choice. You can share a summary, everything, or keep it private.", href: `/p/${slug}/money`, cta: "Decide" });
   if (build.enabled && !build.intakeSubmittedAt) needs.push({ label: "Finish your build questionnaire", detail: `${intakeProgress(build).percent}% done. It saves as you go.`, href: `/p/${slug}/build#questions`, cta: "Continue" });
   if (assessment?.enabled && assessment.status === "leader" && !assessment.leaderSubmittedAt) needs.push({ label: "Complete your leader questionnaire", detail: "About 15 minutes", href: `/p/${slug}/assessment`, cta: "Start" });
   const soon = new Date(`${today}T12:00:00Z`); soon.setUTCDate(soon.getUTCDate() + 14);

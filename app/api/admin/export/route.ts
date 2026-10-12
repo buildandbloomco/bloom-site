@@ -1,10 +1,21 @@
 import { kv } from "@/lib/kv";
+import { getFin, listTx } from "@/lib/finance";
+import { activeShare } from "@/lib/finance-def";
+import { nowET } from "@/lib/booking";
 import { requireAdmin } from "@/lib/http";
 import type { Client } from "@/lib/types";
 import type { StrategyPlan } from "@/lib/plan-types";
 
 const HASHES = ["bb:leads", "bb:courses", "bb:enrollments", "bb:appts", "bb:plans", "bb:assess", "bb:content:posts", "bb:lib:pieces", "bb:lib:members", "bb:lib:answers", "bb:lib:done", "bb:waitlist", "bb:agreements", "bb:reviews", "bb:proposals", "bb:builds", "bb:paynotices"];
 const VALUES = ["bb:settings", "bb:catalog", "bb:lib:settings", "bb:contracts"];
+
+// Money is included only when the client is sharing it in full right now. Private money stays out of your backups.
+async function moneyFor(id: string) {
+  const s = await getFin(id);
+  if (!s.enabled) return null;
+  if (activeShare(s, nowET().date).level !== "full") return { note: "This client keeps Money private, so it is not included." };
+  return { settings: s, transactions: await listTx(id) };
+}
 
 // A full copy of everything stored in the portal, as one file you can keep somewhere safe.
 // Add ?client=<id> for one client only. Portal access codes are left out on purpose.
@@ -26,7 +37,7 @@ export async function GET(req: Request) {
       const r = await db.hgetall(`bb:room:${id}:${s.id}`);
       if (Object.keys(r).length) rooms[s.id] = r;
     }
-    perClient[id] = { teamResponses: await db.hgetall(`bb:assess:resp:${id}`), files: await db.hgetall(`bb:files:${id}`), strategyRooms: rooms, money: { settings: await db.get(`bb:fin:${id}`), transactions: await db.hgetall(`bb:fin:tx:${id}`) } };
+    perClient[id] = { teamResponses: await db.hgetall(`bb:assess:resp:${id}`), files: await db.hgetall(`bb:files:${id}`), strategyRooms: rooms, money: await moneyFor(id) };
   }
 
   const out: Record<string, unknown> = {
