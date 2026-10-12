@@ -1,7 +1,7 @@
 import "server-only";
 import { kv } from "./kv";
 import { newId } from "./crypto";
-import { blankFin, CHECKLIST, r2, type FinSettings, type Owed, type Tx } from "./finance-def";
+import { blankFin, bucketBalances, CHECKLIST, r2, type FinSettings, type Owed, type Person, type PayRecord, type Tx } from "./finance-def";
 
 const sKey = (id: string) => `bb:fin:${id}`;
 const tKey = (id: string) => `bb:fin:tx:${id}`;
@@ -89,5 +89,42 @@ export function cleanSettings(b: Record<string, unknown>, cur: FinSettings): Fin
     s.taxPayments = (b.taxPayments as Record<string, unknown>[]).filter((p) => /^\d{4}-Q[1-4]$/.test(String(p.quarter))).slice(0, 40)
       .map((p) => ({ quarter: String(p.quarter), amount: amt(p.amount), paidOn: isDate(p.paidOn) ? String(p.paidOn) : "" }));
   }
+  if (Array.isArray(b.people)) {
+    s.people = (b.people as Record<string, unknown>[]).slice(0, 200).map((p): Person => {
+      const d = (p.docs && typeof p.docs === "object" ? p.docs : {}) as Record<string, unknown>;
+      return {
+        id: /^[a-z0-9]{6,40}$/i.test(String(p.id)) ? String(p.id) : newId(), name: str(p.name, 100).trim() || "Team member", role: str(p.role, 100),
+        kind: p.kind === "contractor" ? "contractor" : "employee", payType: p.payType === "salary" ? "salary" : p.payType === "project" ? "project" : "hourly",
+        rate: amt(p.rate), start: isDate(p.start) ? String(p.start) : "", active: p.active !== false,
+        docs: { w4: d.w4 === true, i9: d.i9 === true, w9: d.w9 === true, agreement: d.agreement === true },
+      };
+    });
+  }
+  if (Array.isArray(b.pay)) {
+    const ids = new Set(s.people.map((p) => p.id));
+    s.pay = (b.pay as Record<string, unknown>[]).filter((p) => ids.has(String(p.personId)) && isDate(p.date)).slice(-3000).map((p): PayRecord => ({
+      id: /^[a-z0-9]{6,40}$/i.test(String(p.id)) ? String(p.id) : newId(), personId: String(p.personId), date: String(p.date),
+      gross: amt(p.gross), employerCost: amt(p.employerCost), reimbursement: amt(p.reimbursement), hours: Math.min(10000, Math.max(0, Number(p.hours) || 0)), note: str(p.note, 300), txId: str(p.txId, 40),
+    }));
+  }
+  if (b.filings && typeof b.filings === "object") {
+    s.filings = {};
+    for (const [k, v] of Object.entries(b.filings as Record<string, unknown>)) if (/^\d{4}-(941-Q[1-4]|W2|940|1099)$/.test(k) && isDate(v)) s.filings[k] = String(v);
+  }
   return s;
+}
+
+/** What Build & Bloom is allowed to see, based on the client's sharing setting */
+export function forAdmin(s: FinSettings, tx: Tx[], level: "private" | "summary" | "full", includeTeam: boolean) {
+  const base = { enabled: s.enabled, share: s.share, accessRequest: s.accessRequest, accessLog: s.accessLog };
+  if (level === "private") return { view: "private" as const, settings: base, tx: [] as Tx[] };
+  const team = includeTeam ? { people: s.people, pay: s.pay, filings: s.filings } : { people: [], pay: [], filings: {} };
+  if (level === "full") return { view: "full" as const, settings: { ...s, ...team }, tx };
+  // Summary: totals only, no individual transactions
+  const months: Record<string, { inn: number; out: number }> = {};
+  for (const t of tx) { const m = t.date.slice(0, 7); months[m] ??= { inn: 0, out: 0 }; t.type === "in" ? (months[m].inn += t.amount) : (months[m].out += t.amount); }
+  for (const m of Object.values(months)) { m.inn = r2(m.inn); m.out = r2(m.out); }
+  const teamCost: Record<string, number> = {};
+  if (includeTeam) for (const p of s.pay) { const m = p.date.slice(0, 7); teamCost[m] = r2((teamCost[m] || 0) + p.gross + p.employerCost); }
+  return { view: "summary" as const, settings: { ...base, buckets: s.buckets, opening: s.opening }, tx: [] as Tx[], summary: { months, teamCost, headcount: includeTeam ? s.people.filter((p) => p.active).length : null, buckets: Object.fromEntries(Object.entries(bucketBalances(s, tx)).map(([k, v]) => [k, v.balance])) } };
 }

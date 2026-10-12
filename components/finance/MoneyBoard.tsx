@@ -6,28 +6,42 @@ import {
   bucketBalances, CHECKLIST, estimatedTaxDates, money0, monthLabel, monthOf, parseBankCsv, r2, shiftMonth, totals, unallocated,
   type FinSettings, type Owed, type Tx,
 } from "@/lib/finance-def";
+import { Guide, PrivacyBar, AdminLocked, AdminSummary, Team, type Summary } from "./MoneyExtras";
 
 const TABS = [
   ["overview", "Overview"], ["split", "Split income"], ["tx", "Transactions"], ["budget", "Budget"],
-  ["owed", "Invoices & bills"], ["taxes", "Taxes"], ["close", "Month-end"], ["reports", "Reports"], ["setup", "Set up"],
+  ["owed", "Invoices & bills"], ["team", "Team"], ["taxes", "Taxes"], ["close", "Month-end"], ["reports", "Reports"], ["setup", "Set up"], ["guide", "How to use Money"],
 ] as const;
-type Tab = (typeof TABS)[number][0];
+export type Tab = (typeof TABS)[number][0];
 const IN_COLOR = "#2176A8", OUT_COLOR = "#C9682E";
 const day = (d: string) => (d ? new Date(d + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "");
+const NO_MONTH: Tab[] = ["setup", "taxes", "owed", "guide", "team"];
 
-/** A client's money plan. The client uses it in their portal; you see the same thing from admin. */
+/**
+ * A client's money plan. In their portal the client owns it completely.
+ * From admin you only see what they choose to share, and only to read.
+ */
 export default function MoneyBoard({ as, clientId, today, clientName }: { as: "client" | "us"; clientId: string; today: string; clientName: string }) {
   const [s, setS] = useState<FinSettings | null>(null);
   const [tx, setTx] = useState<Tx[]>([]);
+  const [view, setView] = useState<"own" | "private" | "summary" | "full">("own");
+  const [summary, setSummary] = useState<Summary | null>(null);
   const [tab, setTab] = useState<Tab>("overview");
   const [month, setMonth] = useState(today.slice(0, 7));
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
   const qs = as === "us" ? `?c=${clientId}` : "";
+  const take = (j: { view?: typeof view; settings: FinSettings; tx: Tx[]; summary?: Summary }) => { setS(j.settings); setTx(j.tx ?? []); setView(j.view ?? "own"); setSummary(j.summary ?? null); };
 
   useEffect(() => {
-    fetch(`/api/fin${qs}`).then(async (r) => { const j = await r.json(); if (r.ok) { setS(j.settings); setTx(j.tx); } else setMsg(j.error || "Could not load."); });
-  }, [qs]);
+    fetch(`/api/fin${qs}`).then(async (r) => {
+      const j = await r.json();
+      if (!r.ok) { setMsg(j.error || "Could not load."); return; }
+      take(j);
+      // First visit with nothing entered yet: start with the guide
+      if (as === "client" && !(j.tx ?? []).length) setTab("guide");
+    });
+  }, [qs, as]);
 
   async function api(op: string, payload: Record<string, unknown> = {}, ok = "") {
     setBusy(true); setMsg("");
@@ -35,29 +49,37 @@ export default function MoneyBoard({ as, clientId, today, clientName }: { as: "c
     const j = await res.json().catch(() => ({}));
     setBusy(false);
     if (!res.ok) { setMsg(j.error || "Something went wrong."); return null; }
-    setS(j.settings); setTx(j.tx); if (ok) setMsg(ok);
+    take(j); if (ok) setMsg(ok);
     return j;
   }
   const saveSettings = (patch: Partial<FinSettings>, ok = "Saved") => api("settings", { patch }, ok);
 
   if (!s) return <p className="muted">{msg || "Loading your numbers..."}</p>;
   const monthTx = tx.filter((t) => monthOf(t.date) === month);
+  const readOnly = as === "us";
+  const teamShared = as === "client" || !!s.share?.includeTeam;
+  const tabs = TABS.filter(([id]) => (id === "team" ? teamShared : true) && !(readOnly && (id === "setup" || id === "guide")));
+
+  const adminBar = as === "us" && (
+    <section className="panel row between" style={{ gap: 12, flexWrap: "wrap" }}>
+      <label className="row" style={{ gap: 8 }}>
+        <input type="checkbox" style={{ width: "auto" }} checked={s.enabled} onChange={(e) => saveSettings({ enabled: e.target.checked } as Partial<FinSettings>, e.target.checked ? "On. Money now shows in their portal." : "Hidden from their portal.")} />
+        <span><strong>Show Money in {clientName}&rsquo;s portal</strong></span>
+      </label>
+      <span className="small muted">{view === "private" ? "They keep it private." : view === "summary" ? "They are sharing a summary." : view === "full" ? `They are sharing everything${s.share.includeTeam ? ", including team pay" : ""}, to view only.` : ""}{s.share?.until && view !== "private" ? ` Until ${day(s.share.until)}.` : ""}</span>
+    </section>
+  );
+  if (as === "us" && view === "private") return <div className="stack" style={{ gap: 18 }}>{adminBar}<AdminLocked s={s} clientName={clientName} api={api} msg={msg} /></div>;
+  if (as === "us" && view === "summary" && summary) return <div className="stack" style={{ gap: 18 }}>{adminBar}<AdminSummary s={s} summary={summary} clientName={clientName} today={today} /></div>;
 
   return (
     <div className="stack fin" style={{ gap: 18 }}>
-      {as === "us" && (
-        <section className="panel row between" style={{ gap: 12, flexWrap: "wrap" }}>
-          <label className="row" style={{ gap: 8 }}>
-            <input type="checkbox" style={{ width: "auto" }} checked={s.enabled} onChange={(e) => saveSettings({ enabled: e.target.checked } as Partial<FinSettings>, e.target.checked ? "On. Money now shows in their portal." : "Hidden from their portal.")} />
-            <span><strong>Show Money in {clientName}&rsquo;s portal</strong></span>
-          </label>
-          <span className="small muted">You can see and edit everything they see.</span>
-        </section>
-      )}
+      {adminBar}
+      {as === "client" && <PrivacyBar s={s} api={api} today={today} />}
       <div className="fin-tabs" role="tablist" aria-label="Money sections">
-        {TABS.map(([id, label]) => <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? "on" : ""} onClick={() => setTab(id)}>{label}</button>)}
+        {tabs.map(([id, label]) => <button key={id} role="tab" aria-selected={tab === id} className={tab === id ? "on" : ""} onClick={() => setTab(id)}>{label}</button>)}
       </div>
-      {!["setup", "taxes", "owed"].includes(tab) && (
+      {!NO_MONTH.includes(tab) && (
         <div className="row" style={{ gap: 10 }}>
           <button type="button" className="btn btn-sm btn-ghost" aria-label="Previous month" onClick={() => setMonth(shiftMonth(month, -1))}>&larr;</button>
           <strong style={{ minWidth: 170, textAlign: "center" }}>{monthLabel(month)}</strong>
@@ -66,19 +88,25 @@ export default function MoneyBoard({ as, clientId, today, clientName }: { as: "c
           <span className="small" role="status" style={{ marginLeft: "auto" }}>{busy ? "Saving..." : msg}</span>
         </div>
       )}
-      {["setup", "taxes", "owed"].includes(tab) && msg && <span className="small" role="status">{msg}</span>}
+      {NO_MONTH.includes(tab) && msg && <span className="small" role="status">{msg}</span>}
+      {readOnly && <p className="small muted" style={{ margin: 0 }}>View only. {clientName} controls what is shared and makes all changes.</p>}
 
-      {tab === "overview" && <Overview s={s} tx={tx} monthTx={monthTx} month={month} today={today} go={setTab} />}
-      {tab === "split" && <SplitBoard s={s} monthTx={monthTx} tx={tx} month={month} api={api} />}
-      {tab === "tx" && <Transactions s={s} monthTx={monthTx} month={month} api={api} as={as} clientId={clientId} />}
-      {tab === "budget" && <Budget s={s} monthTx={monthTx} save={saveSettings} />}
-      {tab === "owed" && <OwedList s={s} today={today} save={saveSettings} api={api} />}
-      {tab === "taxes" && <Taxes s={s} tx={tx} today={today} save={saveSettings} />}
-      {tab === "close" && <MonthEnd s={s} month={month} monthTx={monthTx} save={saveSettings} />}
+      <fieldset disabled={readOnly} className="fin-body">
+        {tab === "overview" && <Overview s={s} tx={tx} monthTx={monthTx} month={month} today={today} go={setTab} />}
+        {tab === "split" && <SplitBoard s={s} monthTx={monthTx} tx={tx} month={month} api={api} />}
+        {tab === "tx" && <Transactions s={s} monthTx={monthTx} month={month} api={api} as={as} clientId={clientId} />}
+        {tab === "budget" && <Budget s={s} monthTx={monthTx} save={saveSettings} />}
+        {tab === "owed" && <OwedList s={s} today={today} save={saveSettings} api={api} />}
+        {tab === "team" && <Team s={s} tx={tx} today={today} save={saveSettings} api={api} />}
+        {tab === "taxes" && <Taxes s={s} tx={tx} today={today} save={saveSettings} />}
+        {tab === "close" && <MonthEnd s={s} month={month} monthTx={monthTx} save={saveSettings} />}
+        {tab === "setup" && <Setup s={s} save={saveSettings} />}
+        {tab === "guide" && <Guide go={setTab} />}
+      </fieldset>
+      {/* Reports stay usable when viewing, so you can download what they shared */}
       {tab === "reports" && <Reports s={s} tx={tx} month={month} clientName={clientName} />}
-      {tab === "setup" && <Setup s={s} save={saveSettings} />}
 
-      <p className="tiny muted" style={{ margin: 0 }}>Money is a planning and record-keeping tool. It is not accounting, tax, or legal advice. Your bank statements are the official record, and a tax professional should confirm what you owe.</p>
+      <p className="tiny muted" style={{ margin: 0 }}>Money is a planning and record-keeping tool. It is not accounting, tax, payroll, or legal advice. Your bank statements are the official record, and a tax professional should confirm what you owe.</p>
     </div>
   );
 }

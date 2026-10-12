@@ -22,8 +22,48 @@ export interface Tx {
 export interface Bucket { id: string; name: string; pct: number; hint: string }
 export interface Owed { id: string; kind: "receivable" | "payable"; name: string; amount: number; due: string; status: "open" | "paid"; note: string; paidTxId: string }
 export interface TaxPayment { quarter: string; amount: number; paidOn: string }
+export interface Person {
+  id: string;
+  name: string;
+  role: string;
+  kind: "employee" | "contractor";
+  payType: "hourly" | "salary" | "project";
+  /** Hourly rate, yearly salary, or typical project fee */
+  rate: number;
+  start: string;
+  active: boolean;
+  /** Only whether each document is on file. Never the document itself or ID numbers. */
+  docs: { w4?: boolean; i9?: boolean; w9?: boolean; agreement?: boolean };
+}
+export interface PayRecord {
+  id: string;
+  personId: string;
+  /** Pay date */
+  date: string;
+  /** Gross pay (employee) or amount paid (contractor) */
+  gross: number;
+  /** Employer payroll taxes and benefits on top of gross pay (employees) */
+  employerCost: number;
+  /** Expense reimbursements, which are not wages */
+  reimbursement: number;
+  hours: number;
+  note: string;
+  txId: string;
+}
+export type ShareLevel = "private" | "summary" | "full";
+export interface Share { level: ShareLevel; includeTeam: boolean; /** YYYY-MM-DD, or "" for until they turn it off */ until: string; changedAt: string }
 export interface FinSettings {
   enabled: boolean;
+  /** What Build & Bloom can see. Only the client changes this. */
+  share: Share;
+  /** Build & Bloom asking to review */
+  accessRequest: { at: string; note: string } | null;
+  /** When Build & Bloom last looked (newest first) */
+  accessLog: string[];
+  people: Person[];
+  pay: PayRecord[];
+  /** Employer filing reminders marked done, e.g. "2026-941-Q1" */
+  filings: Record<string, string>;
   buckets: Bucket[];
   incomeCategories: string[];
   expenseCategories: string[];
@@ -56,7 +96,7 @@ export const CHECKLIST = [
   { id: "budget", label: "You looked at budget vs. actual and noted any surprises" },
   { id: "send", label: "Monthly report sent to your bookkeeper or accountant" },
 ];
-export const blankFin = (): FinSettings => ({ enabled: false, buckets: DEFAULT_BUCKETS.map((b) => ({ ...b })), incomeCategories: [...DEFAULT_INCOME], expenseCategories: [...DEFAULT_EXPENSE], budget: {}, owed: [], checklist: {}, taxPayments: [], opening: {}, updatedAt: "" });
+export const blankFin = (): FinSettings => ({ enabled: false, share: { level: "private", includeTeam: false, until: "", changedAt: "" }, accessRequest: null, accessLog: [], people: [], pay: [], filings: {}, buckets: DEFAULT_BUCKETS.map((b) => ({ ...b })), incomeCategories: [...DEFAULT_INCOME], expenseCategories: [...DEFAULT_EXPENSE], budget: {}, owed: [], checklist: {}, taxPayments: [], opening: {}, updatedAt: "" });
 
 export const r2 = (n: number) => Math.round(n * 100) / 100;
 export const monthOf = (d: string) => d.slice(0, 7);
@@ -159,3 +199,28 @@ export function parseBankCsv(text: string): { rows: { date: string; desc: string
   if (!rows.length) return { rows, error: "No transactions were found in that file." };
   return { rows };
 }
+
+/** The sharing setting in force today (an expired share counts as private) */
+export function activeShare(s: Pick<FinSettings, "share">, today: string): Share {
+  const sh = s.share ?? { level: "private", includeTeam: false, until: "", changedAt: "" };
+  return sh.until && today > sh.until ? { ...sh, level: "private" } : sh;
+}
+/** Employer filing dates for a calendar year's payroll. Most payroll providers file these for you. */
+export function employerDates(year: number) {
+  const roll = (y: number, m: number, d: number) => {
+    const dt = new Date(Date.UTC(y, m - 1, d));
+    while (dt.getUTCDay() === 0 || dt.getUTCDay() === 6) dt.setUTCDate(dt.getUTCDate() + 1);
+    return dt.toISOString().slice(0, 10);
+  };
+  return [
+    { key: `${year}-941-Q1`, label: "Form 941, quarter 1 (Jan to Mar)", due: roll(year, 4, 30), who: "employees" },
+    { key: `${year}-941-Q2`, label: "Form 941, quarter 2 (Apr to Jun)", due: roll(year, 7, 31), who: "employees" },
+    { key: `${year}-941-Q3`, label: "Form 941, quarter 3 (Jul to Sep)", due: roll(year, 10, 31), who: "employees" },
+    { key: `${year}-941-Q4`, label: "Form 941, quarter 4 (Oct to Dec)", due: roll(year + 1, 1, 31), who: "employees" },
+    { key: `${year}-W2`, label: `W-2s to employees and the SSA for ${year}`, due: roll(year + 1, 1, 31), who: "employees" },
+    { key: `${year}-940`, label: `Form 940 (federal unemployment) for ${year}`, due: roll(year + 1, 1, 31), who: "employees" },
+    { key: `${year}-1099`, label: `1099-NEC to contractors and the IRS for ${year}`, due: roll(year + 1, 1, 31), who: "contractors" },
+  ];
+}
+/** The 1099-NEC reporting threshold for payments made in a year */
+export const nec1099Threshold = (year: number) => (year >= 2026 ? 2000 : 600);

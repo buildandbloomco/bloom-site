@@ -352,7 +352,7 @@ Clients can choose Card or Zelle in the pay section of their portal. With Zelle 
 
 ## Money (high-level bookkeeping for clients)
 
-Turn it on per client: Meeting view, "Money" in the Proposal and agreements box, then check "Show Money in their portal". You see and can edit everything they see.
+Turn it on per client: Meeting view, "Money" in the Proposal and agreements box, then check "Show Money in their portal". Money starts **private**: you only see that it is on.
 
 - **Overview:** money in, money out, net, what is in each bucket, what needs a look (unsplit income, missing categories or receipts, past-due invoices, the next estimated tax date), and six months of in vs. out.
 - **Split income:** drag a deposit onto a bucket (or tap it, then tap the bucket on a phone) and choose how much goes there, or click "Split it all by my percentages". Drag a payment onto the bucket it came out of. Buckets start at Profit 5%, Owner's pay 50%, Taxes 15%, Operating expenses 30%, the Profit First starting point for businesses under $250,000. Clients can rename, add, and change them under Set up.
@@ -362,5 +362,17 @@ Turn it on per client: Meeting view, "Money" in the Proposal and agreements box,
 - **Taxes:** the four federal estimated tax due dates (Form 1040-ES) with what they paid and when, plus their Taxes bucket balance.
 - **Month-end:** the checklist a bookkeeper runs every month.
 - **Reports:** profit and loss for the month or year to date, printable, and CSV downloads of transactions and the P&L for their accountant.
+
+- **Team:** employees and contractors (name, role, pay type and rate, start date; no Social Security numbers, addresses, or bank details), which forms are on file (W-4, I-9, W-9, offer letter or contract), each payroll or contractor payment (gross, employer taxes and benefits, reimbursements, hours), team cost this month and year and as a share of money in, a 1099-NEC flag for contractors paid $2,000 or more in 2026 ($600 before 2026), employer filing deadlines to check off, and how long to keep records. Recording a payment can also add it to Money out.
+- **How to use Money:** a step-by-step guide (once, weekly, twice a month, monthly, quarterly) with "Take me there" buttons, plus free resources (IRS, SBA, SCORE, Department of Labor). New clients land here first.
+
+**Privacy and sharing.** The client controls who sees their Money from the bar at the top of the page:
+- *Private* (the default): you see only that Money is on, and you can send an "Ask to review" note. It shows on their Money page and on their portal home until they answer.
+- *Summary*: monthly totals in and out and bucket balances. No transactions, receipts, or notes.
+- *Everything*: all tabs, view only.
+- Team pay is shared only if they also check "Include team pay". Sharing can last 7 days, 30 days, or until they turn it off. They see each time you look.
+- You can never change their Money, even when they share. The admin view is read-only (you can still download reports).
+- Your full backup includes a client's Money only while they share everything.
+- Honest limit: "private" hides it from your admin screens and backups, but the data still lives in your database. It is not encrypted from you as the site owner.
 
 Everything is entered by hand or imported from a bank file; nothing connects to a bank account. It is a planning tool, not accounting or tax advice, and the page says so.
