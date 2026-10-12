@@ -145,6 +145,7 @@ export async function getCatalog(): Promise<Catalog> {
   await migratePricing();
   await migrateSystems();
   await migrateSystemAddOns();
+  await migrateMoneyAddOns();
   const cat = (await kv().get<Catalog>(K.catalog)) ?? DEFAULT_CATALOG;
   for (const s of cat.services) {
     s.showOnSite ??= s.kind === "core";
@@ -278,6 +279,31 @@ function migrateSystemAddOns() {
     });
   }
   return sysAddons;
+}
+/** One-time: Money add-ons. The Money tool itself stays included; these are for your time with it. */
+export const MONEY_ADDONS: Service[] = [
+  { id: "addon-money-setup", name: "Money Setup Session", kind: "addon", lane: "both", active: true, showOnSite: true, showPrice: true, unit: "per session", price: 350, priceOrg: 475,
+    description: "A 90-minute working session to set up Money in your portal together: your income buckets, categories, first month of transactions, and your team. You leave organized and knowing exactly what to do each week. Financial organization, not bookkeeping, tax, or accounting advice." },
+  { id: "addon-money-checkin", name: "Monthly Money Check-in", kind: "addon", lane: "both", active: true, showOnSite: true, showPrice: true, unit: "per month", price: 200, priceOrg: 275,
+    description: "A standing monthly call where you share your Money with us and we walk through the month together: what came in and went out, whether your buckets are funded, where your budget drifted, and what your team costs. Financial organization, not bookkeeping, tax, or accounting advice. Your CPA or bookkeeper handles taxes and filings." },
+];
+let moneyAdd: Promise<void> | null = null;
+function migrateMoneyAddOns() {
+  if (!moneyAdd) {
+    moneyAdd = (async () => {
+      if (await kv().get("bb:mig:money1")) return;
+      const cat = (await kv().get<Catalog>(K.catalog)) ?? DEFAULT_CATALOG;
+      const add = MONEY_ADDONS.filter((n) => !cat.services.some((s) => s.id === n.id));
+      const at = cat.services.findIndex((s) => s.id === "addon-checkin");
+      cat.services = at >= 0 ? [...cat.services.slice(0, at + 1), ...add, ...cat.services.slice(at + 1)] : [...cat.services, ...add];
+      await kv().set(K.catalog, cat);
+      await kv().set("bb:mig:money1", true);
+    })().catch((e) => {
+      moneyAdd = null;
+      throw e;
+    });
+  }
+  return moneyAdd;
 }
 export async function saveCatalog(c: Catalog) {
   await kv().set(K.catalog, c);
