@@ -71,7 +71,7 @@ export async function recordCheckoutSession(session: Stripe.Checkout.Session): P
   const becameActive = client.status === "draft" || client.status === "sent";
   if (becameActive) client.status = "active";
   await saveClient(client);
-  if (becameActive) await ensureAgreement(client, `${client.name} made their first payment.`);
+  if (becameActive && session.metadata?.noAgreement !== "1") await ensureAgreement(client, `${client.name} made their first payment.`);
   await notifyAdmin(`${client.name} paid $${total.toFixed(2)}`, [`${client.name} paid $${total.toFixed(2)} by card${payer}.`, session.metadata?.optionLabel || ""], `/admin/clients/${client.id}`);
   return true;
 }

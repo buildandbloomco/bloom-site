@@ -376,3 +376,13 @@ Turn it on per client: Meeting view, "Money" in the Proposal and agreements box,
 - Honest limit: "private" hides it from your admin screens and backups, but the data still lives in your database. It is not encrypted from you as the site owner.
 
 Everything is entered by hand or imported from a bank file; nothing connects to a bank account. It is a planning tool, not accounting or tax advice, and the page says so.
+
+
+## Private event offers (C.R.E.A.T.E.)
+
+A private, code-gated offer page for a live event: `/event/create`. It is not linked anywhere on the site and search engines are told not to list it.
+- Guests scan the QR code, type the room code (BLOOM, set in `lib/events.ts` or with the `EVENT_CODE_CREATE` environment variable), and see the weekend offers. The page closes itself at the time set in `lib/event-def.ts` (Sunday, Oct 18, 2026, 11:59 PM Eastern).
+- Tiers, prices, deposits, and what each includes are in `lib/event-def.ts`.
+- Choosing an offer creates a client portal (with Money on and every guidebook), a lead tagged with the event and their Bloom Check scores, and the agreement when the tier needs one.
+- Card: Stripe checkout. The portal waits as "sent" until the payment clears. Zelle: the guest sees your Zelle details, and the payment shows on their Meeting view for you to confirm.
+- Someone who uses an email that already has a portal is never signed in automatically. They sign in with their own code.
