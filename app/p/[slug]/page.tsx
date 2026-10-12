@@ -21,6 +21,7 @@ import { listAgreements } from "@/lib/agreements";
 import { listFiles } from "@/lib/files";
 import { getProposal } from "@/lib/proposals";
 import { isExpired } from "@/lib/proposal-def";
+import { getFin } from "@/lib/finance";
 import { getBuild } from "@/lib/builds";
 import { BUILD_KINDS, STAGES, intakeProgress } from "@/lib/build-def";
 import { listNotices } from "@/lib/paynotices";
@@ -100,6 +101,7 @@ export default async function Portal({
   const toSign = myAgreements.filter((a) => a.status === "sent");
   const proposal = await getProposal(client.id);
   const build = await getBuild(client.id);
+  const fin = await getFin(client.id);
   const pendingZelle = (await listNotices(client.id)).filter((n) => n.status === "pending");
   // While a proposal is waiting for an answer, the price lives on the proposal page, not here
   const proposalOpen = proposal?.status === "sent";
@@ -125,6 +127,7 @@ export default async function Portal({
   const nav = [
     hasWorkspace && plan.enabled ? ["Sessions", `/p/${slug}/plan`] : null,
     build.enabled ? ["Your build", `/p/${slug}/build`] : null,
+    fin.enabled ? ["Money", `/p/${slug}/money`] : null,
     holdPay ? ["Your proposal", `/p/${slug}/proposal`] : null,
     myCourses.length ? ["Courses", "#courses"] : null,
     ["Files", "#files"],
@@ -199,6 +202,20 @@ export default async function Portal({
                   <p className="small" style={{ margin: 0 }}>{build.updates[0] ? build.updates[0].text.slice(0, 160) : "Follow progress, send us your brand and details, and request add-ons."}{!build.intakeSubmittedAt ? ` Your questionnaire is ${intakeProgress(build).percent}% done.` : ""}</p>
                 </div>
                 <a className="btn btn-sm btn-dark" href={`/p/${slug}/build`}>{build.intakeSubmittedAt ? "Open your build" : "Continue your questionnaire"}</a>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {fin.enabled && (
+          <section className="section" style={{ paddingBottom: 0 }}>
+            <div className="wrap">
+              <div className="ws-card" style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap" }}>
+                <div className="stack" style={{ gap: 4, maxWidth: 640 }}>
+                  <h3>Money</h3>
+                  <p className="small" style={{ margin: 0 }}>Record what comes in and goes out, split income into your buckets, and close out each month.</p>
+                </div>
+                <a className="btn btn-sm btn-dark" href={`/p/${slug}/money`}>Open Money</a>
               </div>
             </div>
           </section>

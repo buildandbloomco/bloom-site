@@ -26,7 +26,7 @@ export async function GET(req: Request) {
       const r = await db.hgetall(`bb:room:${id}:${s.id}`);
       if (Object.keys(r).length) rooms[s.id] = r;
     }
-    perClient[id] = { teamResponses: await db.hgetall(`bb:assess:resp:${id}`), files: await db.hgetall(`bb:files:${id}`), strategyRooms: rooms };
+    perClient[id] = { teamResponses: await db.hgetall(`bb:assess:resp:${id}`), files: await db.hgetall(`bb:files:${id}`), strategyRooms: rooms, money: { settings: await db.get(`bb:fin:${id}`), transactions: await db.hgetall(`bb:fin:tx:${id}`) } };
   }
 
   const out: Record<string, unknown> = {

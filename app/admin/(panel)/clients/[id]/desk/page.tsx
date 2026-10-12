@@ -18,6 +18,7 @@ import ScoreTrend from "@/components/ScoreTrend";
 import { listAgreements, signedIsStale } from "@/lib/agreements";
 import { listFiles } from "@/lib/files";
 import { scorecardHistory } from "@/lib/room";
+import { getFin } from "@/lib/finance";
 import { getBuild } from "@/lib/builds";
 import { STAGES } from "@/lib/build-def";
 import { getProposal } from "@/lib/proposals";
@@ -45,6 +46,7 @@ export default async function ClientDesk({ params }: { params: Promise<{ id: str
   const agreementStale = await signedIsStale(client, agreements);
   const propState = proposalState(await getProposal(id), today);
   const build = await getBuild(id);
+  const fin = await getFin(id);
   const zelle = (await listNotices(id)).filter((n) => n.status === "pending");
   const courses = (await Promise.all(enrollments.map(async (e) => ({ e, c: await getCourse(e.courseId) })))).filter((x) => x.c);
   const upcoming = appts.filter((a) => a.clientId === id && a.date >= today).sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start)).slice(0, 3);
@@ -116,6 +118,7 @@ export default async function ClientDesk({ params }: { params: Promise<{ id: str
 
           <section className="panel" style={agreements.some((a) => a.status === "sent") ? { borderTopColor: "var(--gold)" } : undefined}>
             <h3>Proposal and agreements</h3>
+            <Row k="Money" v={<Link href={`/admin/clients/${id}/money`}>{fin.enabled ? "On in their portal" : "Set up"}</Link>} />
             <Row k="Systems build" v={<Link href={`/admin/clients/${id}/build`}>{build.enabled ? `${STAGES.find((s) => s.id === build.stage)?.label}${build.requests.some((r) => r.status === "new") ? " · new add-on request" : ""}` : "Set up"}</Link>} />
             <Row k="Proposal" v={<Link href={`/admin/clients/${id}/proposal`}>{propState ? propState.label.replace("Proposal ", "").replace(/^./, (m) => m.toUpperCase()) : "Create one"}</Link>} />
             {agreements.length === 0 && <p className="small muted" style={{ margin: 0 }}>None yet.</p>}
