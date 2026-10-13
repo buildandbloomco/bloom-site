@@ -3,7 +3,7 @@ import QRCode from "qrcode";
 import { isAdmin } from "@/lib/auth";
 import { getEvent } from "@/lib/events";
 import { siteOrigin } from "@/lib/http";
-import { BLOOM_CHECK, usd } from "@/lib/event-def";
+import { BLOOM_CHECK, earlyOn, tierPrice, usd } from "@/lib/event-def";
 import PrintButton from "@/components/event/PrintButton";
 import "@/components/event/card.css";
 
@@ -46,8 +46,10 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
         <p style={{ fontSize: "10.5pt", lineHeight: 1.35 }}>Offers for the people in this room, for a short time, so this momentum has somewhere to go.</p>
         {tiers.map((t) => (
           <div key={t.id} className={`tier${t.featured ? " f" : ""}`}>
-            <div><h3>{t.name}</h3><div className="d">{t.tagline}{t.deposit ? ` Hold it with ${usd(t.deposit)}.` : ""}</div></div>
-            <div className="pr"><span className="n">{usd(t.price)}</span>{t.was ? <s>{usd(t.was)}</s> : null}</div>
+            <div><h3>{t.name}</h3><div className="d">{t.tagline}{t.deposit ? ` Hold it with ${usd(t.deposit)}.` : ""}</div>
+              {tiers.length <= 2 && t.includes.length ? <ul className="inc">{t.includes.slice(0, 3).map((x) => <li key={x}>{x.indexOf(":") > 15 ? x.slice(0, x.indexOf(":")) : x}</li>)}</ul> : null}
+              {earlyOn(t) && t.early ? <div className="early">{usd(t.early.price)} through {new Date(t.early.until).toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit", timeZone: "America/New_York" }).replace("11:59 PM", "midnight")}. Then {usd(t.price)}.</div> : null}</div>
+            <div className="pr"><span className="n">{usd(tierPrice(t))}</span>{t.was ? <s>{usd(t.was)}</s> : null}</div>
           </div>
         ))}
         <div className="qr">

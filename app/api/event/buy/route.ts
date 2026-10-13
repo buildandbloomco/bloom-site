@@ -9,7 +9,7 @@ import { findOrCreateClient } from "@/lib/enroll";
 import { ensureAgreement } from "@/lib/agreements";
 import { getFin, saveFin } from "@/lib/finance";
 import { listNotices, saveNotices } from "@/lib/paynotices";
-import { BLOOM_CHECK, usd } from "@/lib/event-def";
+import { BLOOM_CHECK, earlyOn, tierPrice, usd } from "@/lib/event-def";
 import { eventAccess } from "@/lib/events";
 import { GUIDES } from "@/lib/guides";
 import type { Lead } from "@/lib/types";
@@ -31,7 +31,9 @@ export async function POST(req: Request) {
   if (b.agree !== true) return error("Please check the box to agree to the terms.");
   const method = b.method === "zelle" ? "zelle" : "card";
   const deposit = b.pay === "deposit" && tier.deposit ? tier.deposit : 0;
-  const amount = deposit || tier.price;
+  const price = tierPrice(tier);
+  const early = earlyOn(tier);
+  const amount = deposit || price;
   const label = `${ev.name} offer: ${tier.name}${deposit ? " (deposit)" : ""}`;
   const settings = await getSettings();
   if (method === "zelle" && !settings.zelle) return error("Zelle isn't available right now. Please pay by card.");
@@ -64,7 +66,7 @@ export async function POST(req: Request) {
     client.guideSlugs = GUIDES.map((g) => g.slug);
     client.welcome = `Welcome, ${client.contactName}! It was so good to be in the room with you at ${ev.name}. Everything from here lives in this portal.`;
     client.package = { ...client.package, title: tier.name, summary: tier.tagline, serviceIds: tier.serviceIds, customItems: tier.includes.map((i) => ({ title: i, detail: "" })) };
-    client.investment = { total: tier.price, retainer: deposit || tier.price, lineItems: [{ label: `${tier.name}, ${ev.name} price`, amount: tier.price }], note: deposit ? tier.depositNote || "" : "" };
+    client.investment = { total: price, retainer: deposit || price, lineItems: [{ label: `${tier.name}, ${ev.name} ${early ? "decide-today " : ""}price`, amount: price }], note: deposit ? tier.depositNote || "" : "" };
     client.notes = [client.notes, `Came from ${ev.name} (${now.slice(0, 10)}). Chose ${tier.name}${deposit ? " with a deposit" : ""}, paying by ${method === "zelle" ? "Zelle" : "card"}.`, checkLine].filter(Boolean).join("\n");
     // Card: the portal waits as "sent" until the payment clears, then becomes active (and gets its agreement) automatically
     if (method === "card") client.status = "sent";
