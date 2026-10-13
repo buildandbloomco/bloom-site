@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
-import { eventOpen, getEvent } from "@/lib/event-def";
-import { eventAccess } from "@/lib/events";
+import { eventOpen } from "@/lib/event-def";
+import { eventAccess, getEvent } from "@/lib/events";
 import { getSettings } from "@/lib/data";
 import { bookProps } from "@/lib/booking";
 import Ribbon from "@/components/Ribbon";
@@ -13,7 +13,7 @@ export const metadata = { title: "Guest offers", robots: { index: false, follow:
 
 export default async function EventPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ canceled?: string }> }) {
   const { slug } = await params;
-  const e = getEvent(slug);
+  const e = await getEvent(slug);
   if (!e) notFound();
   const s = await getSettings();
   const inside = await eventAccess(slug);
@@ -49,7 +49,7 @@ export default async function EventPage({ params, searchParams }: { params: Prom
           </div>
         </div>
       ) : (
-        <EventOffers event={e} ends={ends} canceled={(await searchParams).canceled === "1"} contact={{ email: s.email, phone: s.phone }} />
+        <EventOffers event={inside} ends={ends} canceled={(await searchParams).canceled === "1"} contact={{ email: s.email, phone: s.phone }} />
       )}
     </main>
   );

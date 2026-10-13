@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
-import { getEvent, usd } from "@/lib/event-def";
+import { usd } from "@/lib/event-def";
+import { getEvent } from "@/lib/events";
 import { currentClient } from "@/lib/auth";
 import { getSettings } from "@/lib/data";
 import { decryptCode } from "@/lib/crypto";
@@ -13,7 +14,7 @@ export const metadata = { title: "Welcome", robots: { index: false, follow: fals
 export default async function EventWelcome({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ t?: string; z?: string; existing?: string }> }) {
   const { slug } = await params;
   const sp = await searchParams;
-  const e = getEvent(slug);
+  const e = await getEvent(slug);
   if (!e) notFound();
   const tier = e.tiers.find((t) => t.id === sp.t);
   const s = await getSettings();
