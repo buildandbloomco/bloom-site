@@ -378,11 +378,14 @@ Turn it on per client: Meeting view, "Money" in the Proposal and agreements box,
 Everything is entered by hand or imported from a bank file; nothing connects to a bank account. It is a planning tool, not accounting or tax advice, and the page says so.
 
 
-## Private event offers (C.R.E.A.T.E.)
+## Event offers (private pages for events)
 
-A private, code-gated offer page for a live event: `/event/create`. It is not linked anywhere on the site and search engines are told not to list it.
-- Guests scan the QR code, type the room code (BLOOM, set in `lib/events.ts` or with the `EVENT_CODE_CREATE` environment variable), and see the weekend offers. The page closes itself at the time set in `lib/event-def.ts` (Sunday, Oct 18, 2026, 11:59 PM Eastern).
-- Tiers, prices, deposits, and what each includes are in `lib/event-def.ts`.
-- Choosing an offer creates a client portal (with Money on and every guidebook), a lead tagged with the event and their Bloom Check scores, and the agreement when the tier needs one.
+Admin, then **Event offers**. Each event has a private page at `/event/<address>` that is not linked anywhere on the site, and search engines are told not to list it.
+- Edit everything there: event name, web address, closing date and time (Eastern), room code, welcome text, and each offer's name, price, "usually" price, deposit option, what is included, what happens after they pay, which services it becomes in their portal and agreement, and whether it is shown or highlighted. Save, and guests see it right away.
+- Turn a page off to show it as closed. Duplicate an event to reuse it for the next one.
+- **Print card** makes a two-sided 5 x 7 card (the Bloom Check, plus the offers, QR code, and room code) that always matches what you saved. Print it after you settle prices.
+- Changing the web address breaks QR codes already printed. Changing the room code asks guests to enter the new one.
+- Choosing an offer creates a client portal (with Money on and every guidebook), a lead tagged with the event and their Bloom Check scores, and the agreement when the offer needs one.
 - Card: Stripe checkout. The portal waits as "sent" until the payment clears. Zelle: the guest sees your Zelle details, and the payment shows on their Meeting view for you to confirm.
 - Someone who uses an email that already has a portal is never signed in automatically. They sign in with their own code.
+- Your regular service prices are under **Services & add-ons**; event prices are set separately so a special price never changes your normal rates.

@@ -1,5 +1,6 @@
 /** Private, code-gated offer pages for live events (a mastermind, a conference, a workshop room).
- *  Shared by the browser and the server. The room code itself lives only on the server, in lib/events.ts. */
+ *  Shared by the browser and the server. Edited in admin under Event offers; these are the starting values.
+ *  The room code lives only on the server (lib/events.ts). */
 
 export interface EventTier {
   id: string;
@@ -21,6 +22,8 @@ export interface EventTier {
   agreement: boolean;
   /** What happens right after they pay, shown on the welcome page */
   next: string[];
+  /** false = hidden from guests */
+  active?: boolean;
 }
 
 export interface EventOffer {
@@ -31,11 +34,13 @@ export interface EventOffer {
   endsAt: string;
   intro: string;
   tiers: EventTier[];
+  /** false = the page shows as closed */
+  active?: boolean;
 }
 
 const KIT = "Your own private Build & Bloom portal with Money: budget, income buckets you drag and drop, team pay, and tax dates";
 
-export const EVENTS: EventOffer[] = [
+export const DEFAULT_EVENTS: EventOffer[] = [
   {
     slug: "create",
     name: "C.R.E.A.T.E.",
@@ -73,7 +78,7 @@ export const EVENTS: EventOffer[] = [
         includes: ["Three strategy sessions and a 90-day plan built with you in your portal", "Bonus: a Money Setup Session to organize your finances together (a $350 value)", "Email support between sessions", "Everything in the Bloom Kit"],
         serviceIds: ["strategy", "addon-money-setup"],
         deposit: 500,
-        depositNote: "Hold your mastermind price with $500 today. The balance is due before your first session, in your portal.",
+        depositNote: "Hold your C.R.E.A.T.E. price with $500 today. The balance is due before your first session, in your portal.",
         agreement: true,
         next: ["Sign your service agreement at the top of your portal.", "Book your first strategy session from your portal.", "Pay any remaining balance in your portal before that session."],
       },
@@ -81,8 +86,7 @@ export const EVENTS: EventOffer[] = [
   },
 ];
 
-export const getEvent = (slug: string) => EVENTS.find((e) => e.slug === slug);
-export const eventOpen = (e: EventOffer, now = Date.now()) => now < new Date(e.endsAt).getTime();
+export const eventOpen = (e: EventOffer, now = Date.now()) => e.active !== false && now < new Date(e.endsAt).getTime();
 export const usd = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 })}`;
 
 /** The Bloom Check: the five-area self-check used in the live activity and on the page */
