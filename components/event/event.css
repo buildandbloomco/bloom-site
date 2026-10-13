@@ -2,7 +2,7 @@
 .ev-narrow { max-width: 560px; width: 100%; margin: 0 auto; padding: 24px 20px 64px; }
 .ev-wrap { max-width: 1080px; width: 100%; margin: 0 auto; padding: 16px clamp(16px, 4vw, 48px) 64px; gap: 26px; }
 .ev-lede { font-size: 1.2rem; max-width: 720px; margin: 0; }
-.ev-tiers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: stretch; }
+.ev-tiers { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; align-items: stretch; }
 @media (max-width: 900px) { .ev-tiers { grid-template-columns: 1fr; } }
 .ev-tier { position: relative; background: var(--ivory); border: 1.5px solid var(--line); border-radius: 0 48px 0 0; border-bottom: 3px solid var(--mocha); padding: 26px 22px 22px; display: flex; flex-direction: column; gap: 10px; box-shadow: var(--shadow); }
 .ev-tier h3 { margin: 0; font-size: 1.5rem; }
@@ -27,3 +27,5 @@
 .ev-opts label.on { border-color: var(--rust); background: #fbf1ea; }
 .ev-opts input { width: auto; margin-top: 5px; }
 .ev-done { border-top: 4px solid var(--gold); }
+.ev-early { margin: 0; font-size: 0.92rem; background: #fbf3dc; border-radius: 8px; padding: 6px 10px; color: var(--espresso); }
+.ev-tier .btn { white-space: normal; line-height: 1.25; height: auto; min-height: 44px; padding-top: 10px; padding-bottom: 10px; }

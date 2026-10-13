@@ -93,7 +93,7 @@ export default function EventsEditor({ initial, services, origin }: { initial: E
                 {e.tiers.map((t, k) => (
                   <div key={t.id} className="stack" style={{ gap: 10, border: "1px solid var(--line)", borderRadius: 14, padding: 14, background: t.active === false ? "var(--cream)" : "transparent" }}>
                     <div className="row between" style={{ gap: 8, flexWrap: "wrap" }}>
-                      <strong>{t.name || `Offer ${k + 1}`}{t.price ? ` · ${usd(t.price)}` : ""}</strong>
+                      <strong>{t.name || `Offer ${k + 1}`}{t.early ? ` · ${usd(t.early.price)}, then` : ""}{t.price ? ` · ${usd(t.price)}` : ""}</strong>
                       <span className="row" style={{ gap: 8 }}>
                         <button type="button" className="btn btn-sm btn-ghost" disabled={k === 0} aria-label="Move up" onClick={() => moveTier(i, k, -1)}>↑</button>
                         <button type="button" className="btn btn-sm btn-ghost" disabled={k === e.tiers.length - 1} aria-label="Move down" onClick={() => moveTier(i, k, 1)}>↓</button>
@@ -104,6 +104,8 @@ export default function EventsEditor({ initial, services, origin }: { initial: E
                       <label>Name<input type="text" value={t.name} onChange={(x) => updTier(i, k, { name: x.target.value })} /></label>
                       <label>Event price<input type="number" min={0} step="1" value={t.price || ""} onChange={(x) => updTier(i, k, { price: Number(x.target.value) })} /></label>
                       <label>Usually <span className="hint">Crossed out</span><input type="number" min={0} step="1" value={t.was || ""} onChange={(x) => updTier(i, k, { was: Number(x.target.value) || undefined })} /></label>
+                      <label>Decide-today price <span className="hint">Blank = none</span><input type="number" min={0} step="1" value={t.early?.price || ""} onChange={(x) => updTier(i, k, { early: Number(x.target.value) ? { price: Number(x.target.value), until: t.early?.until || e.endsAt } : undefined })} /></label>
+                      {t.early ? <label>Decide-today ends (Eastern)<input type="datetime-local" value={toET(t.early.until)} onChange={(x) => updTier(i, k, { early: { price: t.early!.price, until: fromET(x.target.value) || t.early!.until } })} /></label> : null}
                       <label>Deposit option <span className="hint">Blank = none</span><input type="number" min={0} step="1" value={t.deposit || ""} onChange={(x) => updTier(i, k, { deposit: Number(x.target.value) || undefined })} /></label>
                     </div>
                     <label>One line under the name<input type="text" value={t.tagline} onChange={(x) => updTier(i, k, { tagline: x.target.value })} /></label>

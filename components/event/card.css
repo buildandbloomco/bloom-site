@@ -22,11 +22,14 @@
 .pc .tier.f { border: 1.4px solid #deb547; border-bottom: 2.5px solid #854327; }
 .pc .tier h3 { font-family: var(--display); font-size: 12.5pt; margin: 0; color: #2c1b13; text-transform: none; letter-spacing: 0; line-height: 1.15; }
 .pc .tier .d { font-size: 9pt; line-height: 1.25; color: #4a3a30; margin-top: 2px; }
+.pc .tier .early { font-size: 8.8pt; font-weight: 600; color: #854327; margin-top: 3px; }
+.pc .tier .inc { margin: 3px 0 0; padding-left: 14px; font-size: 8.4pt; line-height: 1.25; color: #4a3a30; }
+.pc .tier .inc li { margin: 0 0 1px; }
 .pc .pr { text-align: right; white-space: nowrap; }
 .pc .pr .n { font-family: var(--display); color: #854327; font-size: 16pt; font-weight: 600; }
 .pc .pr s { display: block; font-size: 8.5pt; color: #6a574b; }
-.pc .qr { margin-top: auto; display: flex; gap: 16px; align-items: center; background: #2c1b13; color: #fffdf8; border-radius: 16px; padding: 12px 14px; }
-.pc .qr .img { width: 1.3in; height: 1.3in; flex: none; border-radius: 8px; background: #fffdf8; padding: 4px; }
+.pc .qr { margin-top: auto; display: flex; gap: 14px; align-items: center; background: #2c1b13; color: #fffdf8; border-radius: 16px; padding: 10px 14px; }
+.pc .qr .img { width: 1.15in; height: 1.15in; flex: none; border-radius: 8px; background: #fffdf8; padding: 4px; }
 .pc .qr .img svg { width: 100%; height: 100%; display: block; }
 .pc .code { font-family: var(--display); font-size: 20pt; color: #deb547; letter-spacing: .08em; font-weight: 700; }
 .pc .sm { font-size: 9pt; line-height: 1.35; }

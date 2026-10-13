@@ -71,6 +71,24 @@ export const GUIDES: Guide[] = [
     lane: "orgs",
     public: true,
   },
+  {
+    slug: "practitioner-wellness",
+    title: "Pour From Wholeness",
+    tagline: "A practitioner wellness guide for helpers, healers, and the people who hold everyone else.",
+    inside: [
+      "Burnout, compassion fatigue, and secondary trauma, side by side",
+      "The Capacity Check: a five-minute self-check",
+      "Recovery practices between sessions and at the end of the day",
+      "Caseload and calendar limits, with boundary scripts",
+      "Your support map and questions for supervision",
+      "A 30-day Restore Plan",
+    ],
+    file: "/guides/Pour-From-Wholeness-Practitioner-Guide.pdf",
+    pages: 10,
+    price: 0,
+    lane: "orgs",
+    public: false,
+  },
 ];
 
 export const getGuide = (slug: string) => GUIDES.find((g) => g.slug === slug);

@@ -59,10 +59,19 @@ function cleanTier(t: Record<string, unknown>, i: number, serviceIds: Set<string
   const price = money(t.price);
   if (!price) return `${name} needs a price above $0.`;
   const was = money(t.was), deposit = money(t.deposit);
-  if (deposit && deposit >= price) return `${name}: the deposit must be less than the price.`;
+  const e = (t.early && typeof t.early === "object" ? t.early : {}) as Record<string, unknown>;
+  const earlyPrice = money(e.price), until = str(e.until, 40);
+  let early: EventTier["early"];
+  if (earlyPrice) {
+    if (earlyPrice >= price) return `${name}: the decide-today price must be lower than the event price.`;
+    if (Number.isNaN(new Date(until).getTime())) return `${name}: choose when the decide-today price ends.`;
+    early = { price: earlyPrice, until: new Date(until).toISOString() };
+  }
+  if (deposit && deposit >= (early?.price ?? price)) return `${name}: the deposit must be less than the price.`;
   return {
     id: slugify(str(t.id, 40)) || `tier-${i + 1}`,
     name, tagline: str(t.tagline, 160), price,
+    ...(early ? { early } : {}),
     ...(was > price ? { was } : {}),
     includes: lines(t.includes),
     serviceIds: (Array.isArray(t.serviceIds) ? t.serviceIds : []).map(String).filter((x) => serviceIds.has(x)).slice(0, 12),

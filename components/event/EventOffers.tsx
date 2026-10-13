@@ -1,7 +1,9 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { BLOOM_CHECK, usd, type EventOffer } from "@/lib/event-def";
+import { BLOOM_CHECK, earlyOn, tierPrice, usd, type EventOffer } from "@/lib/event-def";
+
+const when = (iso: string) => new Date(iso).toLocaleString("en-US", { weekday: "long", hour: "numeric", minute: "2-digit", timeZone: "America/New_York" }).replace("11:59 PM", "midnight");
 
 type Zelle = { to: string; name: string; amount: number; memo: string };
 
@@ -19,7 +21,7 @@ export default function EventOffers({ event, ends, canceled, contact }: { event:
   const formRef = useRef<HTMLDivElement>(null);
 
   const tier = event.tiers.find((t) => t.id === tierId);
-  const amount = tier ? (pay === "deposit" && tier.deposit ? tier.deposit : tier.price) : 0;
+  const amount = tier ? (pay === "deposit" && tier.deposit ? tier.deposit : tierPrice(tier)) : 0;
   const answered = BLOOM_CHECK.filter((q) => check[q.id]);
   const done = answered.length === BLOOM_CHECK.length;
   const low = done ? [...BLOOM_CHECK].sort((a, b) => check[a.id] - check[b.id])[0] : null;
@@ -92,9 +94,10 @@ export default function EventOffers({ event, ends, canceled, contact }: { event:
             <h3>{t.name}</h3>
             <p className="small muted" style={{ margin: 0 }}>{t.tagline}</p>
             <div className="ev-price">
-              <span className="now">{usd(t.price)}</span>
+              <span className="now">{usd(tierPrice(t))}</span>
               {t.was && <span className="was"><s>{usd(t.was)}</s> usually</span>}
             </div>
+            {earlyOn(t) && t.early && <p className="ev-early">Decide-today price, through {when(t.early.until)}. Then {usd(t.price)}.</p>}
             <ul>{t.includes.map((i) => <li key={i}>{i}</li>)}</ul>
             {t.deposit && <p className="tiny muted" style={{ margin: 0 }}>Or hold this price with {usd(t.deposit)} today.</p>}
             <button type="button" className={`btn btn-block ${tierId === t.id ? "btn-dark" : "btn-primary"}`} onClick={() => choose(t.id)}>{tierId === t.id ? "Selected" : `Choose ${t.name}`}</button>
@@ -124,7 +127,7 @@ export default function EventOffers({ event, ends, canceled, contact }: { event:
           <form className="stack" style={{ gap: 14 }} onSubmit={submit}>
             {tier.deposit && (
               <div className="ev-opts" role="radiogroup" aria-label="How much today">
-                <label className={pay === "full" ? "on" : ""}><input type="radio" name="pay" checked={pay === "full"} onChange={() => setPay("full")} /><span><strong>Pay in full</strong> · {usd(tier.price)}</span></label>
+                <label className={pay === "full" ? "on" : ""}><input type="radio" name="pay" checked={pay === "full"} onChange={() => setPay("full")} /><span><strong>Pay in full</strong> · {usd(tierPrice(tier))}</span></label>
                 <label className={pay === "deposit" ? "on" : ""}><input type="radio" name="pay" checked={pay === "deposit"} onChange={() => setPay("deposit")} /><span><strong>Hold my price</strong> · {usd(tier.deposit)} today<br /><span className="tiny muted">{tier.depositNote}</span></span></label>
               </div>
             )}
