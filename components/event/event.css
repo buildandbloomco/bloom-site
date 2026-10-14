@@ -29,3 +29,6 @@
 .ev-done { border-top: 4px solid var(--gold); }
 .ev-early { margin: 0; font-size: 0.92rem; background: #fbf3dc; border-radius: 8px; padding: 6px 10px; color: var(--espresso); }
 .ev-tier .btn { white-space: normal; line-height: 1.25; height: auto; min-height: 44px; padding-top: 10px; padding-bottom: 10px; }
+.ev-price .from { font-size: 1.1rem; color: var(--muted); }
+.ev-spots { margin: 0; font-weight: 700; color: var(--rust); font-size: 0.95rem; }
+.ev-spots.out { color: var(--muted); }

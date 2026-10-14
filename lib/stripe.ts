@@ -25,6 +25,10 @@ export async function recordCheckoutSession(session: Stripe.Checkout.Session): P
   }
   const clientId = session.metadata?.clientId;
   if (!clientId) return false;
+  if (session.metadata?.kind === "event" && session.metadata.pool) {
+    const { takeSpot } = await import("./events");
+    await takeSpot(session.metadata.pool, { ref: session.id, clientId, at: new Date().toISOString(), event: session.metadata.slug || "" });
+  }
   const client = await getClient(clientId);
   if (!client) return false;
   if (client.payments.some((p) => p.stripeSessionId === session.id)) return true;

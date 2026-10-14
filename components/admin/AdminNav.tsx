@@ -13,7 +13,7 @@ const LINKS = [
   ["/admin/content", "Content"],
   ["/admin/services", "Services & add-ons"],
   ["/admin/events", "Event offers"],
-  ["/admin/library", "Library"],
+  ["/admin/library", "Books & Tools"],
   ["/admin/settings", "Settings"],
 ];
 

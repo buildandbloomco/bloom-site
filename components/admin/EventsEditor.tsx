@@ -124,6 +124,13 @@ export default function EventsEditor({ initial, services, origin }: { initial: E
                       <label className="row" style={{ gap: 6 }}><input type="checkbox" style={{ width: "auto" }} checked={t.active !== false} onChange={(x) => updTier(i, k, { active: x.target.checked })} />Show to guests</label>
                       <label className="row" style={{ gap: 6 }}><input type="checkbox" style={{ width: "auto" }} checked={!!t.featured} onChange={(x) => updTier(i, k, { featured: x.target.checked })} />Highlight as "Most support"</label>
                       <label className="row" style={{ gap: 6 }}><input type="checkbox" style={{ width: "auto" }} checked={t.agreement} onChange={(x) => updTier(i, k, { agreement: x.target.checked })} />Needs a signed agreement</label>
+                      <label className="row" style={{ gap: 6 }}><input type="checkbox" style={{ width: "auto" }} checked={!!t.fromPrice} onChange={(x) => updTier(i, k, { fromPrice: x.target.checked })} />Show as &ldquo;From&rdquo; price</label>
+                      {t.deposit ? <label className="row" style={{ gap: 6 }}><input type="checkbox" style={{ width: "auto" }} checked={!!t.depositOnly} onChange={(x) => updTier(i, k, { depositOnly: x.target.checked })} />Reserve with deposit only</label> : null}
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 10 }}>
+                      <label>Limited spots <span className="hint">Blank = unlimited</span><input type="number" min={0} step="1" value={t.spots || ""} onChange={(x) => updTier(i, k, { spots: Number(x.target.value) || undefined })} /></label>
+                      {t.spots ? <label>Spot group <span className="hint">Offers with the same group share spots, across events</span><input type="text" value={t.pool || ""} onChange={(x) => updTier(i, k, { pool: x.target.value })} /></label> : null}
+                      <label>Turns on a build workspace<select value={t.build || ""} onChange={(x) => updTier(i, k, { build: (x.target.value || undefined) as EventTier["build"] })}><option value="">No</option><option value="systems-landing">Landing page</option><option value="systems-portal">Proposal and payment portal</option><option value="systems-hub">Full operations hub</option></select></label>
                     </div>
                   </div>
                 ))}

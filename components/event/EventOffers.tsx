@@ -7,7 +7,7 @@ const when = (iso: string) => new Date(iso).toLocaleString("en-US", { weekday: "
 
 type Zelle = { to: string; name: string; amount: number; memo: string };
 
-export default function EventOffers({ event, ends, canceled, contact }: { event: EventOffer; ends: string; canceled: boolean; contact: { email: string; phone: string } }) {
+export default function EventOffers({ event, ends, canceled, contact, spots = {} }: { event: EventOffer; ends: string; canceled: boolean; contact: { email: string; phone: string }; spots?: Record<string, number> }) {
   const [check, setCheck] = useState<Record<string, number>>({});
   const [showCheck, setShowCheck] = useState(false);
   const [tierId, setTierId] = useState("");
@@ -21,7 +21,7 @@ export default function EventOffers({ event, ends, canceled, contact }: { event:
   const formRef = useRef<HTMLDivElement>(null);
 
   const tier = event.tiers.find((t) => t.id === tierId);
-  const amount = tier ? (pay === "deposit" && tier.deposit ? tier.deposit : tierPrice(tier)) : 0;
+  const amount = tier ? ((tier.depositOnly || pay === "deposit") && tier.deposit ? tier.deposit : tierPrice(tier)) : 0;
   const answered = BLOOM_CHECK.filter((q) => check[q.id]);
   const done = answered.length === BLOOM_CHECK.length;
   const low = done ? [...BLOOM_CHECK].sort((a, b) => check[a.id] - check[b.id])[0] : null;
@@ -94,13 +94,14 @@ export default function EventOffers({ event, ends, canceled, contact }: { event:
             <h3>{t.name}</h3>
             <p className="small muted" style={{ margin: 0 }}>{t.tagline}</p>
             <div className="ev-price">
-              <span className="now">{usd(tierPrice(t))}</span>
+              <span className="now">{t.fromPrice && <span className="from">From </span>}{usd(tierPrice(t))}</span>
               {t.was && <span className="was"><s>{usd(t.was)}</s> usually</span>}
             </div>
             {earlyOn(t) && t.early && <p className="ev-early">Decide-today price, through {when(t.early.until)}. Then {usd(t.price)}.</p>}
             <ul>{t.includes.map((i) => <li key={i}>{i}</li>)}</ul>
-            {t.deposit && <p className="tiny muted" style={{ margin: 0 }}>Or hold this price with {usd(t.deposit)} today.</p>}
-            <button type="button" className={`btn btn-block ${tierId === t.id ? "btn-dark" : "btn-primary"}`} onClick={() => choose(t.id)}>{tierId === t.id ? "Selected" : `Choose ${t.name}`}</button>
+            {t.deposit && !t.depositOnly && <p className="tiny muted" style={{ margin: 0 }}>Or hold this price with {usd(t.deposit)} today.</p>}
+            {t.id in spots && <p className={`ev-spots${spots[t.id] === 0 ? " out" : ""}`}>{spots[t.id] === 0 ? "All spots are taken" : `${spots[t.id]} of ${t.spots} ${t.build ? "build spots" : "spots"} left`}</p>}
+            <button type="button" disabled={spots[t.id] === 0} className={`btn btn-block ${tierId === t.id ? "btn-dark" : "btn-primary"}`} onClick={() => choose(t.id)}>{spots[t.id] === 0 ? "Full" : tierId === t.id ? "Selected" : t.depositOnly && t.deposit ? `Reserve with ${usd(t.deposit)}` : `Choose ${t.name}`}</button>
           </article>
         ))}
       </section>
@@ -125,7 +126,9 @@ export default function EventOffers({ event, ends, canceled, contact }: { event:
             <h2 style={{ margin: 0 }}>{tier.name}</h2>
           </div>
           <form className="stack" style={{ gap: 14 }} onSubmit={submit}>
-            {tier.deposit && (
+            {tier.depositOnly && tier.deposit ? (
+              <div className="ev-result stack" style={{ gap: 4 }}><strong>Today: {usd(tier.deposit)} to reserve your spot</strong><span className="small">{tier.depositNote}</span></div>
+            ) : tier.deposit && (
               <div className="ev-opts" role="radiogroup" aria-label="How much today">
                 <label className={pay === "full" ? "on" : ""}><input type="radio" name="pay" checked={pay === "full"} onChange={() => setPay("full")} /><span><strong>Pay in full</strong> · {usd(tierPrice(tier))}</span></label>
                 <label className={pay === "deposit" ? "on" : ""}><input type="radio" name="pay" checked={pay === "deposit"} onChange={() => setPay("deposit")} /><span><strong>Hold my price</strong> · {usd(tier.deposit)} today<br /><span className="tiny muted">{tier.depositNote}</span></span></label>

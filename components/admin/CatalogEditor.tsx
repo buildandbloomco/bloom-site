@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Catalog, LibraryItem, Service } from "@/lib/types";
+import Uploader from "./Uploader";
 
 export default function CatalogEditor({ initial, mode }: { initial: Catalog; mode: "services" | "library" }) {
   const [cat, setCat] = useState<Catalog>(initial);
@@ -110,7 +111,7 @@ export default function CatalogEditor({ initial, mode }: { initial: Catalog; mod
         <section className="stack" style={{ gap: 14 }}>
           <div className="row between">
             <p className="small muted" style={{ maxWidth: 620 }}>
-              Digital products, workshop links, recordings, and tools. “Everyone” items show in every client’s portal. “Only
+              Your own digital products, workshop links, recordings, and tools. Upload a file or paste a link. “Everyone” items show in every client’s portal. “Only
               assigned” items show for the clients you check them for.
             </p>
             <button type="button" className="btn btn-sm btn-ghost" onClick={() => update((d) => void d.library.push(blankLib()))}>+ Add item</button>
@@ -137,6 +138,10 @@ export default function CatalogEditor({ initial, mode }: { initial: Catalog; mod
                     <option value="assigned">Only assigned clients</option>
                   </select>
                 </label>
+              </div>
+              <div className="row" style={{ gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+                <Uploader accept="application/pdf,image/*,audio/*,video/*" label={l.url ? "Replace with an upload" : "Upload a file (PDF, audio, video)"} onDone={(url) => update((d) => void (d.library[i].url = url))} />
+                {l.url && <a className="small" href={l.url} target="_blank" rel="noopener noreferrer">Open current file or link ↗</a>}
               </div>
               <label>Description<textarea value={l.description} onChange={(e) => update((d) => void (d.library[i].description = e.target.value))} /></label>
               <div className="row between">

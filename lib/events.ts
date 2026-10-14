@@ -13,7 +13,7 @@ const KEY = "bb:events";
 export async function listEvents(): Promise<StoredEvent[]> {
   const saved = await kv().get<StoredEvent[]>(KEY);
   if (saved) return saved;
-  return DEFAULT_EVENTS.map((e) => ({ ...e, active: true, code: process.env[`EVENT_CODE_${e.slug.toUpperCase()}`] || "BLOOM" }));
+  return DEFAULT_EVENTS.map((e) => ({ ...e, active: e.active !== false, code: process.env[`EVENT_CODE_${e.slug.toUpperCase()}`] || "BLOOM" }));
 }
 export async function saveEvents(list: StoredEvent[]) { await kv().set(KEY, list); }
 export async function getEvent(slug: string): Promise<StoredEvent | null> {
@@ -80,6 +80,10 @@ function cleanTier(t: Record<string, unknown>, i: number, serviceIds: Set<string
     agreement: t.agreement === true,
     next: lines(t.next, 6),
     active: t.active !== false,
+    ...(Number(t.spots) > 0 ? { spots: Math.min(999, Math.floor(Number(t.spots))), pool: slugify(str(t.pool, 40)) || `${slugify(name)}-spots` } : {}),
+    ...(t.depositOnly === true && deposit ? { depositOnly: true } : {}),
+    ...(t.fromPrice === true ? { fromPrice: true } : {}),
+    ...(["systems-landing", "systems-portal", "systems-hub"].includes(String(t.build)) ? { build: t.build as EventTier["build"] } : {}),
   };
 }
 
@@ -111,4 +115,22 @@ export function cleanEvents(input: unknown, serviceIds: Set<string>): StoredEven
     out.push({ slug, name, endsAt: new Date(endsAt).toISOString(), intro: str(raw.intro, 600), tiers, active: raw.active !== false, code });
   }
   return out;
+}
+
+/* ---------- Limited spots, shared across events by pool name ---------- */
+type Hold = { ref: string; clientId: string; at: string; event: string };
+const poolKey = (pool: string) => `bb:spots:${pool}`;
+export async function spotHolds(pool: string): Promise<Hold[]> { return (await kv().get<Hold[]>(poolKey(pool))) ?? []; }
+export async function spotsLeft(t: EventTier): Promise<number | null> {
+  if (!t.spots || !t.pool) return null;
+  return Math.max(0, t.spots - (await spotHolds(t.pool)).length);
+}
+/** Count a spot once per payment or Zelle notice */
+export async function takeSpot(pool: string, h: Hold) {
+  const list = await spotHolds(pool);
+  if (list.some((x) => x.ref === h.ref)) return;
+  await kv().set(poolKey(pool), [...list, h]);
+}
+export async function releaseSpot(pool: string, ref: string) {
+  await kv().set(poolKey(pool), (await spotHolds(pool)).filter((x) => x.ref !== ref));
 }
