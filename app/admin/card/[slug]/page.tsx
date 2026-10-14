@@ -17,7 +17,7 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
   if (!e) notFound();
   const url = `${await siteOrigin()}/event/${e.slug}`;
   const svg = await QRCode.toString(url, { type: "svg", errorCorrectionLevel: "Q", margin: 1, color: { dark: "#2c1b13", light: "#fffdf8" } });
-  const tiers = e.tiers.filter((t) => t.active !== false).slice(0, 4);
+  const tiers = e.tiers.filter((t) => t.active !== false).slice(0, 5);
   const ends = new Date(e.endsAt).toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/New_York" });
   const brand = (
     <span className="brand"><img src="/logo.png" alt="" />BUILD &amp; BLOOM COLLECTIVE</span>
@@ -40,16 +40,16 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
         ))}
         <div className="wr"><div>My growing edge is<div className="ln" /></div><div>My one small step is<div className="ln" /></div></div>
       </section>
-      <section className="pc">
+      <section className={`pc${tiers.length > 3 ? " compact" : ""}${tiers.length > 4 ? " tight" : ""}`}>
         <div className="top">{brand}<span className="eb">Guests only</span></div>
         <h1>Your next step</h1><div className="rl" />
         <p style={{ fontSize: "10.5pt", lineHeight: 1.35 }}>Offers for the people in this room, for a short time, so this momentum has somewhere to go.</p>
         {tiers.map((t) => (
           <div key={t.id} className={`tier${t.featured ? " f" : ""}`}>
-            <div><h3>{t.name}</h3><div className="d">{t.tagline}{t.deposit ? ` Hold it with ${usd(t.deposit)}.` : ""}</div>
+            <div><h3>{t.name}</h3><div className="d">{t.tagline}{t.deposit ? (t.depositOnly ? ` Reserve with ${usd(t.deposit)}.` : ` Hold it with ${usd(t.deposit)}.`) : ""}{t.spots ? ` Only ${t.spots} ${t.build ? "build " : ""}spots${t.build ? " in all" : ""}.` : ""}</div>
               {tiers.length <= 2 && t.includes.length ? <ul className="inc">{t.includes.slice(0, 3).map((x) => <li key={x}>{x.indexOf(":") > 15 ? x.slice(0, x.indexOf(":")) : x}</li>)}</ul> : null}
               {earlyOn(t) && t.early ? <div className="early">{usd(t.early.price)} through {new Date(t.early.until).toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit", timeZone: "America/New_York" }).replace("11:59 PM", "midnight")}. Then {usd(t.price)}.</div> : null}</div>
-            <div className="pr"><span className="n">{usd(tierPrice(t))}</span>{t.was ? <s>{usd(t.was)}</s> : null}</div>
+            <div className="pr">{t.fromPrice ? <span className="fr">From</span> : null}<span className="n">{usd(tierPrice(t))}</span>{t.was ? <s>{usd(t.was)}</s> : null}</div>
           </div>
         ))}
         <div className="qr">

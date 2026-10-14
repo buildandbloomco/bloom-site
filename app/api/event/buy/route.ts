@@ -10,7 +10,8 @@ import { ensureAgreement } from "@/lib/agreements";
 import { getFin, saveFin } from "@/lib/finance";
 import { listNotices, saveNotices } from "@/lib/paynotices";
 import { BLOOM_CHECK, earlyOn, tierPrice, usd } from "@/lib/event-def";
-import { eventAccess } from "@/lib/events";
+import { eventAccess, getEvent, spotsLeft, takeSpot } from "@/lib/events";
+import { getBuild, saveBuild } from "@/lib/builds";
 import { GUIDES } from "@/lib/guides";
 import type { Lead } from "@/lib/types";
 
@@ -30,7 +31,11 @@ export async function POST(req: Request) {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return error("Please add a valid email. Your receipt and portal details go there.");
   if (b.agree !== true) return error("Please check the box to agree to the terms.");
   const method = b.method === "zelle" ? "zelle" : "card";
-  const deposit = b.pay === "deposit" && tier.deposit ? tier.deposit : 0;
+  const full = await getEvent(ev.slug);
+  const fullTier = full?.tiers.find((t) => t.id === tier.id);
+  const left = fullTier ? await spotsLeft(fullTier) : null;
+  if (left === 0) return error("All the spots for this offer are taken. Ask Jadon about the waitlist.");
+  const deposit = (tier.depositOnly || b.pay === "deposit") && tier.deposit ? tier.deposit : 0;
   const price = tierPrice(tier);
   const early = earlyOn(tier);
   const amount = deposit || price;
@@ -73,6 +78,7 @@ export async function POST(req: Request) {
     await saveClient(client);
     const fin = await getFin(client.id);
     if (!fin.enabled) await saveFin(client.id, { ...fin, enabled: true });
+    if (tier.build) { const bd = await getBuild(client.id); await saveBuild(client.id, { ...bd, enabled: true, kind: tier.build }); }
     if (tier.agreement && method === "zelle") await ensureAgreement(client, `${client.name} chose ${tier.name} at ${ev.name}.`);
   }
   lead.clientId = client.id;
@@ -83,6 +89,7 @@ export async function POST(req: Request) {
     const list = await listNotices(client.id);
     if (!list.some((n) => n.status === "pending" && n.amount === amount))
       await saveNotices(client.id, [{ id: newId(), at: now, method: "zelle", amount, packageAmount: amount, addOnTotal: 0, addOnIds: [], label, name: str(b.zelleName, 120) || name, note: `${tag}${phone ? `. Phone ${phone}` : ""}`, status: "pending" }, ...list]);
+    if (tier.spots && tier.pool) await takeSpot(tier.pool, { ref: `zelle:${client.id}:${tier.id}`, clientId: client.id, at: now, event: ev.slug });
     await notifyAdmin(`${name} chose ${tier.name} and is paying ${usd(amount)} by Zelle`, [`${name} (${email}${phone ? `, ${phone}` : ""}) chose ${tier.name} at ${ev.name}.`, "Check your bank, then confirm the Zelle payment on their Meeting view.", checkLine], `/admin/clients/${client.id}/desk`);
     if (created) await startClientSession(client.id);
     return json({ ok: true, zelle: { to: settings.zelle, name: settings.zelleName || settings.brandName, amount, memo: `${name.split(/\s+/)[0]} ${tier.name}` }, welcome: created ? `/event/${ev.slug}/welcome?t=${tier.id}&z=1` : null });
@@ -93,7 +100,7 @@ export async function POST(req: Request) {
     mode: "payment",
     customer_email: email,
     line_items: [{ quantity: 1, price_data: { currency: "usd", unit_amount: Math.round(amount * 100), product_data: { name: `${tier.name}${deposit ? " (deposit)" : ""}`, description: `Build & Bloom, ${ev.name} price` } } }],
-    metadata: { kind: "event", slug: ev.slug, tierId: tier.id, clientId: client.id, packageAmount: String(amount), optionLabel: label, payerName: name, newClient: created ? "1" : "", noAgreement: tier.agreement ? "" : "1" },
+    metadata: { kind: "event", slug: ev.slug, tierId: tier.id, clientId: client.id, packageAmount: String(amount), optionLabel: label, payerName: name, newClient: created ? "1" : "", noAgreement: tier.agreement ? "" : "1", pool: tier.spots && tier.pool ? tier.pool : "" },
     success_url: `${origin}/api/event/done?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${origin}/event/${ev.slug}?canceled=1`,
   });

@@ -22,6 +22,9 @@ import { listFiles } from "@/lib/files";
 import { getProposal } from "@/lib/proposals";
 import { isExpired } from "@/lib/proposal-def";
 import { getFin } from "@/lib/finance";
+import { listToolRecords } from "@/lib/tools";
+import { TOOLS, TOOL_GROUPS } from "@/lib/tools-def";
+import "@/components/tools/tools.css";
 import { getBuild } from "@/lib/builds";
 import { BUILD_KINDS, STAGES, intakeProgress } from "@/lib/build-def";
 import { listNotices } from "@/lib/paynotices";
@@ -102,6 +105,8 @@ export default async function Portal({
   const proposal = await getProposal(client.id);
   const build = await getBuild(client.id);
   const fin = await getFin(client.id);
+  const toolRecs = await listToolRecords(client.id);
+  const usedTools = TOOLS.filter((t) => toolRecs[t.id]?.data).length;
   const pendingZelle = (await listNotices(client.id)).filter((n) => n.status === "pending");
   // While a proposal is waiting for an answer, the price lives on the proposal page, not here
   const proposalOpen = proposal?.status === "sent";
@@ -132,6 +137,7 @@ export default async function Portal({
     holdPay ? ["Your proposal", `/p/${slug}/proposal`] : null,
     myCourses.length ? ["Courses", "#courses"] : null,
     ["Files", "#files"],
+    ["Books & Tools", "#books-tools"],
     client.showBooking ? ["Book", "#book"] : null,
     noPay || holdPay ? null : ["Billing", hasInvestment ? "#investment" : "#pay"],
   ].filter(Boolean) as [string, string][];
@@ -448,34 +454,54 @@ export default async function Portal({
           pendingZelle={pendingZelle.map((n) => ({ amount: n.amount, at: n.at }))}
         />}
 
-        {/* LIBRARY */}
-        {library.length > 0 && (
-          <section className="section" id="library" style={{ paddingBottom: 24 }}>
+        {/* BOOKS & TOOLS: books, interactive tools, digital products, workshops */}
+        {(
+          <section className="section" id="books-tools" style={{ paddingBottom: 24 }}>
             <div className="wrap">
-              <details className="card">
-              <summary style={{ cursor: "pointer", fontWeight: 600 }}>Workshops, tools, and resources ({library.length})</summary>
+              <details className="card" open={myGuides.length > 1 || usedTools > 0}>
+              <summary style={{ cursor: "pointer", fontWeight: 600 }}>Books &amp; Tools <span className="small muted" style={{ fontWeight: 400 }}>· {myGuides.length} {myGuides.length === 1 ? "book" : "books"}, {TOOLS.length} tools{library.length ? `, ${library.length} more resources` : ""}</span></summary>
               <div className="stack" style={{ gap: 40, marginTop: 20 }}>
-                {workshops.length > 0 && (
-                  <div className="stack">
-                    <h3>Workshops & trainings</h3>
-                    <div className="grid-3">
-                      {workshops.map((l) => (
-                        <article className="card lib-card" key={l.id}>
-                          <span className="tag rust">Workshop</span>
-                          <h3 style={{ fontSize: "1.15rem" }}>{l.title}</h3>
-                          <p className="muted small">{l.description}</p>
-                          <div className="foot">
-                            <span className="small"><strong>{l.priceLabel}</strong></span>
-                            <a className="btn btn-dark btn-sm" href={l.url} target="_blank" rel="noopener noreferrer">View</a>
-                          </div>
-                        </article>
-                      ))}
-                    </div>
+                {myGuides.length > 0 && (
+                  <div className="stack" id="guidebooks" style={{ gap: 4 }}>
+                    <h3>Books &amp; guidebooks</h3>
+                    {myGuides.map((g) => (
+                      <div className="file-row" key={g.slug}>
+                        <div className="stack" style={{ gap: 2, flex: "1 1 240px" }}><strong>{g.title}</strong><span className="small muted">{g.tagline}</span></div>
+                        <a className="btn btn-sm btn-ghost" href={g.file} target="_blank" rel="noopener noreferrer">Open (PDF)</a>
+                      </div>
+                    ))}
                   </div>
                 )}
+                <div className="stack" id="tools" style={{ gap: 18 }}>
+                  <div className="stack" style={{ gap: 2 }}>
+                    <h3 style={{ margin: 0 }}>Tools</h3>
+                    <span className="small muted">Everything you fill in saves here, just for you. You can share any tool with us to work on it together in a session.</span>
+                  </div>
+                  {TOOL_GROUPS.map((g) => (
+                    <div key={g} className="stack" style={{ gap: 8 }}>
+                      <span className="eyebrow" style={{ fontSize: "0.75rem" }}>{g}</span>
+                      <div className="bt-grid">
+                        {TOOLS.filter((t) => t.group === g).map((t) => (
+                          <a key={t.id} className="bt-tool" href={`/p/${slug}/tools/${t.id}`}>
+                            <strong>{t.name}</strong>
+                            <span className="small muted">{t.blurb}</span>
+                            <span className="meta">{toolRecs[t.id]?.data ? <span className="used">Started</span> : t.minutes}{toolRecs[t.id]?.private ? " · Private" : ""}</span>
+                          </a>
+                        ))}
+                        {g === "Money" && fin.enabled && (
+                          <a className="bt-tool" href={`/p/${slug}/money`}>
+                            <strong>Money</strong>
+                            <span className="small muted">Your budget, income buckets, team pay, and tax dates.</span>
+                            <span className="meta">Private unless you share it</span>
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
                 {products.length > 0 && (
                   <div className="stack">
-                    <h3>Digital products & tools</h3>
+                    <h3>Digital products</h3>
                     <div className="grid-3">
                       {products.map((l) => (
                         <article className="card lib-card" key={l.id}>
@@ -491,24 +517,26 @@ export default async function Portal({
                     </div>
                   </div>
                 )}
+                {workshops.length > 0 && (
+                  <div className="stack">
+                    <h3>Workshops &amp; trainings</h3>
+                    <div className="grid-3">
+                      {workshops.map((l) => (
+                        <article className="card lib-card" key={l.id}>
+                          <span className="tag rust">Workshop</span>
+                          <h3 style={{ fontSize: "1.15rem" }}>{l.title}</h3>
+                          <p className="muted small">{l.description}</p>
+                          <div className="foot">
+                            <span className="small"><strong>{l.priceLabel}</strong></span>
+                            <a className="btn btn-dark btn-sm" href={l.url} target="_blank" rel="noopener noreferrer">View</a>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
               </details>
-            </div>
-          </section>
-        )}
-
-        {myGuides.length > 0 && (
-          <section className="section" id="guidebooks" style={{ paddingTop: 0 }}>
-            <div className="wrap">
-              <div className="card stack" style={{ gap: 4 }}>
-                <h3 style={{ margin: "0 0 6px" }}>Guidebooks</h3>
-                {myGuides.map((g) => (
-                  <div className="file-row" key={g.slug}>
-                    <div className="stack" style={{ gap: 2, flex: "1 1 240px" }}><strong>{g.title}</strong><span className="small muted">{g.tagline}</span></div>
-                    <a className="btn btn-sm btn-ghost" href={g.file} target="_blank" rel="noopener noreferrer">Open (PDF)</a>
-                  </div>
-                ))}
-              </div>
             </div>
           </section>
         )}

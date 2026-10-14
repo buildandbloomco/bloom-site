@@ -16,7 +16,13 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
   const list = await listNotices(id);
   const n = list.find((x) => x.id === String(b.noticeId));
   if (!n || n.status !== "pending") return error("That notice was already handled.", 404);
-  if (b.action === "dismiss") n.status = "dismissed";
+  if (b.action === "dismiss") {
+    n.status = "dismissed";
+    // A dismissed Zelle payment gives back any limited spot it was holding
+    const { listEvents, releaseSpot } = await import("@/lib/events");
+    const pools = new Set((await listEvents()).flatMap((e) => e.tiers.filter((t) => t.spots && t.pool).map((t) => `${t.pool}|${t.id}`)));
+    for (const x of pools) { const [pool, tierId] = x.split("|"); await releaseSpot(pool, `zelle:${id}:${tierId}`); }
+  }
   else if (b.action === "confirm") {
     // You can correct the amount if what arrived was different from what they reported
     const got = b.amount === undefined || b.amount === "" ? n.amount : Math.round((Number(b.amount) || 0) * 100) / 100;

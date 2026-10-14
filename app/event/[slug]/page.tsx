@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { eventOpen } from "@/lib/event-def";
-import { eventAccess, getEvent } from "@/lib/events";
+import { eventAccess, getEvent, spotsLeft } from "@/lib/events";
 import { getSettings } from "@/lib/data";
 import { bookProps } from "@/lib/booking";
 import Ribbon from "@/components/Ribbon";
@@ -17,6 +17,8 @@ export default async function EventPage({ params, searchParams }: { params: Prom
   if (!e) notFound();
   const s = await getSettings();
   const inside = await eventAccess(slug);
+  const spots: Record<string, number> = {};
+  if (inside) for (const t of e.tiers) { const n = await spotsLeft(t); if (n !== null) spots[t.id] = n; }
   const open = eventOpen(e);
   const ends = new Date(e.endsAt).toLocaleString("en-US", { weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/New_York" });
 
@@ -49,7 +51,7 @@ export default async function EventPage({ params, searchParams }: { params: Prom
           </div>
         </div>
       ) : (
-        <EventOffers event={inside} ends={ends} canceled={(await searchParams).canceled === "1"} contact={{ email: s.email, phone: s.phone }} />
+        <EventOffers event={inside} spots={spots} ends={ends} canceled={(await searchParams).canceled === "1"} contact={{ email: s.email, phone: s.phone }} />
       )}
     </main>
   );

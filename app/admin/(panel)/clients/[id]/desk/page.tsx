@@ -119,6 +119,7 @@ export default async function ClientDesk({ params }: { params: Promise<{ id: str
           <section className="panel" style={agreements.some((a) => a.status === "sent") ? { borderTopColor: "var(--gold)" } : undefined}>
             <h3>Proposal and agreements</h3>
             <Row k="Money" v={<Link href={`/admin/clients/${id}/money`}>{fin.enabled ? "On in their portal" : "Set up"}</Link>} />
+            <Row k="Books & Tools" v={<Link href={`/admin/clients/${id}/tools`}>See what they&rsquo;ve shared</Link>} />
             <Row k="Systems build" v={<Link href={`/admin/clients/${id}/build`}>{build.enabled ? `${STAGES.find((s) => s.id === build.stage)?.label}${build.requests.some((r) => r.status === "new") ? " · new add-on request" : ""}` : "Set up"}</Link>} />
             <Row k="Proposal" v={<Link href={`/admin/clients/${id}/proposal`}>{propState ? propState.label.replace("Proposal ", "").replace(/^./, (m) => m.toUpperCase()) : "Create one"}</Link>} />
             {agreements.length === 0 && <p className="small muted" style={{ margin: 0 }}>None yet.</p>}
