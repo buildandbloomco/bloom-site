@@ -8,7 +8,7 @@ type Entry = { date: string; scores: Record<string, number>; note: string };
 type D = { entries: Entry[] } | null;
 
 /** A check-in that saves each time you take it, and shows how it has changed */
-function Tracker({ areasKey, data, set, ro, today, intro }: ToolProps<D> & { areasKey: string; intro: string }) {
+function Tracker({ areasKey, data, set, ro, today, intro, debrief }: ToolProps<D> & { areasKey: string; intro: string; debrief?: string }) {
   const areas = CHECK_AREAS[areasKey];
   const entries = data?.entries ?? [];
   const [draft, setDraft] = useState<Record<string, number>>({});
@@ -51,6 +51,7 @@ function Tracker({ areasKey, data, set, ro, today, intro }: ToolProps<D> & { are
           <span className="eyebrow" style={{ fontSize: "0.75rem" }}>Your growing edge, {day(latest.date)}</span>
           <strong style={{ fontSize: "1.3rem" }}>{low.area}</strong>
           <p style={{ margin: 0 }}>One small step: {low.step}</p>
+          {debrief && !ro && <p className="small no-print" style={{ margin: "6px 0 0" }}>Want to talk it through? <a href={debrief}>Book a free 20-minute Bloom Check debrief</a>.</p>}
         </section>
       )}
       {entries.length > 0 && (
@@ -72,7 +73,7 @@ function Tracker({ areasKey, data, set, ro, today, intro }: ToolProps<D> & { are
   );
 }
 
-export const BloomCheck = (p: ToolProps<D>) => <Tracker {...p} areasKey="bloom-check" intro="Rate each from 1 (not yet) to 5 (yes, this is me). Your lowest score is your growing edge." />;
+export const BloomCheck = (p: ToolProps<D>) => <Tracker {...p} debrief="/book?type=debrief" areasKey="bloom-check" intro="Rate each from 1 (not yet) to 5 (yes, this is me). Your lowest score is your growing edge." />;
 export const CapacityCheck = (p: ToolProps<D>) => (
   <div className="stack" style={{ gap: 12 }}>
     <Tracker {...p} areasKey="capacity-check" intro="Rate each from 1 (not at all) to 5 (very true right now). A reflection tool, not a diagnosis." />

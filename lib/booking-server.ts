@@ -84,6 +84,10 @@ export async function bookingContext(settings: Settings, q: { type?: string; e?:
       blocked: left > 0 ? "" : "nosessions",
     };
   }
+  // A free 20-minute Bloom Check debrief (books like a consult, shorter, with its own title)
+  if (q.type === "debrief") {
+    return { ...base, minutes: 20, title: "Free Bloom Check debrief", intro: "20 minutes to talk through your Bloom Check results: your growing edge, what it means for your business, and one next step. Free, and no pressure." };
+  }
   if (q.type === "session") {
     const client = await currentClient();
     if (client) {

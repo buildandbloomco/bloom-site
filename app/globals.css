@@ -560,3 +560,8 @@ label.row input[type="checkbox"], label.row input[type="radio"] { accent-color: 
 .fin-guide { list-style: none; counter-reset: st; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
 .fin-guide li { counter-increment: st; position: relative; padding-left: 42px; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
 .fin-guide li::before { content: counter(st); position: absolute; left: 0; top: 0; width: 28px; height: 28px; border-radius: 50%; background: var(--espresso); color: var(--ivory); display: grid; place-items: center; font-weight: 700; font-size: 0.85rem; }
+/* Phone header: keep the Menu button on one line and let the brand name give way */
+.mobile-nav summary { white-space: nowrap !important; overflow-wrap: normal !important; flex: none; }
+.site-header .brandmark { min-width: 0; }
+@media (max-width: 420px) { .site-header .wrap { gap: 10px; } .site-header .brandmark span { font-size: 0.7rem; letter-spacing: 0.12em; } .site-header .brandmark img { width: 38px; height: 42px; } }
+@media (max-width: 350px) { .site-header .brandmark span { display: none; } }

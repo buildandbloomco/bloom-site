@@ -5,7 +5,7 @@ import type { ToolDef } from "@/lib/tools-def";
 import { TOOL_VIEWS } from "./registry";
 
 /** A free tool on the public website. Nothing is saved unless they ask for their results. */
-export default function PublicTool({ tool, today, bookHref }: { tool: ToolDef; today: string; bookHref: string }) {
+export default function PublicTool({ tool, today, bookHref, debriefHref }: { tool: ToolDef; today: string; bookHref: string; debriefHref?: string }) {
   const View = TOOL_VIEWS[tool.id];
   const [data, setData] = useState<unknown>(null);
   const [f, setF] = useState({ name: "", email: "", business: "", company_url: "" });
@@ -27,8 +27,8 @@ export default function PublicTool({ tool, today, bookHref }: { tool: ToolDef; t
         {state === "done" ? (
           <div className="stack" style={{ gap: 8 }} role="status">
             <h3 style={{ margin: 0 }}>Saved. Thank you, {f.name.split(" ")[0]}.</h3>
-            <p style={{ margin: 0 }}>We have your results, and we&rsquo;ll follow up by email. Want to talk through them? A free consult is the easiest next step.</p>
-            <div><a className="btn btn-primary btn-sm" href={bookHref}>Book a free consult</a></div>
+            <p style={{ margin: 0 }}>We have your results, and we&rsquo;ll follow up by email. Want to talk through them? {tool.id === "bloom-check" ? "Book a free 20-minute debrief." : "A free consult is the easiest next step."}</p>
+            <div><a className="btn btn-primary btn-sm" href={tool.id === "bloom-check" && debriefHref ? debriefHref : bookHref}>{tool.id === "bloom-check" ? "Book my free debrief" : "Book a free consult"}</a></div>
           </div>
         ) : (
           <form className="stack" style={{ gap: 12 }} onSubmit={send}>

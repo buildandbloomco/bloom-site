@@ -9,7 +9,10 @@ import EventOffers from "@/components/event/EventOffers";
 import "@/components/event/event.css";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Guest offers", robots: { index: false, follow: false } };
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const e = await getEvent((await params).slug);
+  return e?.open ? { title: e.headline || e.name, description: e.details || e.intro } : { title: "Guest offers", robots: { index: false, follow: false } };
+}
 
 export default async function EventPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ canceled?: string }> }) {
   const { slug } = await params;
@@ -27,7 +30,7 @@ export default async function EventPage({ params, searchParams }: { params: Prom
       <Ribbon />
       <header className="gate-head">
         <span className="brandmark"><img src="/logo.png" alt="" /><span>{s.brandName.toUpperCase()}</span></span>
-        <span className="eyebrow" style={{ fontSize: "0.75rem" }}>Guests only</span>
+        {!e.open && <span className="eyebrow" style={{ fontSize: "0.75rem" }}>Guests only</span>}
       </header>
       {!open ? (
         <div className="ev-narrow stack" style={{ gap: 18 }}>

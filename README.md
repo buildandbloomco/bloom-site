@@ -402,3 +402,16 @@ Admin, then **Books & Tools** (this used to be called Library; the Wellness Libr
 - Clients can mark any tool private. The Capacity Check starts private. On a client's Meeting view, **Books & Tools** shows what they have shared with you, view only.
 - **Free tools on your website:** the Bloom Check and the Pricing & Pay Calculator, at /tools/bloom-check and /tools/pricing, listed on the Guides & Tools page. "Save my results" adds the person to Leads with their results.
 - Digital products, workshops, and resources: add them below the books, with a link or an uploaded file.
+
+
+## Shop
+
+Your shop is at /shop (in the site menu). Admin, then **Shop**, to manage it.
+- **Products:** title, type, price (0 = free download), an optional "was" price, description, what's inside, a cover image (or a branded cover is drawn), and the file buyers get. Upload both, or pick one of your guidebooks. A Bundle can include other products.
+- **Status:** Live (people can buy), Coming soon (collects a waitlist: each sign-up lands in Leads as "Waitlist: <title>"), or Hidden. A product can't go live without its file.
+- **Free downloads** become leads and get the file right away.
+- **Paid, by card:** Stripe checkout, then the thank-you page with the download. Their download link is emailed (when email is set up) and works for 90 days.
+- **Paid, by Zelle:** the buyer sees your Zelle details. It shows under **Zelle orders to confirm** at the top of Admin, then Shop. Click "It arrived: send it" to deliver it.
+- Every paid buyer gets their own portal (no billing section), with the product under Books & Tools, plus the 12 free tools. Only a portal made by that purchase opens automatically; existing clients sign in with their code.
+- **Orders** lists everything with totals.
+- Honest limit: files are delivered through private links, but anyone who has the file itself can share it. That's true of every digital product shop.

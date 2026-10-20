@@ -23,6 +23,12 @@ export async function recordCheckoutSession(session: Stripe.Checkout.Session): P
     );
     return !!e;
   }
+  if (session.metadata?.kind === "shop" && session.metadata.orderId) {
+    const { fulfill, getOrder } = await import("./shop");
+    const o = await getOrder(session.metadata.orderId);
+    if (o) await fulfill(o, session.id);
+    return !!o;
+  }
   const clientId = session.metadata?.clientId;
   if (!clientId) return false;
   if (session.metadata?.kind === "event" && session.metadata.pool) {

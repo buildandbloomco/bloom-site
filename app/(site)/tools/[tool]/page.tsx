@@ -29,7 +29,7 @@ export default async function FreeTool({ params }: { params: Promise<{ tool: str
       </section>
       <section className="section">
         <div className="wrap" style={{ maxWidth: 980 }}>
-          <PublicTool tool={tool} today={nowET().date} bookHref={book.href || "/contact"} />
+          <PublicTool tool={tool} today={nowET().date} bookHref={book.href || "/contact"} debriefHref={(bookProps(s, "?type=debrief") as { href?: string }).href} />
         </div>
       </section>
     </>

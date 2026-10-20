@@ -147,6 +147,11 @@ export async function getCatalog(): Promise<Catalog> {
   await migrateSystemAddOns();
   await migrateMoneyAddOns();
   const cat = (await kv().get<Catalog>(K.catalog)) ?? DEFAULT_CATALOG;
+  // The shop and events now live on this site, not Wix
+  for (const l of cat.library) {
+    if (/buildandbloomcollective\.com\/category/.test(l.url)) { l.url = "/shop"; l.description = "Guides, workbooks, and tools from Build & Bloom. Anything you buy shows up right here."; l.priceLabel = "Varies"; }
+    if (/buildandbloomcollective\.com\/event-list/.test(l.url)) { l.url = "/workshops"; l.description = "Community conversations, trainings, and gatherings."; }
+  }
   for (const s of cat.services) {
     s.showOnSite ??= s.kind === "core";
     s.lane ??= "both";

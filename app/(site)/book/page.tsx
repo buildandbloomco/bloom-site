@@ -50,7 +50,7 @@ export default async function Book({ searchParams }: { searchParams: Promise<SP>
               title={ctx.title}
               where={s.booking.meetingLink ? "Video call (link on the next screen)" : s.booking.location}
               eid={ctx.eid}
-              type={sp.type === "session" ? "session" : ""}
+              type={sp.type === "session" || sp.type === "debrief" ? sp.type : ""}
               initial={{ name: ctx.name || String(sp.name ?? "").slice(0, 120), email: ctx.email || String(sp.email ?? "").slice(0, 200), lane: sp.lane === "business" || sp.lane === "other" ? sp.lane : "orgs" }}
               email={s.email}
             />

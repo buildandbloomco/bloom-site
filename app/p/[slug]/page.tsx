@@ -23,6 +23,7 @@ import { getProposal } from "@/lib/proposals";
 import { isExpired } from "@/lib/proposal-def";
 import { getFin } from "@/lib/finance";
 import { listToolRecords } from "@/lib/tools";
+import { listProducts, ownedIds } from "@/lib/shop";
 import { TOOLS, TOOL_GROUPS } from "@/lib/tools-def";
 import "@/components/tools/tools.css";
 import { getBuild } from "@/lib/builds";
@@ -107,6 +108,8 @@ export default async function Portal({
   const fin = await getFin(client.id);
   const toolRecs = await listToolRecords(client.id);
   const usedTools = TOOLS.filter((t) => toolRecs[t.id]?.data).length;
+  const owned = await ownedIds(client.id);
+  const bought = (await listProducts()).filter((p) => owned.includes(p.id) && p.file && !(p.guideSlug && (client.guideSlugs ?? ["client-guidebook"]).includes(p.guideSlug)));
   const pendingZelle = (await listNotices(client.id)).filter((n) => n.status === "pending");
   // While a proposal is waiting for an answer, the price lives on the proposal page, not here
   const proposalOpen = proposal?.status === "sent";
@@ -459,11 +462,17 @@ export default async function Portal({
           <section className="section" id="books-tools" style={{ paddingBottom: 24 }}>
             <div className="wrap">
               <details className="card" open={myGuides.length > 1 || usedTools > 0}>
-              <summary style={{ cursor: "pointer", fontWeight: 600 }}>Books &amp; Tools <span className="small muted" style={{ fontWeight: 400 }}>· {myGuides.length} {myGuides.length === 1 ? "book" : "books"}, {TOOLS.length} tools{library.length ? `, ${library.length} more resources` : ""}</span></summary>
+              <summary style={{ cursor: "pointer", fontWeight: 600 }}>Books &amp; Tools <span className="small muted" style={{ fontWeight: 400 }}>· {myGuides.length + bought.length} {myGuides.length + bought.length === 1 ? "book" : "books"}, {TOOLS.length} tools{library.length ? `, ${library.length} more resources` : ""}</span></summary>
               <div className="stack" style={{ gap: 40, marginTop: 20 }}>
                 {myGuides.length > 0 && (
                   <div className="stack" id="guidebooks" style={{ gap: 4 }}>
-                    <h3>Books &amp; guidebooks</h3>
+                    <div className="row between" style={{ gap: 10 }}><h3 style={{ margin: 0 }}>Books &amp; guidebooks</h3><a className="small" href="/shop" target="_blank" rel="noopener noreferrer">Visit the shop ↗</a></div>
+                    {bought.map((p) => (
+                      <div className="file-row" key={p.id}>
+                        <div className="stack" style={{ gap: 2, flex: "1 1 240px" }}><strong>{p.title}</strong><span className="small muted">{p.subtitle}</span></div>
+                        <a className="btn btn-sm btn-ghost" href={`/api/shop/download?p=${p.id}`}>Download</a>
+                      </div>
+                    ))}
                     {myGuides.map((g) => (
                       <div className="file-row" key={g.slug}>
                         <div className="stack" style={{ gap: 2, flex: "1 1 240px" }}><strong>{g.title}</strong><span className="small muted">{g.tagline}</span></div>

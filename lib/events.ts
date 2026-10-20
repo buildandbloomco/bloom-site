@@ -12,7 +12,17 @@ const KEY = "bb:events";
 
 export async function listEvents(): Promise<StoredEvent[]> {
   const saved = await kv().get<StoredEvent[]>(KEY);
-  if (saved) return saved;
+  if (saved) {
+    // One time: add the November workshop events to a list you already saved
+    if (!(await kv().get("bb:events:mig:workshop1"))) {
+      const add = DEFAULT_EVENTS.filter((e) => ["build-it-workshop", "build-it-next-step"].includes(e.slug) && !saved.some((x) => x.slug === e.slug));
+      const next = [...saved, ...add.map((e) => ({ ...e, active: e.active !== false, code: "BLOOM" }))];
+      await kv().set(KEY, next);
+      await kv().set("bb:events:mig:workshop1", true);
+      return next;
+    }
+    return saved;
+  }
   return DEFAULT_EVENTS.map((e) => ({ ...e, active: e.active !== false, code: process.env[`EVENT_CODE_${e.slug.toUpperCase()}`] || "BLOOM" }));
 }
 export async function saveEvents(list: StoredEvent[]) { await kv().set(KEY, list); }
@@ -44,6 +54,7 @@ export async function grantEvent(e: StoredEvent) {
 export async function eventAccess(slug: string): Promise<EventOffer | null> {
   const e = await getEvent(slug);
   if (!e || !eventOpen(e)) return null;
+  if (e.open) return publicEvent(e);
   return verify((await cookies()).get(cookieName(slug))?.value) === stamp(e) ? publicEvent(e) : null;
 }
 
@@ -112,7 +123,7 @@ export function cleanEvents(input: unknown, serviceIds: Set<string>): StoredEven
       tiers.push(c);
     }
     if (!tiers.length) return `${name} needs at least one offer.`;
-    out.push({ slug, name, endsAt: new Date(endsAt).toISOString(), intro: str(raw.intro, 600), tiers, active: raw.active !== false, code });
+    out.push({ slug, name, endsAt: new Date(endsAt).toISOString(), intro: str(raw.intro, 600), tiers, active: raw.active !== false, code, ...(raw.open === true ? { open: true } : {}), ...(str(raw.headline, 140) ? { headline: str(raw.headline, 140) } : {}), ...(str(raw.details, 200) ? { details: str(raw.details, 200) } : {}) });
   }
   return out;
 }

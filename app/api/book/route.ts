@@ -42,7 +42,7 @@ export async function POST(req: Request) {
 
   const a: Appointment = {
     id: newId(),
-    title: ctx.mode === "consult" ? `Consult: ${name}${organization ? ` (${organization})` : ""}` : ctx.mode === "learner" ? `1:1 session: ${name} (${ctx.courseTitle})` : `Session: ${name}`,
+    title: ctx.mode === "consult" && str(b.type, 20) === "debrief" ? `Bloom Check debrief: ${name}${organization ? ` (${organization})` : ""}` : ctx.mode === "consult" ? `Consult: ${name}${organization ? ` (${organization})` : ""}` : ctx.mode === "learner" ? `1:1 session: ${name} (${ctx.courseTitle})` : `Session: ${name}`,
     date,
     start,
     end,

@@ -2,6 +2,8 @@ import Link from "next/link";
 import { getCatalog } from "@/lib/data";
 import { shortDate } from "@/lib/format";
 import type { LibraryItem } from "@/lib/types";
+import { listEvents } from "@/lib/events";
+import { eventOpen, tierPrice, usd } from "@/lib/event-def";
 
 export const metadata = {
   title: "Workshops & Events",
@@ -34,6 +36,8 @@ export default async function Workshops() {
     .sort((a, b) => (a.date || "9999").localeCompare(b.date || "9999"));
   const upcoming = workshops.filter((l) => !l.date || l.date >= today);
   const products = items.filter((l) => l.kind !== "workshop");
+  // Public workshops with registration on this site
+  const live = (await listEvents()).filter((e) => e.open && eventOpen(e));
 
   return (
     <>
@@ -52,8 +56,22 @@ export default async function Workshops() {
         <div className="wrap stack" style={{ gap: 48 }}>
           <div className="stack">
             <h3>Upcoming workshops &amp; events</h3>
-            {upcoming.length ? (
-              <div className="grid-3">{upcoming.map((l) => <Item key={l.id} l={l} />)}</div>
+            {live.length > 0 && (
+              <div className="grid-3">{live.map((e) => { const t = e.tiers.find((x) => x.active !== false); return (
+                <article key={e.slug} className="card lib-card">
+                  <span className="tag rust" style={{ alignSelf: "flex-start" }}>Workshop</span>
+                  <h3 style={{ fontSize: "1.1rem" }}>{e.headline || e.name}</h3>
+                  {e.details && <p className="small muted">{e.details}</p>}
+                  <p className="small">{e.intro}</p>
+                  <div className="foot">
+                    <span className="small"><strong>{t ? usd(tierPrice(t)) : ""}</strong></span>
+                    <a className="btn btn-dark btn-sm" href={`/event/${e.slug}`}>Register</a>
+                  </div>
+                </article>
+              ); })}</div>
+            )}
+            {upcoming.length || live.length ? (
+              upcoming.filter((l) => l.url !== "/workshops").length > 0 && <div className="grid-3">{upcoming.filter((l) => l.url !== "/workshops").map((l) => <Item key={l.id} l={l} />)}</div>
             ) : (
               <p className="muted">New workshops and events are coming soon. <Link href="/contact">Ask about a private workshop for your team.</Link></p>
             )}

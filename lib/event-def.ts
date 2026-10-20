@@ -47,6 +47,12 @@ export interface EventOffer {
   tiers: EventTier[];
   /** false = the page shows as closed */
   active?: boolean;
+  /** Open to the public: no room code, listed on the Workshops page */
+  open?: boolean;
+  /** Big headline on the page (default: "Leave empowered, with a next step.") */
+  headline?: string;
+  /** When and where, e.g. "Saturday, Nov 14 · 11 AM to 12:30 PM ET · Live on Zoom" */
+  details?: string;
 }
 
 const PORTAL = "Your own private Build & Bloom portal with Money: budget, income buckets you drag and drop, team pay, and tax dates";
@@ -171,6 +177,41 @@ export const DEFAULT_EVENTS: EventOffer[] = [
     })),
   });
 }
+
+// Public $27 virtual workshop, and the private follow-up offer for attendees (turn on after the workshop)
+DEFAULT_EVENTS.push(
+  {
+    slug: "build-it-workshop",
+    name: "Build It So It Doesn't Break You",
+    headline: "Build It So It Doesn't Break You",
+    details: "Saturday, November 14 · 11:00 AM to 12:30 PM ET · Live on Zoom",
+    endsAt: "2026-11-14T10:00:00-05:00",
+    intro: "A hands-on workshop for women business owners. Find what's draining your business with the Bloom Check, then build three tools in the room: a pay-yourself-first money plan, a weekly schedule that protects your energy, and your first written process.",
+    open: true,
+    active: true,
+    tiers: [{
+      id: "seat", name: "Workshop seat", tagline: "90 minutes, live and hands-on. Only 15 seats.", price: 27,
+      includes: ["The Bloom Check, scored and explained", "A pay-yourself-first money plan", "A weekly schedule that protects your energy", "Your first SOP, written in the room", "A free 20-minute one-on-one Bloom Check debrief after the workshop", "Your own Build & Bloom portal with Money and 12 business tools"],
+      serviceIds: [], agreement: false, spots: 15, pool: "build-it-nov-2026",
+      next: ["Your Zoom link will be emailed to you 2 days before the workshop.", "Before the workshop, take the Bloom Check in your portal under Books & Tools.", "After the workshop, book your free 20-minute debrief from the Bloom Check page."],
+    }],
+  },
+  {
+    slug: "build-it-next-step",
+    name: "Build It workshop",
+    headline: "Your next step, workshop pricing",
+    details: "For workshop attendees only, for 72 hours",
+    endsAt: "2026-11-17T11:00:00-05:00",
+    intro: "You built the tools. Now let's put them to work on your business, together.",
+    active: false,
+    tiers: [{
+      id: "intensive", name: "Strategy Intensive", tagline: "90 minutes on your top priority, with a written plan.", price: 223, was: 350,
+      includes: ["A 90-minute one-on-one working session", "A written action plan in your portal", "Workshop price: $250, minus the $27 you already paid"],
+      serviceIds: ["addon-intensive"], agreement: true,
+      next: ["Sign your short service agreement at the top of your portal.", "Book your Strategy Intensive from your portal within 30 days."],
+    }],
+  },
+);
 
 export const eventOpen = (e: EventOffer, now = Date.now()) => e.active !== false && now < new Date(e.endsAt).getTime();
 /** The price a guest pays right now */

@@ -48,14 +48,15 @@ export default function EventOffers({ event, ends, canceled, contact, spots = {}
   return (
     <div className="ev-wrap stack">
       <section className="stack" style={{ gap: 14 }}>
-        <p className="eyebrow">{event.name} · Guest offers</p>
-        <h1>Leave empowered, <span className="ink">with a next step.</span></h1>
+        <p className="eyebrow">{event.open ? "Workshop" : `${event.name} · Guest offers`}</p>
+        {event.headline ? <h1>{event.headline}</h1> : <h1>Leave empowered, <span className="ink">with a next step.</span></h1>}
+        {event.details && <p className="ev-details">{event.details}</p>}
         <span className="rule" aria-hidden="true" />
         <p className="ev-lede">{event.intro}</p>
-        <p className="small muted" style={{ margin: 0 }}>Open through {ends} Eastern.</p>
+        <p className="small muted" style={{ margin: 0 }}>{event.open ? "Registration open" : "Open"} through {ends} Eastern.</p>
       </section>
 
-      <section className="card stack ev-check" style={{ gap: 12 }}>
+      {!event.open && <section className="card stack ev-check" style={{ gap: 12 }}>
         <div className="row between" style={{ gap: 12, flexWrap: "wrap" }}>
           <div className="stack" style={{ gap: 2 }}>
             <h2 style={{ margin: 0 }}>The Bloom Check</h2>
@@ -85,7 +86,7 @@ export default function EventOffers({ event, ends, canceled, contact, spots = {}
             )}
           </div>
         )}
-      </section>
+      </section>}
 
       <section className="ev-tiers">
         {event.tiers.map((t) => (
@@ -147,7 +148,7 @@ export default function EventOffers({ event, ends, canceled, contact, spots = {}
             {method === "zelle" && <label>Name on the Zelle account you will send from <span className="hint">If different from yours</span><input type="text" value={f.zelleName} onChange={(e) => setF({ ...f, zelleName: e.target.value })} /></label>}
             <label className="row small" style={{ gap: 10, alignItems: "flex-start", flexWrap: "nowrap" }}>
               <input type="checkbox" style={{ width: "auto", marginTop: 4 }} checked={agree} onChange={(e) => setAgree(e.target.checked)} />
-              <span>I understand this is a {event.name} price, available through Sunday night. {tier.agreement ? "My short service agreement will be waiting in my portal to sign before my first session. " : ""}Build &amp; Bloom provides strategy and organizational wellness support, not therapy, legal, tax, or accounting services.</span>
+              <span>{event.open ? "I understand this is a ticket to a live workshop. " : `I understand this is a ${event.name} price, available through ${ends}. `}{tier.agreement ? "My short service agreement will be waiting in my portal to sign before my first session. " : ""}Build &amp; Bloom provides strategy and organizational wellness support, not therapy, legal, tax, or accounting services.</span>
             </label>
             {err && <p className="error-text" role="alert">{err}</p>}
             <button className="btn btn-primary btn-block" disabled={busy || !agree}>{busy ? "One moment..." : method === "card" ? `Pay ${usd(amount)} by card` : `Pay ${usd(amount)} by Zelle`}</button>

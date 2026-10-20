@@ -14,6 +14,7 @@ const LINKS = [
   ["/admin/services", "Services & add-ons"],
   ["/admin/events", "Event offers"],
   ["/admin/library", "Books & Tools"],
+  ["/admin/shop", "Shop"],
   ["/admin/settings", "Settings"],
 ];
 

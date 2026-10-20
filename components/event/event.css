@@ -32,3 +32,4 @@
 .ev-price .from { font-size: 1.1rem; color: var(--muted); }
 .ev-spots { margin: 0; font-weight: 700; color: var(--rust); font-size: 0.95rem; }
 .ev-spots.out { color: var(--muted); }
+.ev-details { margin: 0; font-size: 1.15rem; font-weight: 600; color: var(--rust); }
