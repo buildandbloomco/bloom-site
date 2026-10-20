@@ -133,6 +133,9 @@ export function guessType(url: string): Client["deliverables"][number]["type"] {
 export async function getSettings(): Promise<Settings> {
   await ensureSeeded();
   const saved = (await kv().get<Settings>(K.settings)) ?? ({} as Partial<Settings>);
+  // Move to the buildandbloomcollective.com addresses: info@ for the business, jadon@ for alerts to you
+  if (!saved.email || /buildandbloomnetwork|wix|gmail\.com/i.test(saved.email)) saved.email = "info@buildandbloomcollective.com";
+  if (saved.notifyEmail === undefined) saved.notifyEmail = "jadon@buildandbloomcollective.com";
   return { ...DEFAULT_SETTINGS, ...saved, booking: { ...DEFAULT_SETTINGS.booking, ...(saved.booking ?? {}) } };
 }
 export async function saveSettings(s: Settings) {

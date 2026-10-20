@@ -44,6 +44,7 @@ export async function PUT(req: Request) {
     brandName: str(b.brandName, 120) || cur.brandName,
     tagline: str(b.tagline),
     email: str(b.email, 200),
+    notifyEmail: str(b.notifyEmail, 200).trim(),
     phone: str(b.phone, 60),
     website: str(b.website, 300),
     instagram: str(b.instagram, 300),

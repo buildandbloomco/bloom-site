@@ -28,7 +28,7 @@ export default async function SettingsPage() {
       <section className="panel">
         <h3>Email, alerts, and reminders</h3>
         <ul className="small" style={{ margin: 0, paddingLeft: 18 }}>
-          <li>{emailReady() ? `✓ Email is on. Alerts go to ${process.env.NOTIFY_EMAIL || settings.email || "the email in your settings (add one below)"}.` : "• Email is off. Add RESEND_API_KEY and EMAIL_FROM in Vercel to get alerts and send invites."}</li>
+          <li>{emailReady() ? `✓ Email is on. Alerts go to ${process.env.NOTIFY_EMAIL || settings.notifyEmail || settings.email || "the email in your settings (add one below)"}.` : "• Email is off. Add RESEND_API_KEY and EMAIL_FROM in Vercel to get alerts and send invites."}</li>
           <li>{process.env.CRON_SECRET ? "✓ Day-before session reminders are on." : "• Session reminders are off. Add CRON_SECRET in Vercel to turn them on (see the README)."}</li>
           <li>{process.env.BLOB_READ_WRITE_TOKEN ? "✓ File sharing is on." : "• File sharing is off. Connect a Blob store in Vercel Storage."}</li>
         </ul>

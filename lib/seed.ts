@@ -4,6 +4,7 @@ export const DEFAULT_SETTINGS: Settings = {
   brandName: "Build & Bloom Collective",
   tagline: "Organizational wellness and strategy, rooted in the Psychology of Care.",
   email: "info@buildandbloomcollective.com",
+  notifyEmail: "jadon@buildandbloomcollective.com",
   phone: "",
   website: "https://www.buildandbloomcollective.com",
   instagram: "https://www.instagram.com/buildbloom.co",

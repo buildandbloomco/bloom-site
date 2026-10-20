@@ -44,7 +44,10 @@ export interface LibraryItem {
 export interface Settings {
   brandName: string;
   tagline: string;
+  /** Business email, shown to clients and the public */
   email: string;
+  /** Where alerts to you go (new bookings, payments, leads). Blank = the business email */
+  notifyEmail?: string;
   phone: string;
   website: string;
   instagram: string;

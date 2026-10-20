@@ -55,7 +55,8 @@ export default function SettingsEditor({ initial, status }: { initial: Settings;
         <div className="grid-2" style={{ gap: 14 }}>
           {text("brandName", "Business name")}
           {text("location", "Location")}
-          {text("email", "Email", undefined, "email")}
+          {text("email", "Business email", "shown to clients", "email")}
+          {text("notifyEmail", "Your email for alerts", "bookings, payments, new leads", "email")}
           {text("phone", "Phone", "optional")}
           {text("website", "Website", undefined, "url")}
           {text("instagram", "Instagram link", undefined, "url")}

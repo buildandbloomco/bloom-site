@@ -10,7 +10,7 @@ export async function notifyAdmin(subject: string, lines: string[], path = "/adm
   try {
     if (!emailReady()) return;
     const [s, origin] = await Promise.all([getSettings(), siteOrigin()]);
-    const to = (process.env.NOTIFY_EMAIL || s.email || "").trim();
+    const to = (process.env.NOTIFY_EMAIL || s.notifyEmail || s.email || "").trim();
     if (!to) return;
     const link = `${origin}${path}`;
     const body = lines.filter(Boolean);

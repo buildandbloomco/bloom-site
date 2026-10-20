@@ -265,10 +265,10 @@ Email invites send the client a real calendar invitation with Yes and No buttons
 3. In Resend, create an API key and copy it.
 4. In Vercel, open your project > Settings > Environment Variables and add:
    - `RESEND_API_KEY` = the key you copied
-   - `EMAIL_FROM` = `Build & Bloom Collective <hello@yourdomain.com>` (use an address on the domain you verified)
+   - `EMAIL_FROM` = `Build & Bloom Collective <info@buildandbloomcollective.com>` (an address on the domain you verified)
 5. Redeploy. The "Email calendar invite" button on each session turns on.
 
-Replies go to the email address in Admin > Settings. Sending the invite again after changing the time updates the same event on their calendar instead of adding a second one.
+Replies go to your business email in Admin > Settings (info@buildandbloomcollective.com). Sending the invite again after changing the time updates the same event on their calendar instead of adding a second one.
 
 ## Agreements, files, alerts, reminders, reviews, and backup
 
@@ -276,7 +276,7 @@ Replies go to the email address in Admin > Settings. Sending the invite again af
 
 **Shared files.** Clients upload documents in the Files section of their portal (PDF, Word, Excel, PowerPoint, images, text, up to 50 MB each). You upload and remove files from the Shared files box on the Meeting view. This uses the same Blob store as course media. File links are long and unguessable but not password protected, so do not use this for records with protected health information.
 
-**Alerts to you.** Once email is set up (see Scheduling above), you get an email when a client signs an agreement, uploads a file, comments on a task, sends a change request, submits the leader questionnaire, confirms a consult summary, asks about add-ons, or pays by card, and when someone books, sends an inquiry, or requests a guide. Alerts go to the email in Settings. To send them somewhere else, add `NOTIFY_EMAIL` in Vercel.
+**Alerts to you.** Once email is set up (see Scheduling above), you get an email when a client signs an agreement, uploads a file, comments on a task, sends a change request, submits the leader questionnaire, confirms a consult summary, asks about add-ons, or pays by card, and when someone books, sends an inquiry, or requests a guide. Alerts go to "Your email for alerts" in Admin > Settings (jadon@buildandbloomcollective.com).
 
 **Session reminders.** Clients get an email the day before a strategy session with the time, call link, and their open tasks. To turn this on:
 1. In Vercel, Settings, Environment Variables, add `CRON_SECRET` with any long random text (30 or more letters and numbers).
