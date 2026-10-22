@@ -2,7 +2,7 @@
 
 import "./room.css";
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { CANVASES, IDEA_PROMPTS, IDEA_STAGES, ideaScore, type Entry, type IdeaStage, type ItemKind, type Role, type RoomItem } from "@/lib/room-def";
+import { CANVASES, FULL_STEPS, IDEA_PROMPTS, IDEA_STAGES, SESSION_TYPES, ideaScore, typeDef, type Brief, type Entry, type IdeaStage, type ItemKind, type Role, type RoomItem, type TabId } from "@/lib/room-def";
 
 interface Task { id: string; title: string; owner: Role; due: string; status: "todo" | "doing" | "done"; createdBy: Role; carriedFrom: string }
 type TaskOp = { op: "add" | "set" | "del"; id?: string; title?: string; owner?: string; due?: string; status?: string };
@@ -133,15 +133,27 @@ function MindMap() {
   );
 }
 
-const TABS = [["checkin", "Check-in"], ["focus", "Focus"], ["ideas", "Brainstorm"], ["map", "Mind map"], ["evaluate", "Evaluate"], ["canvas", "Canvases"], ["plan", "Roadmap"], ["decide", "Decisions"], ["recap", "Recap"]] as const;
-type Tab = (typeof TABS)[number][0];
+type Tab = TabId;
+const DEFAULT_TITLE: Record<TabId, string> = {
+  since: "Since last time", checkin: "Check-in: where things stand", focus: "Focus: the one thing this session is for", roots: "Root causes: what is really going on",
+  ideas: "Brainstorm: new and existing ideas", map: "Mind map: think it through together", evaluate: "Evaluate: which ideas earn our time", canvas: "Strategy canvases",
+  plan: "Roadmap and actions", decide: "Decisions and notes", recap: "Session recap",
+};
+const DEFAULT_ASK: Partial<Record<TabId, string>> = {
+  checkin: "What moved since we last met? What is heavier than it should be right now?",
+  focus: "If we could only solve one thing today, what should it be? How will we know this session was worth it?",
+  evaluate: "If this worked, how much would it change? What would it really take from you and your team?",
+  plan: "What has to be true in 90 days for this to have worked? What is the very first step, and whose is it?",
+  decide: "What did we decide today? Say it in one sentence each, so nobody leaves with a different version.",
+};
 
 export default function StrategyRoom({ sid, clientId, role, names, title, date, closed, backHref, link = "", calHref = "" }: { sid: string; clientId?: string; role: Role; names: Record<Role, string>; title: string; date: string; closed: boolean; backHref: string; link?: string; calHref?: string }) {
   const [entries, setEntries] = useState<Record<string, Entry>>({});
   const [tasks, setTasks] = useState<Task[]>([]);
   const [other, setOther] = useState({ here: false, editing: "" });
   const [net, setNet] = useState<"connecting" | "live" | "saving" | "offline">("connecting");
-  const [tab, setTab] = useState<Tab>("checkin");
+  const [tab, setTab] = useState<Tab | "">("");
+  const [brief, setBrief] = useState<Brief | null>(null);
   const [canvas, setCanvas] = useState(CANVASES[0].id);
   const [spark, setSpark] = useState(0);
   const [isClosed, setClosed] = useState(closed);
@@ -194,6 +206,7 @@ export default function StrategyRoom({ sid, clientId, role, names, title, date, 
           const fresh = Object.entries(d.entries as Record<string, Entry>).filter(([k]) => !pending.current.has(k) && (lastLocal.current.get(k) ?? 0) < now - 2500);
           if (fresh.length) setEntries((prev) => ({ ...prev, ...Object.fromEntries(fresh) }));
           if (now - lastTaskEdit.current > 2500 && !taskQ.current.length) setTasks(d.tasks);
+          if (d.brief) setBrief(d.brief);
           setOther(d.other);
           setClosed(d.session.status === "done");
           setNet((s) => (s === "saving" ? s : "live"));
@@ -249,6 +262,19 @@ export default function StrategyRoom({ sid, clientId, role, names, title, date, 
   const cv = CANVASES.find((c) => c.id === canvas)!;
   const nice = date ? new Date(date + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" }) : "";
   const otherName = names[role === "us" ? "client" : "us"];
+  const chosenType = r.field("type"), suggested = r.field("suggestType");
+  const def = typeDef(chosenType) ?? (isClosed ? undefined : typeDef(suggested));
+  const steps = def ? def.steps : FULL_STEPS;
+  const cur = steps.find((x) => x.id === tab) ? (tab as Tab) : steps[0].id;
+  const step = steps.find((x) => x.id === cur)!;
+  const H = ({ id }: { id: TabId }) => { const x = steps.find((y) => y.id === id); return <h3>{x?.title ?? DEFAULT_TITLE[id]}</h3>; };
+  const askFor = (id: TabId) => { const x = steps.find((y) => y.id === id); return x?.ask !== undefined ? x.ask : DEFAULT_ASK[id] ?? ""; };
+  const canvasIds = def ? def.canvases : CANVASES.filter((c) => c.id !== "road" && c.id !== "roots").map((c) => c.id);
+  const canvasList = CANVASES.filter((c) => canvasIds.includes(c.id));
+  const cvShown = canvasList.find((c) => c.id === canvas) ?? canvasList[0] ?? cv;
+  const inRoom = new Set(ideas.map((i) => i.text.trim().toLowerCase()));
+  const backlog = (brief?.backlog ?? []).filter((b) => !inRoom.has(b.text.trim().toLowerCase()));
+  const setType = (t: string) => { r.setField("type", t); setTab(""); };
 
   async function publish(close: boolean) {
     await flush();
@@ -294,16 +320,118 @@ export default function StrategyRoom({ sid, clientId, role, names, title, date, 
             </div>
           </div>
           <div className="rm-tabs" role="tablist" aria-label="Session steps">
-            {TABS.map(([id, label], i) => <button key={id} type="button" role="tab" aria-selected={tab === id} onClick={() => setTab(id)}><b>{i + 1}</b>{label}</button>)}
+            {steps.map((x, i) => <button key={x.id} type="button" role="tab" aria-selected={cur === x.id} onClick={() => setTab(x.id)}><b>{i + 1}</b>{x.label}</button>)}
           </div>
         </div>
 
         {locked && <div className="card"><p style={{ margin: 0 }}>This session is closed. You can read everything here, and the recap is on your strategy plan.</p></div>}
 
-        {tab === "checkin" && (
+        {role === "us" && !chosenType && suggested && !isClosed && (
+          <div className="rm-type rm-noprint">
+            <div className="stack" style={{ gap: 4 }}>
+              <span className="lab">Suggested for this session</span>
+              <strong>{typeDef(suggested)?.name}</strong>
+              <span className="small">{r.field("suggestWhy")} {typeDef(suggested)?.blurb}</span>
+            </div>
+            <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+              <button type="button" className="btn btn-sm btn-gold" onClick={() => setType(suggested)}>Use this</button>
+              <select aria-label="Pick another kind of session" value="" style={{ width: "auto", minHeight: 38 }} onChange={(e) => e.target.value && setType(e.target.value)}>
+                <option value="">Pick another...</option>
+                {SESSION_TYPES.filter((t) => t.id !== suggested).map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+              </select>
+            </div>
+          </div>
+        )}
+        {def && (chosenType || role === "client" || isClosed) && (
+          <div className="rm-typeline rm-noprint">
+            <span><strong>{def.name}.</strong> {def.blurb}</span>
+            {role === "us" && !isClosed && (
+              <select aria-label="Kind of session" value={chosenType} style={{ width: "auto", minHeight: 34, padding: "2px 8px" }} onChange={(e) => setType(e.target.value)}>
+                {SESSION_TYPES.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+              </select>
+            )}
+          </div>
+        )}
+
+        {cur === "since" && (
           <section className="rm-panel">
-            <h3>Check-in: where things stand</h3>
-            <Ask>What moved since we last met? What is heavier than it should be right now?</Ask>
+            <H id="since" />
+            {!brief ? <p className="muted" style={{ margin: 0 }}>Gathering what has happened since last time...</p> : !brief.prev ? (
+              <>
+                <div className="rm-ask"><div className="lab">Start here</div><p>This is your first session together. Use it to understand the business as it really is, before trying to change anything.</p></div>
+                {brief.bloom ? (
+                  <div className="rm-box"><h4>Bloom Check, {brief.bloom.date}</h4><p style={{ margin: 0 }}>Average <strong>{brief.bloom.avg} of 5</strong>. Growing edge: <strong>{brief.bloom.lowest}</strong>.</p><span className="small muted">Suggested first step: {brief.bloom.step}</span></div>
+                ) : <div className="rm-box"><h4>Bloom Check</h4><span className="small muted">Not taken yet. It is in {role === "us" ? "their" : "your"} portal under Books &amp; Tools and takes 2 minutes. It is a good thing to do together today.</span></div>}
+              </>
+            ) : (
+              <>
+                <p className="small muted" style={{ margin: 0 }}>Since <strong>{brief.prev.title}</strong>{brief.prev.date ? ` on ${new Date(brief.prev.date + "T12:00:00").toLocaleDateString("en-US", { month: "long", day: "numeric" })}` : ""}{brief.daysSince !== null ? `, ${brief.daysSince} days ago` : ""}.</p>
+                {brief.suggestions.length > 0 && (
+                  <div className="rm-ask"><div className="lab">What to address today</div>
+                    <ul className="rm-sugg">{brief.suggestions.map((x, i) => <li key={i}>{x}</li>)}</ul>
+                  </div>
+                )}
+                <div className="rm-grid2">
+                  <div className="rm-box">
+                    <h4>Still open <span className="hint">· {brief.open.length}</span></h4>
+                    {brief.open.length === 0 ? <span className="small muted">Nothing open. Every action from last time is done.</span> : brief.open.map((o, i) => (
+                      <div key={i} className="rm-brief-row"><span className={`rm-pill ${o.overdue ? "late" : ""}`}>{o.overdue ? "Past due" : "Open"}</span><span>{o.title} <span className="muted small">· {names[o.owner]}{o.due ? ` · due ${o.due}` : ""}</span></span></div>
+                    ))}
+                    {brief.open.length > 0 && <Live name="blocked" label="What got in the way?" rows={3} placeholder="Time, money, unclear next step, someone else, energy..." />}
+                  </div>
+                  <div className="rm-box">
+                    <h4>Done since last time <span className="hint">· {brief.done.length}</span></h4>
+                    {brief.done.length === 0 ? <span className="small muted">Nothing marked done yet.</span> : brief.done.map((t, i) => <div key={i} className="rm-brief-row"><span className="rm-pill done">Done</span><span>{t}</span></div>)}
+                  </div>
+                </div>
+                <div className="rm-grid2">
+                  {brief.moves.length > 0 && (
+                    <div className="rm-box">
+                      <h4>Numbers last time</h4>
+                      {brief.moves.map((m, i) => <div key={i} className="rm-brief-row"><span className={`rm-arrow ${m.dir}`} aria-label={m.dir}>{m.dir === "up" ? "▲" : m.dir === "down" ? "▼" : "●"}</span><span>{m.name}: {m.from ? <>{m.from} to <strong>{m.to}</strong></> : <strong>{m.to}</strong>}</span></div>)}
+                    </div>
+                  )}
+                  {brief.decisions.length > 0 && (
+                    <div className="rm-box">
+                      <h4>Decisions to confirm</h4>
+                      <span className="hint">Did each one hold? If not, why?</span>
+                      <ul style={{ margin: 0, paddingLeft: 18 }}>{brief.decisions.map((d, i) => <li key={i}>{d}</li>)}</ul>
+                    </div>
+                  )}
+                  {brief.bloom && (
+                    <div className="rm-box">
+                      <h4>Bloom Check, {brief.bloom.date}</h4>
+                      <p style={{ margin: 0 }}>Average <strong>{brief.bloom.avg} of 5</strong>{brief.bloom.prevAvg !== null ? ` (was ${brief.bloom.prevAvg})` : ""}. Growing edge: <strong>{brief.bloom.lowest}</strong>.</p>
+                    </div>
+                  )}
+                  {brief.parked.length > 0 && (
+                    <div className="rm-box">
+                      <h4>Parking lot</h4>
+                      <span className="hint">Is one of these ready now?</span>
+                      {brief.parked.map((x, i) => <div key={i} className="rm-brief-row"><span>{x}</span>{!locked && <button type="button" className="btn btn-sm btn-ghost" style={{ padding: "4px 10px", fontSize: "0.68rem", marginLeft: "auto" }} onClick={() => { r.setField("focus", x); setTab("focus"); }}>Make it today&rsquo;s focus</button>}</div>)}
+                    </div>
+                  )}
+                </div>
+                {brief.nextFocus && !locked && !r.field("focus") && <div><button type="button" className="btn btn-sm btn-dark" onClick={() => { r.setField("focus", brief.nextFocus); setTab(steps.some((x) => x.id === "focus") ? "focus" : cur); }}>Use &ldquo;{brief.nextFocus.slice(0, 60)}{brief.nextFocus.length > 60 ? "..." : ""}&rdquo; as today&rsquo;s focus</button></div>}
+              </>
+            )}
+          </section>
+        )}
+
+        {cur === "roots" && (
+          <section className="rm-panel">
+            <H id="roots" />
+            {r.field("focus") && <div className="rm-ask"><div className="lab">The problem</div><p>{r.field("focus")}</p></div>}
+            <div className="rm-grid2">
+              {CANVASES.find((c) => c.id === "roots")!.boxes.map((b) => <div className="rm-box" key={b.id}><h4>{b.label}</h4><span className="hint">{b.hint}</span><List kind="note" box={`roots.${b.id}`} placeholder="Add a line" /></div>)}
+            </div>
+          </section>
+        )}
+
+        {cur === "checkin" && (
+          <section className="rm-panel">
+            <H id="checkin" />
+            {askFor("checkin") && <Ask>{askFor("checkin")}</Ask>}
             <div className="rm-grid2">
               <div className="rm-box"><h4>Wins since last time</h4><List kind="win" placeholder="Add a win, big or small" /></div>
               <div className="rm-box"><h4>What feels heavy</h4><Live name="heavy" rows={5} placeholder="Bottlenecks, worries, decisions being avoided" /></div>
@@ -315,7 +443,7 @@ export default function StrategyRoom({ sid, clientId, role, names, title, date, 
                 <div className="rm-metric" key={m.id}>
                   <input type="text" value={m.text} aria-label="Measure" disabled={locked} onFocus={() => r.editing(`i:${m.id}`)} onBlur={() => r.editing(null)} onChange={(e) => r.patch(m.id, { text: e.target.value })} />
                   <input type="text" value={m.prev ?? ""} aria-label="Last time" disabled={locked} placeholder="" onChange={(e) => r.patch(m.id, { prev: e.target.value })} />
-                  <input type="text" value={m.value ?? ""} aria-label="Now" disabled={locked} className={r.otherOn(`i:${m.id}`) ? "is-other" : ""} onFocus={() => r.editing(`i:${m.id}`)} onBlur={() => r.editing(null)} onChange={(e) => r.patch(m.id, { value: e.target.value })} />
+                  <span className="rm-now"><input type="text" value={m.value ?? ""} aria-label="Now" disabled={locked} className={r.otherOn(`i:${m.id}`) ? "is-other" : ""} onFocus={() => r.editing(`i:${m.id}`)} onBlur={() => r.editing(null)} onChange={(e) => r.patch(m.id, { value: e.target.value })} />{(() => { const n = (x?: string) => Number(String(x ?? "").replace(/[^0-9.-]/g, "")); if (!m.value?.trim() || !m.prev?.trim() || Number.isNaN(n(m.value)) || Number.isNaN(n(m.prev)) || n(m.value) === n(m.prev)) return null; const up = n(m.value) > n(m.prev); return <span className={`rm-arrow ${up ? "up" : "down"}`} aria-label={up ? "up" : "down"}>{up ? "▲" : "▼"}</span>; })()}</span>
                   {!locked ? <button type="button" className="rm-x" aria-label="Remove measure" onClick={() => r.patch(m.id, { deleted: true })}>&times;</button> : <span />}
                 </div>
               ))}
@@ -324,10 +452,10 @@ export default function StrategyRoom({ sid, clientId, role, names, title, date, 
           </section>
         )}
 
-        {tab === "focus" && (
+        {cur === "focus" && (
           <section className="rm-panel">
-            <h3>Focus: the one thing this session is for</h3>
-            <Ask>If we could only solve one thing today, what should it be? How will we know this session was worth it?</Ask>
+            <H id="focus" />
+            {askFor("focus") && <Ask>{askFor("focus")}</Ask>}
             <Live name="focus" label="The question we are here to answer" rows={2} placeholder="How do we..." />
             <div className="rm-grid2">
               <Live name="outcome" label="What we want to walk out with" rows={4} placeholder="A decision, a plan, a shortlist" />
@@ -337,15 +465,30 @@ export default function StrategyRoom({ sid, clientId, role, names, title, date, 
           </section>
         )}
 
-        {tab === "ideas" && (
+        {cur === "ideas" && (
           <section className="rm-panel">
-            <h3>Brainstorm: new and existing ideas</h3>
+            <H id="ideas" />
+            {askFor("ideas") && <Ask>{askFor("ideas")}</Ask>}
             <div className="rm-ask" style={{ display: "flex", gap: 14, alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" }}>
               <div><div className="lab">Need a spark?</div><p>{IDEA_PROMPTS[spark % IDEA_PROMPTS.length]}</p></div>
               <button type="button" className="btn btn-sm btn-gold rm-noprint" onClick={() => setSpark(spark + 1)}>Another question</button>
             </div>
             <p className="small muted" style={{ margin: 0 }}>No judging yet. Get everything out, vote for what has energy, then move the strongest to Exploring. Yellow notes are {names.us}&rsquo;s, pink are {names.client}&rsquo;s.</p>
             {!locked && <div className="rm-add"><IdeaAdd /></div>}
+            {backlog.length > 0 && (
+              <details className="rm-backlog">
+                <summary>Ideas from earlier sessions <span className="muted">· {backlog.length} waiting</span></summary>
+                <p className="small muted" style={{ margin: "6px 0 10px" }}>Only pull in what matters for today. The rest stays here for later.</p>
+                <div className="stack" style={{ gap: 6 }}>
+                  {backlog.map((b, i) => (
+                    <div key={i} className="rm-brief-row">
+                      <span className="rm-pill">{IDEA_STAGES.find((x) => x.id === b.stage)?.label ?? "Idea"}</span><span>{b.text}</span>
+                      {!locked && <button type="button" className="btn btn-sm btn-ghost" style={{ padding: "4px 10px", fontSize: "0.68rem", marginLeft: "auto" }} onClick={() => r.add("idea", { text: b.text, stage: (b.stage === "chosen" || b.stage === "exploring" ? b.stage : "existing") as IdeaStage, votes: {} })}>Pull in</button>}
+                    </div>
+                  ))}
+                </div>
+              </details>
+            )}
             <div className="rm-board">
               {IDEA_STAGES.map((st) => {
                 const col = ideas.filter((i) => (i.stage ?? "new") === st.id).sort((a, b) => votes(b) - votes(a) || a.o - b.o);
@@ -369,18 +512,18 @@ export default function StrategyRoom({ sid, clientId, role, names, title, date, 
           </section>
         )}
 
-        {tab === "map" && (
+        {cur === "map" && (
           <section className="rm-panel">
-            <h3>Mind map: think it through together</h3>
+            <H id="map" />
             <p className="small muted" style={{ margin: 0 }}>Start from the center. Press <strong>Tab</strong> to branch off an idea, <strong>Enter</strong> to add one beside it. Hover a branch to add under it or remove it.</p>
             <MindMap />
           </section>
         )}
 
-        {tab === "evaluate" && (
+        {cur === "evaluate" && (
           <section className="rm-panel">
-            <h3>Evaluate: which ideas earn our time</h3>
-            <Ask>If this worked, how much would it change? What would it really take from you and your team?</Ask>
+            <H id="evaluate" />
+            {askFor("evaluate") && <Ask>{askFor("evaluate")}</Ask>}
             {scored.length === 0 ? <p className="muted" style={{ margin: 0 }}>Move ideas to &ldquo;Exploring&rdquo; on the Brainstorm step and they show up here to score.</p> : (
               <div className="rm-eval">
                 <div>
@@ -421,26 +564,26 @@ export default function StrategyRoom({ sid, clientId, role, names, title, date, 
           </section>
         )}
 
-        {tab === "canvas" && (
+        {cur === "canvas" && (
           <section className="rm-panel">
-            <h3>Strategy canvases</h3>
+            <H id="canvas" />
             <div className="pl-tabs rm-noprint" style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              {CANVASES.filter((c) => c.id !== "road").map((c) => <button key={c.id} type="button" aria-pressed={canvas === c.id} className={`btn btn-sm ${canvas === c.id ? "btn-dark" : "btn-ghost"}`} style={{ fontSize: "0.7rem", padding: "7px 12px" }} onClick={() => setCanvas(c.id)}>{c.name}</button>)}
+              {canvasList.map((c) => <button key={c.id} type="button" aria-pressed={cvShown.id === c.id} className={`btn btn-sm ${cvShown.id === c.id ? "btn-dark" : "btn-ghost"}`} style={{ fontSize: "0.7rem", padding: "7px 12px" }} onClick={() => setCanvas(c.id)}>{c.name}</button>)}
             </div>
-            <Ask>{cv.blurb}</Ask>
-            <div className={cv.boxes.length === 3 ? "rm-grid3" : "rm-grid2"}>
-              {cv.boxes.map((b) => <div className="rm-box" key={b.id}><h4>{b.label}</h4><span className="hint">{b.hint}</span><List kind="note" box={`${cv.id}.${b.id}`} placeholder="Add a line" /></div>)}
+            <Ask>{cvShown.blurb}</Ask>
+            <div className={cvShown.boxes.length === 3 ? "rm-grid3" : "rm-grid2"}>
+              {cvShown.boxes.map((b) => <div className="rm-box" key={b.id}><h4>{b.label}</h4><span className="hint">{b.hint}</span><List kind="note" box={`${cvShown.id}.${b.id}`} placeholder="Add a line" /></div>)}
             </div>
           </section>
         )}
 
-        {tab === "plan" && (
+        {cur === "plan" && (
           <section className="rm-panel">
-            <h3>Roadmap and actions</h3>
-            <Ask>What has to be true in 90 days for this to have worked? What is the very first step, and whose is it?</Ask>
-            <div className="rm-grid3">
+            <H id="plan" />
+            {askFor("plan") && <Ask>{askFor("plan")}</Ask>}
+            {(!def || def.id === "plan90") && <div className="rm-grid3">
               {CANVASES.find((c) => c.id === "road")!.boxes.map((b) => <div className="rm-box" key={b.id}><h4>{b.label}</h4><span className="hint">{b.hint}</span><List kind="note" box={`road.${b.id}`} placeholder="Add a milestone" /></div>)}
-            </div>
+            </div>}
             <div className="rm-box">
               <h4>Action items <span className="hint">· these also show on the strategy plan</span></h4>
               {tasks.length === 0 && <span className="small muted">Nothing yet. Every session should end with at least one action for each of you.</span>}
@@ -450,17 +593,17 @@ export default function StrategyRoom({ sid, clientId, role, names, title, date, 
           </section>
         )}
 
-        {tab === "decide" && (
+        {cur === "decide" && (
           <section className="rm-panel">
-            <h3>Decisions and notes</h3>
-            <Ask>What did we decide today? Say it in one sentence each, so nobody leaves with a different version.</Ask>
+            <H id="decide" />
+            {askFor("decide") && <Ask>{askFor("decide")}</Ask>}
             <div className="rm-box"><h4>Decisions we made</h4><List kind="decision" placeholder="We decided to..." /></div>
             <Live name="notes" label="Shared session notes" rows={7} placeholder="Anything worth remembering from today" />
             {role === "us" && <Live name="notes" priv label="My private notes" hint="only you see these, never the client" rows={5} />}
           </section>
         )}
 
-        {tab === "recap" && (
+        {cur === "recap" && (
           <section className="rm-panel rm-recap">
             <div className="row between rm-noprint" style={{ flexWrap: "wrap", gap: 10 }}>
               <h3>Session recap</h3>
@@ -471,9 +614,22 @@ export default function StrategyRoom({ sid, clientId, role, names, title, date, 
               </div>
             </div>
             {msg && <p className="ok-text small rm-noprint">{msg}</p>}
+            <div className="rm-box rm-noprint">
+              <h4>Before you leave</h4>
+              <Live name="nextFocus" label="Next session should focus on" rows={2} placeholder="The one thing we pick up next time" />
+              {role === "us" && (
+                <label className="rm-field"><span className="l">Next session should be a</span>
+                  <select value={r.field("nextType")} disabled={locked} style={{ width: "auto", minHeight: 38 }} onChange={(e) => r.setField("nextType", e.target.value)}>
+                    <option value="">Let the room suggest it</option>
+                    {SESSION_TYPES.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+                  </select>
+                </label>
+              )}
+            </div>
             {role === "us" && clientId && <NextSession clientId={clientId} link={link} />}
             <div>
-              <p className="eyebrow">{title}{nice ? ` · ${nice}` : ""}</p>
+              <p className="eyebrow">{title}{nice ? ` · ${nice}` : ""}{def ? ` · ${def.name}` : ""}</p>
+              {r.field("blocked") && <><h4>What got in the way</h4><p>{r.field("blocked")}</p></>}
               {r.field("focus") && <><h4>The question</h4><p>{r.field("focus")}</p></>}
               {r.field("outcome") && <><h4>What we set out to do</h4><p>{r.field("outcome")}</p></>}
               {r.items("win").length > 0 && <><h4>Wins</h4><ul>{r.items("win").map((i) => <li key={i.id}>{i.text}</li>)}</ul></>}
@@ -485,6 +641,7 @@ export default function StrategyRoom({ sid, clientId, role, names, title, date, 
               {tasks.length > 0 && <><h4>Action items</h4><ul>{tasks.map((t) => <li key={t.id}>{t.title} <span className="muted">· {names[t.owner]}{t.due ? ` · due ${t.due}` : ""} · {STAT[t.status]}</span></li>)}</ul></>}
               {r.items("park").length > 0 && <><h4>Parking lot</h4><ul>{r.items("park").map((i) => <li key={i.id}>{i.text}</li>)}</ul></>}
               {r.field("notes") && <><h4>Notes</h4><p>{r.field("notes")}</p></>}
+              {r.field("nextFocus") && <><h4>Next session will focus on</h4><p>{r.field("nextFocus")}</p></>}
               {CANVASES.filter((c) => c.id !== "road" && c.boxes.some((b) => r.items("note", `${c.id}.${b.id}`).length)).map((c) => (
                 <div key={c.id}><h4>{c.name}</h4>{c.boxes.map((b) => r.items("note", `${c.id}.${b.id}`).length > 0 && <p key={b.id}><strong>{b.label}:</strong> {r.items("note", `${c.id}.${b.id}`).map((i) => i.text).join("; ")}</p>)}</div>
               ))}

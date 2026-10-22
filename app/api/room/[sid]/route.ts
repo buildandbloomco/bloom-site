@@ -2,7 +2,7 @@ import { currentClient, isAdmin } from "@/lib/auth";
 import { getClient, rateLimit } from "@/lib/data";
 import { error, json } from "@/lib/http";
 import { getPlan } from "@/lib/workspace";
-import { applyOps, applyTaskOps, publishRecap, readRoom, seedRoom, sessionTasks, touchPresence } from "@/lib/room";
+import { applyOps, applyTaskOps, buildBrief, publishRecap, readRoom, seedRoom, sessionTasks, suggest, touchPresence } from "@/lib/room";
 import type { Role } from "@/lib/room-def";
 
 type Ctx = { params: Promise<{ sid: string }> };
@@ -29,6 +29,8 @@ export async function GET(req: Request, ctx: Ctx) {
   const now = Date.now(); // taken before reading, so nothing written during the read is ever skipped
   let room = await readRoom(me.client.id, sid);
   if (me.role === "us" && !room["f:seeded"]) { await seedRoom(me.client.id, sid); room = await readRoom(me.client.id, sid); }
+  // Rooms opened before session types: suggest a type the first time you open one that is still going
+  else if (me.role === "us" && !room["f:suggestType"] && !room["f:type"] && session.status !== "done") { await suggest(me.client.id, sid); room = await readRoom(me.client.id, sid); }
   if (u.searchParams.get("p")) await touchPresence(me.client.id, sid, me.role, u.searchParams.get("e") || "");
   const since = Number(u.searchParams.get("since")) || 0;
   const entries: Record<string, unknown> = {};
@@ -43,6 +45,7 @@ export async function GET(req: Request, ctx: Ctx) {
     other: other ? { here: now - other.at < 25000, editing: now - other.at < 8000 ? other.v : "" } : { here: false, editing: "" },
     tasks: sessionTasks(plan.tasks, sid),
     session: { title: session.title, date: session.date, status: session.status },
+    ...(since === 0 || u.searchParams.get("brief") ? { brief: await buildBrief(me.client.id, sid, me.role) } : {}),
   });
 }
 
