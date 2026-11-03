@@ -102,7 +102,7 @@ export default function EventOffers({ event, ends, canceled, contact, spots = {}
             {earlyOn(t) && t.early && <p className="ev-early">{event.open ? "Early-bird price" : "Decide-today price"}, through {when(t.early.until)}. Then {usd(t.price)}.</p>}
             <ul>{t.includes.map((i) => <li key={i}>{i}</li>)}</ul>
             {t.deposit && !t.depositOnly && <p className="tiny muted" style={{ margin: 0 }}>Or hold this price with {usd(t.deposit)} today.</p>}
-            {t.id in spots && <p className={`ev-spots${spots[t.id] === 0 ? " out" : ""}`}>{spots[t.id] === 0 ? "All spots are taken" : `${spots[t.id]} of ${t.spots} ${t.build ? "build spots" : "spots"} left`}</p>}
+            {spots[t.id] === 0 && <p className="ev-spots out">All spots are taken</p>}
             <button type="button" disabled={spots[t.id] === 0} className={`btn btn-block ${tierId === t.id ? "btn-dark" : "btn-primary"}`} onClick={() => choose(t.id)}>{spots[t.id] === 0 ? "Full" : tierId === t.id ? "Selected" : t.depositOnly && t.deposit ? `Reserve with ${usd(t.deposit)}` : `Choose ${t.name}`}</button>
           </article>
         ))}
