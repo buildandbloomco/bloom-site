@@ -251,6 +251,32 @@ DEFAULT_EVENTS.push({
   }],
 });
 
+// Private, guests-only next step for Reset Circle attendees (room code on their printed card)
+DEFAULT_EVENTS.push({
+  slug: "reset-guests",
+  name: "The Reset Circle",
+  headline: "Your next step, guest pricing",
+  details: "For Reset Circle guests · through Saturday, December 12",
+  endsAt: "2026-12-12T23:59:00-05:00",
+  intro: "You named your one priority. Now let's turn it into a real plan for the first 90 days of 2027, together.",
+  active: true,
+  tiers: [{
+    id: "intensive", name: "Q1 Priority Intensive", tagline: "90 minutes to turn your one priority into a real plan.", price: 197, was: 350,
+    includes: [
+      "A 90-minute one-on-one strategy session, virtual or in person",
+      "Your one priority turned into a 90-day plan with weekly actions",
+      "Your written plan, saved in your Build & Bloom portal",
+      "Guest bonus: a 30-minute check-in at the 45-day mark",
+    ],
+    serviceIds: ["addon-intensive"], agreement: true, featured: true, spots: 8, pool: "reset-intensive-2026",
+    next: [
+      "Sign your short service agreement at the top of your portal.",
+      "Book your Intensive from your portal. Sessions run in January.",
+      "Bring your One Priority card from the Reset Circle.",
+    ],
+  }],
+});
+
 export const eventOpen = (e: EventOffer, now = Date.now()) => e.active !== false && now < new Date(e.endsAt).getTime();
 /** The price a guest pays right now */
 export const tierPrice = (t: EventTier, now = Date.now()) => (t.early && now < new Date(t.early.until).getTime() ? t.early.price : t.price);

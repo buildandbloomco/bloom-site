@@ -47,7 +47,7 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
         {tiers.map((t) => (
           <div key={t.id} className={`tier${t.featured ? " f" : ""}`}>
             <div><h3>{t.name}</h3><div className="d">{t.tagline}{t.deposit ? (t.depositOnly ? ` Reserve with ${usd(t.deposit)}.` : ` Hold it with ${usd(t.deposit)}.`) : ""}{t.spots ? ` Only ${t.spots} ${t.build ? "build " : ""}spots${t.build ? " in all" : ""}.` : ""}</div>
-              {tiers.length <= 2 && t.includes.length ? <ul className="inc">{t.includes.slice(0, 3).map((x) => <li key={x}>{x.indexOf(":") > 15 ? x.slice(0, x.indexOf(":")) : x}</li>)}</ul> : null}
+              {tiers.length <= 2 && t.includes.length ? <ul className="inc">{t.includes.slice(0, tiers.length === 1 ? 5 : 3).map((x) => <li key={x}>{x.indexOf(":") > 15 ? x.slice(0, x.indexOf(":")) : x}</li>)}</ul> : null}
               {earlyOn(t) && t.early ? <div className="early">{usd(t.early.price)} through {new Date(t.early.until).toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit", timeZone: "America/New_York" }).replace("11:59 PM", "midnight")}. Then {usd(t.price)}.</div> : null}</div>
             <div className="pr">{t.fromPrice ? <span className="fr">From</span> : null}<span className="n">{usd(tierPrice(t))}</span>{t.was ? <s>{usd(t.was)}</s> : null}</div>
           </div>

@@ -48,7 +48,7 @@ export default async function EventPage({ params, searchParams }: { params: Prom
             <span className="rule" aria-hidden="true" />
           </div>
           <div className="gate-card boxed">
-            <p style={{ fontSize: "1.15rem", margin: 0 }}>Enter the room code from Jadon&rsquo;s share.</p>
+            <p style={{ fontSize: "1.15rem", margin: 0 }}>Enter the room code from your card or Jadon&rsquo;s share.</p>
             <EventGate slug={e.slug} />
             <p className="small muted" style={{ margin: 0 }}>Open through {ends} Eastern.</p>
           </div>

@@ -21,6 +21,15 @@ export async function listEvents(): Promise<StoredEvent[]> {
       await kv().set("bb:events:mig:workshop1", true);
       return next;
     }
+    // One time: add the private guest offer for Reset Circle attendees
+    if (!(await kv().get("bb:events:mig:reset2"))) {
+      const add = DEFAULT_EVENTS.filter((e) => e.slug === "reset-guests" && !saved.some((x) => x.slug === e.slug));
+      const next = [...saved, ...add.map((e) => ({ ...e, active: e.active !== false, code: "RESET" }))];
+      await kv().set(KEY, next);
+      await kv().set("bb:events:mig:reset2", true);
+      if (await kv().get("bb:events:mig:reset1")) return next;
+      saved.splice(0, saved.length, ...next);
+    }
     // One time: add the Dec 5 Reset Circle and turn off the Nov 14 virtual workshop it replaces
     if (!(await kv().get("bb:events:mig:reset1"))) {
       const add = DEFAULT_EVENTS.filter((e) => e.slug === "reset-circle" && !saved.some((x) => x.slug === e.slug));
@@ -31,7 +40,7 @@ export async function listEvents(): Promise<StoredEvent[]> {
     }
     return saved;
   }
-  return DEFAULT_EVENTS.map((e) => ({ ...e, active: e.active !== false, code: process.env[`EVENT_CODE_${e.slug.toUpperCase()}`] || "BLOOM" }));
+  return DEFAULT_EVENTS.map((e) => ({ ...e, active: e.active !== false, code: process.env[`EVENT_CODE_${e.slug.toUpperCase()}`] || (e.slug === "reset-guests" ? "RESET" : "BLOOM") }));
 }
 export async function saveEvents(list: StoredEvent[]) { await kv().set(KEY, list); }
 export async function getEvent(slug: string): Promise<StoredEvent | null> {
