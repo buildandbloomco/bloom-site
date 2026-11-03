@@ -188,7 +188,7 @@ DEFAULT_EVENTS.push(
     endsAt: "2026-11-14T10:00:00-05:00",
     intro: "A hands-on workshop for women business owners. Find what's draining your business with the Bloom Check, then build three tools in the room: a pay-yourself-first money plan, a weekly schedule that protects your energy, and your first written process.",
     open: true,
-    active: true,
+    active: false, // replaced by the in-person Reset Circle on Dec 5
     tiers: [{
       id: "seat", name: "Workshop seat", tagline: "90 minutes, live and hands-on. Only 15 seats.", price: 27,
       includes: ["The Bloom Check, scored and explained", "A pay-yourself-first money plan", "A weekly schedule that protects your energy", "Your first SOP, written in the room", "A free 20-minute one-on-one Bloom Check debrief after the workshop", "Your own Build & Bloom portal with Money and 12 business tools"],
@@ -212,6 +212,37 @@ DEFAULT_EVENTS.push(
     }],
   },
 );
+
+// In-person half-day reset at Peace on the Pond, open to the public
+DEFAULT_EVENTS.push({
+  slug: "reset-circle",
+  name: "The Reset Circle",
+  headline: "The Reset Circle: a 4th quarter reset",
+  details: "Saturday, December 5 · 10:00 AM to 1:30 PM · Peace on the Pond",
+  endsAt: "2026-12-04T18:00:00-05:00",
+  intro: "Before the holiday rush, give yourself one slow morning. A half-day gathering at Peace on the Pond to reconnect with yourself and other women, let go of what this year asked of you, and leave knowing your one priority for the new year. Built around the Collective Connection Experience. Low pressure, no experience needed.",
+  open: true,
+  active: true,
+  tiers: [{
+    id: "seat", name: "Your seat", tagline: "A half-day reset, in person. Only 20 seats.", price: 40,
+    early: { price: 30, until: "2026-11-15T23:59:00-05:00" },
+    includes: [
+      "Warm drinks on arrival and a light lunch",
+      "The Collective Connection Experience, a guided circle of connection",
+      "A reflection and release practice to close out 2026",
+      "Your Bloom Check and a One Priority card for the first 90 days of 2027",
+      "A free 20-minute one-on-one follow-up call after the event",
+      "Your own Build & Bloom portal with 12 free tools to keep the momentum going",
+    ],
+    serviceIds: [], agreement: false, spots: 20, pool: "reset-circle-dec-2026",
+    next: [
+      "The address, parking, and what to bring will be emailed to you the week of the event.",
+      "Dress warm and comfortable. Part of the morning is outdoors, weather permitting.",
+      "Coming with a friend? Each person grabs their own seat so we save a spot for both of you.",
+      "After the event, book your free 20-minute follow-up call from your portal.",
+    ],
+  }],
+});
 
 export const eventOpen = (e: EventOffer, now = Date.now()) => e.active !== false && now < new Date(e.endsAt).getTime();
 /** The price a guest pays right now */

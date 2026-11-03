@@ -21,6 +21,14 @@ export async function listEvents(): Promise<StoredEvent[]> {
       await kv().set("bb:events:mig:workshop1", true);
       return next;
     }
+    // One time: add the Dec 5 Reset Circle and turn off the Nov 14 virtual workshop it replaces
+    if (!(await kv().get("bb:events:mig:reset1"))) {
+      const add = DEFAULT_EVENTS.filter((e) => e.slug === "reset-circle" && !saved.some((x) => x.slug === e.slug));
+      const next = [...saved.map((e) => (e.slug === "build-it-workshop" ? { ...e, active: false } : e)), ...add.map((e) => ({ ...e, active: e.active !== false, code: "BLOOM" }))];
+      await kv().set(KEY, next);
+      await kv().set("bb:events:mig:reset1", true);
+      return next;
+    }
     return saved;
   }
   return DEFAULT_EVENTS.map((e) => ({ ...e, active: e.active !== false, code: process.env[`EVENT_CODE_${e.slug.toUpperCase()}`] || "BLOOM" }));

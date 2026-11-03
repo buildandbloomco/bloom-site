@@ -98,7 +98,7 @@ export default function EventOffers({ event, ends, canceled, contact, spots = {}
               <span className="now">{t.fromPrice && <span className="from">From </span>}{usd(tierPrice(t))}</span>
               {t.was && <span className="was"><s>{usd(t.was)}</s> usually</span>}
             </div>
-            {earlyOn(t) && t.early && <p className="ev-early">Decide-today price, through {when(t.early.until)}. Then {usd(t.price)}.</p>}
+            {earlyOn(t) && t.early && <p className="ev-early">{event.open ? "Early-bird price" : "Decide-today price"}, through {when(t.early.until)}. Then {usd(t.price)}.</p>}
             <ul>{t.includes.map((i) => <li key={i}>{i}</li>)}</ul>
             {t.deposit && !t.depositOnly && <p className="tiny muted" style={{ margin: 0 }}>Or hold this price with {usd(t.deposit)} today.</p>}
             {t.id in spots && <p className={`ev-spots${spots[t.id] === 0 ? " out" : ""}`}>{spots[t.id] === 0 ? "All spots are taken" : `${spots[t.id]} of ${t.spots} ${t.build ? "build spots" : "spots"} left`}</p>}
@@ -157,7 +157,7 @@ export default function EventOffers({ event, ends, canceled, contact, spots = {}
         </section>
       )}
 
-      <p className="small muted" style={{ textAlign: "center" }}>Questions? Find Jadon this weekend, or reach out at <a href={`mailto:${contact.email}`}>{contact.email}</a>{contact.phone ? ` or ${contact.phone}` : ""}.</p>
+      <p className="small muted" style={{ textAlign: "center" }}>Questions? {event.open ? "Reach out anytime at " : "Find Jadon this weekend, or reach out at "}<a href={`mailto:${contact.email}`}>{contact.email}</a>{contact.phone ? ` or ${contact.phone}` : ""}.</p>
     </div>
   );
 }
