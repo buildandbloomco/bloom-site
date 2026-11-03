@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { BLOOM_CHECK, earlyOn, tierPrice, usd, type EventOffer } from "@/lib/event-def";
+import { BLOOM_CHECK, earlyOn, eventImage, tierPrice, usd, type EventOffer } from "@/lib/event-def";
 
 const when = (iso: string) => new Date(iso).toLocaleString("en-US", { weekday: "long", hour: "numeric", minute: "2-digit", timeZone: "America/New_York" }).replace("11:59 PM", "midnight");
 
@@ -47,8 +47,9 @@ export default function EventOffers({ event, ends, canceled, contact, spots = {}
 
   return (
     <div className="ev-wrap stack">
+      {eventImage(event) && <img className="ev-hero" src={eventImage(event)} alt="" />}
       <section className="stack" style={{ gap: 14 }}>
-        <p className="eyebrow">{event.open ? "Workshop" : `${event.name} · Guest offers`}</p>
+        <p className="eyebrow">{event.open ? "Upcoming event" : `${event.name} · Guest offers`}</p>
         {event.headline ? <h1>{event.headline}</h1> : <h1>Leave empowered, <span className="ink">with a next step.</span></h1>}
         {event.details && <p className="ev-details">{event.details}</p>}
         <span className="rule" aria-hidden="true" />

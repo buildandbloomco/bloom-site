@@ -53,7 +53,13 @@ export interface EventOffer {
   headline?: string;
   /** When and where, e.g. "Saturday, Nov 14 · 11 AM to 12:30 PM ET · Live on Zoom" */
   details?: string;
+  /** Header photo for the page and link previews, e.g. "/events/reset-circle.jpg" */
+  image?: string;
 }
+
+/** Built-in header photos, used when an event has no image of its own */
+const EVENT_IMAGES: Record<string, string> = { "reset-circle": "/events/reset-circle.jpg" };
+export const eventImage = (e: Pick<EventOffer, "slug" | "image">) => e.image || EVENT_IMAGES[e.slug] || "";
 
 const PORTAL = "Your own private Build & Bloom portal with Money: budget, income buckets you drag and drop, team pay, and tax dates";
 const BOOKS = "Every Build & Bloom guidebook, including the new Pour From Wholeness practitioner wellness guide";
@@ -217,6 +223,7 @@ DEFAULT_EVENTS.push(
 DEFAULT_EVENTS.push({
   slug: "reset-circle",
   name: "The Reset Circle",
+  image: "/events/reset-circle.jpg",
   headline: "The Reset Circle: a 4th quarter reset",
   details: "Saturday, December 5 · 10:00 AM to 1:30 PM · Peace on the Pond",
   endsAt: "2026-12-04T18:00:00-05:00",

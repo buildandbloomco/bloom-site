@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { usd, type EventTier } from "@/lib/event-def";
 
-type Ev = { slug: string; name: string; endsAt: string; intro: string; tiers: EventTier[]; active?: boolean; code: string; open?: boolean; headline?: string; details?: string };
+type Ev = { slug: string; name: string; endsAt: string; intro: string; tiers: EventTier[]; active?: boolean; code: string; open?: boolean; headline?: string; details?: string; image?: string };
 type Svc = { id: string; name: string; price: number | null };
 
 const TZ = "America/New_York";
@@ -92,6 +92,7 @@ export default function EventsEditor({ initial, services, origin }: { initial: E
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12 }}>
                   <label>Headline <span className="hint">Blank = &ldquo;Leave empowered, with a next step.&rdquo;</span><input type="text" value={e.headline || ""} onChange={(x) => upd(i, { headline: x.target.value })} /></label>
                   <label>When and where <span className="hint">e.g. Sat, Nov 14 · 11 AM ET · On Zoom</span><input type="text" value={e.details || ""} onChange={(x) => upd(i, { details: x.target.value })} /></label>
+                  <label>Header photo <span className="hint">optional, a link to an image, e.g. /events/reset-circle.jpg</span><input type="text" value={e.image || ""} onChange={(x) => upd(i, { image: x.target.value })} /></label>
                 </div>
 
                 <h3 style={{ margin: "8px 0 0" }}>Offers</h3>

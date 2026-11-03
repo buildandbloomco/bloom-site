@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { eventOpen } from "@/lib/event-def";
+import { eventImage, eventOpen } from "@/lib/event-def";
 import { eventAccess, getEvent, spotsLeft } from "@/lib/events";
 import { getSettings } from "@/lib/data";
 import { bookProps } from "@/lib/booking";
@@ -11,7 +11,7 @@ import "@/components/event/event.css";
 export const dynamic = "force-dynamic";
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const e = await getEvent((await params).slug);
-  return e?.open ? { title: e.headline || e.name, description: e.details || e.intro } : { title: "Guest offers", robots: { index: false, follow: false } };
+  return e?.open ? { title: e.headline || e.name, description: e.details || e.intro, ...(eventImage(e) ? { openGraph: { images: [eventImage(e)] }, twitter: { card: "summary_large_image", images: [eventImage(e)] } } : {}) } : { title: "Guest offers", robots: { index: false, follow: false } };
 }
 
 export default async function EventPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ canceled?: string }> }) {
