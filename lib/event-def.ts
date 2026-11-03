@@ -231,8 +231,8 @@ DEFAULT_EVENTS.push({
   open: true,
   active: true,
   tiers: [{
-    id: "seat", name: "Your seat", tagline: "A half-day reset, in person. Only 20 seats.", price: 40,
-    early: { price: 30, until: "2026-11-15T23:59:00-05:00" },
+    id: "seat", name: "Your seat", tagline: "A half-day reset, in person. Only 20 seats.", price: 45,
+    early: { price: 35, until: "2026-11-15T23:59:00-05:00" },
     includes: [
       "Warm drinks on arrival and a light lunch",
       "The Collective Connection Experience, a guided circle of connection",

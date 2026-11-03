@@ -21,6 +21,13 @@ export async function listEvents(): Promise<StoredEvent[]> {
       await kv().set("bb:events:mig:workshop1", true);
       return next;
     }
+    // One time: Reset Circle price update ($35 early bird, then $45), only if the prices were not already changed in admin
+    if (!(await kv().get("bb:events:mig:reset3")) && saved.some((e) => e.slug === "reset-circle")) {
+      const next = saved.map((e) => e.slug !== "reset-circle" ? e : { ...e, tiers: e.tiers.map((t) => t.id === "seat" && t.price === 40 && t.early?.price === 30 ? { ...t, price: 45, early: { ...t.early, price: 35 } } : t) });
+      await kv().set(KEY, next);
+      await kv().set("bb:events:mig:reset3", true);
+      saved.splice(0, saved.length, ...next);
+    }
     // One time: add the private guest offer for Reset Circle attendees
     if (!(await kv().get("bb:events:mig:reset2"))) {
       const add = DEFAULT_EVENTS.filter((e) => e.slug === "reset-guests" && !saved.some((x) => x.slug === e.slug));
