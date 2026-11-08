@@ -3,7 +3,7 @@ import crypto from "crypto";
 import { cookies } from "next/headers";
 import { kv } from "./kv";
 import { normalizeCode, safeEqual, sign, verify } from "./crypto";
-import { DEFAULT_EVENTS, eventOpen, type EventOffer, type EventTier } from "./event-def";
+import { DEFAULT_EVENTS, RESET_CIRCLE, eventOpen, type EventOffer, type EventTier } from "./event-def";
 
 /** An event as stored: the guest-facing offer plus its room code, which never leaves the server except to admin */
 export interface StoredEvent extends EventOffer { code: string }
@@ -20,6 +20,17 @@ export async function listEvents(): Promise<StoredEvent[]> {
       await kv().set(KEY, next);
       await kv().set("bb:events:mig:workshop1", true);
       return next;
+    }
+    // One time: the Reset Circle moved to Saturday, Jan 16, 2027 (full day, $157 early bird, $197), and the guest offer moved with it
+    if (!(await kv().get("bb:events:mig:reset4"))) {
+      const next = saved.map((e) => {
+        if (e.slug === "reset-circle") return { ...e, ...RESET_CIRCLE, code: e.code, active: e.active !== false };
+        if (e.slug === "reset-guests") return { ...e, endsAt: "2027-01-23T23:59:00-05:00", details: "For Reset Circle guests · through Saturday, January 23", tiers: e.tiers.map((t) => ({ ...t, next: t.next.map((n) => n.replace("Sessions run in January.", "Sessions run in late January and February.")) })) };
+        return e;
+      });
+      if (saved.some((e) => e.slug === "reset-circle")) { await kv().set(KEY, next); saved.splice(0, saved.length, ...next); }
+      await kv().set("bb:events:mig:reset4", true);
+      await kv().set("bb:events:mig:reset3", true);
     }
     // One time: Reset Circle price update ($35 early bird, then $45), only if the prices were not already changed in admin
     if (!(await kv().get("bb:events:mig:reset3")) && saved.some((e) => e.slug === "reset-circle")) {

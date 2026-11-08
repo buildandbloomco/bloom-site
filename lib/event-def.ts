@@ -219,45 +219,46 @@ DEFAULT_EVENTS.push(
   },
 );
 
-// In-person half-day reset at Peace on the Pond, open to the public
-DEFAULT_EVENTS.push({
+// In-person day of rest and reset at Peace on the Pond, open to the public
+export const RESET_CIRCLE: EventOffer = {
   slug: "reset-circle",
   name: "The Reset Circle",
   image: "/events/reset-circle.jpg",
-  headline: "The Reset Circle: a 4th quarter reset",
-  details: "Saturday, December 5 · 10:00 AM to 1:30 PM · Peace on the Pond",
-  endsAt: "2026-12-04T18:00:00-05:00",
-  intro: "Before the holiday rush, give yourself one slow morning. A half-day gathering at Peace on the Pond to reconnect with yourself and other women, let go of what this year asked of you, and leave knowing your one priority for the new year. Built around the Collective Connection Experience. Low pressure, no experience needed.",
+  headline: "The Reset Circle: a first quarter reset",
+  details: "Saturday, January 16, 2027 · 10:00 AM to 4:00 PM · Peace on the Pond",
+  endsAt: "2027-01-15T18:00:00-05:00",
+  intro: "Start the new year slowly, on purpose. A quiet day at Peace on the Pond to rest, reconnect with yourself and other women, let go of what last year asked of you, and leave rooted in your one priority for the first quarter. Built around the Collective Connection Experience. Low pressure, no experience needed. Full itinerary coming soon.",
   open: true,
   active: true,
   tiers: [{
-    id: "seat", name: "Your seat", tagline: "A half-day reset, in person. Only 20 seats.", price: 45,
-    early: { price: 35, until: "2026-11-15T23:59:00-05:00" },
+    id: "seat", name: "Your seat", tagline: "A full day of rest and reset, in person. Only 20 seats.", price: 197,
+    early: { price: 157, until: "2026-12-31T23:59:00-05:00" },
     includes: [
-      "Warm drinks on arrival and a light lunch",
+      "A quiet morning to slow down and arrive",
       "The Collective Connection Experience, a guided circle of connection",
-      "A reflection and release practice to close out 2026",
-      "Your Bloom Check and a One Priority card for the first 90 days of 2027",
+      "A reflection and release practice to let go of what last year asked of you",
+      "Your Bloom Check and a One Priority plan for the first 90 days of 2027",
+      "Lunch, warm drinks, and time to rest",
       "A free 20-minute one-on-one follow-up call after the event",
-      "Your own Build & Bloom portal with 12 free tools to keep the momentum going",
     ],
     serviceIds: [], agreement: false, spots: 20, pool: "reset-circle-dec-2026",
     next: [
-      "The address, parking, and what to bring will be emailed to you the week of the event.",
-      "Dress warm and comfortable. Part of the morning is outdoors, weather permitting.",
+      "Your full itinerary, the address, parking, and what to bring will be emailed to you before the event.",
+      "Dress warm and comfortable. Part of the day is outdoors, weather permitting.",
       "Coming with a friend? Each person grabs their own seat so we save a spot for both of you.",
       "After the event, book your free 20-minute follow-up call from your portal.",
     ],
   }],
-});
+};
+DEFAULT_EVENTS.push(RESET_CIRCLE);
 
 // Private, guests-only next step for Reset Circle attendees (room code on their printed card)
 DEFAULT_EVENTS.push({
   slug: "reset-guests",
   name: "The Reset Circle",
   headline: "Your next step, guest pricing",
-  details: "For Reset Circle guests · through Saturday, December 12",
-  endsAt: "2026-12-12T23:59:00-05:00",
+  details: "For Reset Circle guests · through Saturday, January 23",
+  endsAt: "2027-01-23T23:59:00-05:00",
   intro: "You named your one priority. Now let's turn it into a real plan for the first 90 days of 2027, together.",
   active: true,
   tiers: [{
@@ -271,7 +272,7 @@ DEFAULT_EVENTS.push({
     serviceIds: ["addon-intensive"], agreement: true, featured: true, spots: 8, pool: "reset-intensive-2026",
     next: [
       "Sign your short service agreement at the top of your portal.",
-      "Book your Intensive from your portal. Sessions run in January.",
+      "Book your Intensive from your portal. Sessions run in late January and February.",
       "Bring your One Priority card from the Reset Circle.",
     ],
   }],
