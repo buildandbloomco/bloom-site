@@ -83,9 +83,9 @@ export default function EventsEditor({ initial, services, origin }: { initial: E
                   <label>Event name<input type="text" value={e.name} onChange={(x) => upd(i, { name: x.target.value })} /></label>
                   <label>Web address <span className="hint">/event/…</span><input type="text" value={e.slug} onChange={(x) => upd(i, { slug: x.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "") })} /></label>
                   <label>Closes (Eastern time)<input type="datetime-local" value={toET(e.endsAt)} onChange={(x) => upd(i, { endsAt: fromET(x.target.value) || e.endsAt })} /></label>
-                  <label>Room code <span className="hint">Say it out loud</span><input type="text" value={e.code} onChange={(x) => upd(i, { code: x.target.value.toUpperCase() })} /></label>
+                  {!e.open && <label>Room code <span className="hint">Say it out loud</span><input type="text" value={e.code} onChange={(x) => upd(i, { code: x.target.value.toUpperCase() })} /></label>}
                 </div>
-                <p className="tiny muted" style={{ margin: 0 }}>Changing the web address breaks QR codes you already printed. Changing the room code asks everyone to enter the new one.</p>
+                <p className="tiny muted" style={{ margin: 0 }}>Changing the web address breaks QR codes you already printed.{e.open ? " This event is open to the public, so guests don't need a room code." : " Changing the room code asks everyone to enter the new one."}</p>
                 <label>Welcome text<textarea rows={3} value={e.intro} onChange={(x) => upd(i, { intro: x.target.value })} /></label>
                 <label className="row" style={{ gap: 8 }}><input type="checkbox" style={{ width: "auto" }} checked={e.active !== false} onChange={(x) => upd(i, { active: x.target.checked })} />Show this page to guests (off = it shows as closed)</label>
                 <label className="row" style={{ gap: 8 }}><input type="checkbox" style={{ width: "auto" }} checked={!!e.open} onChange={(x) => upd(i, { open: x.target.checked })} />Open to the public: no room code, listed on your Workshops page (for workshops and public events)</label>

@@ -73,7 +73,7 @@ async function Guests({ showAll }: { showAll: boolean }) {
               <div className="row" style={{ gap: 10, flexWrap: "wrap" }}>
                 <h3 style={{ margin: 0 }}>{s.label}</h3>
                 <span className={`tag ${STATE[s.state][1]}`}>{STATE[s.state][0]}</span>
-                {!s.e.open && <span className="tag">Private · room code</span>}
+                {s.e.open ? <span className="tag">Public · no code</span> : <span className="tag">Private · room code</span>}
               </div>
               {s.e.details && <span className="small">{s.e.details}</span>}
               <span className="tiny muted">{s.state === "open" ? "Sales close" : "Closed"} {when(s.e.endsAt)} · <a href={`/event/${s.e.slug}`} target="_blank" rel="noopener noreferrer">/event/{s.e.slug} ↗</a></span>

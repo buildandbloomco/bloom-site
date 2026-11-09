@@ -13,6 +13,15 @@ const KEY = "bb:events";
 export async function listEvents(): Promise<StoredEvent[]> {
   const saved = await kv().get<StoredEvent[]>(KEY);
   if (saved) {
+    // One time: the Reset Circle is a public event, so guests never need a room code
+    if (!(await kv().get("bb:events:mig:reset5"))) {
+      if (saved.some((e) => e.slug === "reset-circle" && !e.open)) {
+        const next = saved.map((e) => (e.slug === "reset-circle" ? { ...e, open: true } : e));
+        await kv().set(KEY, next);
+        saved.splice(0, saved.length, ...next);
+      }
+      await kv().set("bb:events:mig:reset5", true);
+    }
     // One time: add the November workshop events to a list you already saved
     if (!(await kv().get("bb:events:mig:workshop1"))) {
       const add = DEFAULT_EVENTS.filter((e) => ["build-it-workshop", "build-it-next-step"].includes(e.slug) && !saved.some((x) => x.slug === e.slug));
@@ -147,7 +156,8 @@ export function cleanEvents(input: unknown, serviceIds: Set<string>): StoredEven
     const endsAt = str(raw.endsAt, 40);
     if (Number.isNaN(new Date(endsAt).getTime())) return `${name} needs a closing date and time.`;
     const code = str(raw.code, 40);
-    if (normalizeCode(code).length < 3) return `${name} needs a room code of at least 3 characters.`;
+    // Public events need no room code
+    if (raw.open !== true && normalizeCode(code).length < 3) return `${name} needs a room code of at least 3 characters.`;
     const tiers: EventTier[] = [];
     const ids = new Set<string>();
     for (const [i, t] of (Array.isArray(raw.tiers) ? raw.tiers : []).slice(0, 8).entries()) {

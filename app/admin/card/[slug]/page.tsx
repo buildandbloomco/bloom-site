@@ -41,7 +41,7 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
         <div className="wr"><div>My growing edge is<div className="ln" /></div><div>My one small step is<div className="ln" /></div></div>
       </section>
       <section className={`pc${tiers.length > 3 ? " compact" : ""}${tiers.length > 4 ? " tight" : ""}`}>
-        <div className="top">{brand}<span className="eb">Guests only</span></div>
+        <div className="top">{brand}<span className="eb">{e.open ? "Save your seat" : "Guests only"}</span></div>
         <h1>Your next step</h1><div className="rl" />
         <p style={{ fontSize: "10.5pt", lineHeight: 1.35 }}>Offers for the people in this room, for a short time, so this momentum has somewhere to go.</p>
         {tiers.map((t) => (
@@ -54,7 +54,7 @@ export default async function CardPage({ params }: { params: Promise<{ slug: str
         ))}
         <div className="qr">
           <div className="img" dangerouslySetInnerHTML={{ __html: svg }} />
-          <div><div className="sm">Scan, then enter the room code</div><div className="code">{e.code}</div><div className="sm">Card or Zelle. Your portal opens the moment you finish.<br />Open through {ends}.</div></div>
+          <div>{e.open ? <div className="sm">Scan to save your seat. No code needed.</div> : <><div className="sm">Scan, then enter the room code</div><div className="code">{e.code}</div></>}<div className="sm">Card or Zelle. Your portal opens the moment you finish.<br />Open through {ends}.</div></div>
         </div>
         <div className="foot">Organizational wellness and strategy, rooted in the Psychology of Care.</div>
       </section>
