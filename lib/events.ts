@@ -13,6 +13,16 @@ const KEY = "bb:events";
 export async function listEvents(): Promise<StoredEvent[]> {
   const saved = await kv().get<StoredEvent[]>(KEY);
   if (saved) {
+    // One time: the Reset Circle early bird now ends Dec 15 instead of Dec 31 (only if it was still Dec 31)
+    if (!(await kv().get("bb:events:mig:reset6"))) {
+      const dec31 = new Date("2026-12-31T23:59:00-05:00").getTime();
+      if (saved.some((e) => e.slug === "reset-circle" && e.tiers.some((t) => t.early && new Date(t.early.until).getTime() === dec31))) {
+        const next = saved.map((e) => e.slug !== "reset-circle" ? e : { ...e, tiers: e.tiers.map((t) => t.early && new Date(t.early.until).getTime() === dec31 ? { ...t, early: { ...t.early, until: "2026-12-15T23:59:00-05:00" } } : t) });
+        await kv().set(KEY, next);
+        saved.splice(0, saved.length, ...next);
+      }
+      await kv().set("bb:events:mig:reset6", true);
+    }
     // One time: the Reset Circle is a public event, so guests never need a room code
     if (!(await kv().get("bb:events:mig:reset5"))) {
       if (saved.some((e) => e.slug === "reset-circle" && !e.open)) {

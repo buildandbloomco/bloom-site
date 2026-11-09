@@ -3,7 +3,12 @@
 import { useRef, useState } from "react";
 import { BLOOM_CHECK, earlyOn, eventImage, tierPrice, usd, type EventOffer } from "@/lib/event-def";
 
-const when = (iso: string) => new Date(iso).toLocaleString("en-US", { weekday: "long", hour: "numeric", minute: "2-digit", timeZone: "America/New_York" }).replace("11:59 PM", "midnight");
+// Within a week, the weekday is enough. Further out, show the date too ("Tuesday, December 15 at midnight").
+const when = (iso: string) => {
+  const d = new Date(iso);
+  const soon = d.getTime() - Date.now() < 6 * 864e5;
+  return d.toLocaleString("en-US", { weekday: "long", ...(soon ? {} : { month: "long", day: "numeric" }), hour: "numeric", minute: "2-digit", timeZone: "America/New_York" }).replace("11:59 PM", "midnight");
+};
 
 type Zelle = { to: string; name: string; amount: number; memo: string };
 

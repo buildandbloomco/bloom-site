@@ -232,7 +232,7 @@ export const RESET_CIRCLE: EventOffer = {
   active: true,
   tiers: [{
     id: "seat", name: "Your seat", tagline: "A full day of rest and reset, in person. Only 20 seats.", price: 197,
-    early: { price: 157, until: "2026-12-31T23:59:00-05:00" },
+    early: { price: 157, until: "2026-12-15T23:59:00-05:00" },
     includes: [
       "A quiet morning to slow down and arrive",
       "The Collective Connection Experience, a guided circle of connection",
