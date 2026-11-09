@@ -35,6 +35,7 @@ export default async function WellnessAdmin({ searchParams }: { searchParams: Pr
         {TABS.map(([k, label]) => (
           <Link key={k} href={`/admin/wellness?tab=${k}`} role="tab" aria-selected={tab === k} className={tab === k ? "on" : ""}>{label}</Link>
         ))}
+        <Link href="/admin/waitlist" role="tab" aria-selected={false}>Waitlist</Link>
       </div>
 
       {tab === "pieces" && (

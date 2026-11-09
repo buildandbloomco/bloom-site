@@ -55,6 +55,7 @@ export async function recordCheckoutSession(session: Stripe.Checkout.Session): P
       date,
       method: "Stripe",
       stripeSessionId: session.id,
+      ...(session.metadata?.kind === "event" && session.metadata.slug ? { event: { slug: session.metadata.slug, tierId: session.metadata.tierId || "" } } : {}),
     });
   }
   if (addOnTotal > 0) {

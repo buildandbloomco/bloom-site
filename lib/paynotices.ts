@@ -15,7 +15,11 @@ export interface PayNotice {
   name: string;
   note: string;
   status: "pending" | "confirmed" | "dismissed";
+  /** Set when the notice came from an event offer page */
+  event?: { slug: string; tierId: string };
 }
 const KEY = "bb:paynotices";
 export async function listNotices(clientId: string): Promise<PayNotice[]> { return (await kv().hget<PayNotice[]>(KEY, clientId)) ?? []; }
 export async function saveNotices(clientId: string, list: PayNotice[]) { await kv().hset(KEY, clientId, list.slice(0, 60)); }
+/** Every client's notices, keyed by client id */
+export async function allNotices(): Promise<Record<string, PayNotice[]>> { return kv().hgetall<PayNotice[]>(KEY); }

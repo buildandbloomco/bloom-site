@@ -1,6 +1,7 @@
 import { getCatalog } from "@/lib/data";
 import CatalogEditor from "@/components/admin/CatalogEditor";
 import { GUIDES } from "@/lib/guides";
+import SectionTabs, { SHOP_TABS } from "@/components/admin/SectionTabs";
 
 export const dynamic = "force-dynamic";
 
@@ -10,9 +11,10 @@ export default async function LibraryPage() {
     <div className="stack" style={{ gap: 24 }}>
       <div className="stack" style={{ gap: 4 }}>
         <p className="eyebrow">Admin</p>
-        <h2>Books &amp; Tools</h2>
+        <h2>Shop &amp; books</h2>
         <p className="small muted" style={{ margin: 0 }}>Everything here shows in your clients&rsquo; portals under <strong>Books &amp; Tools</strong>, along with the 12 interactive tools. Separate from the Wellness Library subscription.</p>
       </div>
+      <SectionTabs tabs={SHOP_TABS} on="/admin/library" />
       <section className="card stack" style={{ gap: 8 }}>
         <h3 style={{ margin: 0 }}>Books &amp; guidebooks</h3>
         <p className="small muted" style={{ margin: 0 }}>Every client gets the client guidebook. Choose more for a client on their Meeting view, under Guidebooks. Clients who buy an event offer get all of them automatically.</p>

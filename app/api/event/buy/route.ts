@@ -88,7 +88,7 @@ export async function POST(req: Request) {
   if (method === "zelle") {
     const list = await listNotices(client.id);
     if (!list.some((n) => n.status === "pending" && n.amount === amount))
-      await saveNotices(client.id, [{ id: newId(), at: now, method: "zelle", amount, packageAmount: amount, addOnTotal: 0, addOnIds: [], label, name: str(b.zelleName, 120) || name, note: `${tag}${phone ? `. Phone ${phone}` : ""}`, status: "pending" }, ...list]);
+      await saveNotices(client.id, [{ id: newId(), at: now, method: "zelle", amount, packageAmount: amount, addOnTotal: 0, addOnIds: [], label, name: str(b.zelleName, 120) || name, note: `${tag}${phone ? `. Phone ${phone}` : ""}`, status: "pending", event: { slug: ev.slug, tierId: tier.id } }, ...list]);
     if (tier.spots && tier.pool) await takeSpot(tier.pool, { ref: `zelle:${client.id}:${tier.id}`, clientId: client.id, at: now, event: ev.slug });
     await notifyAdmin(`${name} chose ${tier.name} and is paying ${usd(amount)} by Zelle`, [`${name} (${email}${phone ? `, ${phone}` : ""}) chose ${tier.name} at ${ev.name}.`, "Check your bank, then confirm the Zelle payment on their Meeting view.", checkLine], `/admin/clients/${client.id}/desk`);
     if (created) await startClientSession(client.id);

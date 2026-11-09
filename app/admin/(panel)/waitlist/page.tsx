@@ -1,6 +1,7 @@
 import { listWaitlist } from "@/lib/waitlist";
 import { TEAM_SIZES, WELLNESS_INTERESTS } from "@/lib/wellness";
 import WaitlistTable from "@/components/admin/WaitlistTable";
+import SectionTabs from "@/components/admin/SectionTabs";
 
 export const dynamic = "force-dynamic";
 
@@ -14,11 +15,13 @@ export default async function WaitlistPage() {
       <div className="row between">
         <div className="stack" style={{ gap: 4 }}>
           <p className="eyebrow">Admin</p>
-          <h2>Wellness Library waitlist</h2>
+          <h2>Wellness Library</h2>
           <p className="muted small">Everyone who joined from your <a href="/wellness-library" target="_blank" rel="noopener noreferrer">Wellness Library page ↗</a>. Use it to decide which plan to launch first.</p>
         </div>
         {rows.length > 0 && <a className="btn btn-sm btn-ghost" href="/api/admin/waitlist/csv">Download spreadsheet</a>}
       </div>
+
+      <SectionTabs on="/admin/waitlist" tabs={[["/admin/wellness?tab=pieces", "Pieces"], ["/admin/wellness?tab=members", "Members"], ["/admin/wellness?tab=settings", "Home page & affirmations"], ["/admin/waitlist", "Waitlist"]]} />
 
       <div className="stat-tiles">
         <div className="panel"><span className="small muted">Total</span><strong style={{ fontSize: "2rem" }}>{rows.length}</strong></div>

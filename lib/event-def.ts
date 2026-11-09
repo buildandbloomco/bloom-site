@@ -1,5 +1,5 @@
 /** Private, code-gated offer pages for live events (a mastermind, a conference, a workshop room).
- *  Shared by the browser and the server. Edited in admin under Event offers; these are the starting values.
+ *  Shared by the browser and the server. Edited in admin under Events > Edit event pages; these are the starting values.
  *  The room code lives only on the server (lib/events.ts). */
 
 export interface EventTier {

@@ -29,7 +29,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     if (got <= 0) return error("Enter the amount that arrived.");
     const addOn = got === n.amount ? n.addOnTotal : 0;
     const date = nowET().date;
-    if (got - addOn > 0) c.payments.push({ id: newId(), kind: "package", amount: Math.round((got - addOn) * 100) / 100, description: `${n.label} (Zelle from ${n.name})`, date, method: "Zelle" });
+    if (got - addOn > 0) c.payments.push({ id: newId(), kind: "package", amount: Math.round((got - addOn) * 100) / 100, description: `${n.label} (Zelle from ${n.name})`, date, method: "Zelle", ...(n.event ? { event: n.event } : {}) });
     if (addOn > 0) {
       c.payments.push({ id: newId(), kind: "addon", amount: addOn, description: `Add-ons (Zelle from ${n.name})`, date, method: "Zelle" });
       c.requests.push({ id: newId(), addOnIds: n.addOnIds, note: `Paid $${addOn.toFixed(2)} for these add-ons by Zelle.`, date: new Date().toISOString(), status: "new" });

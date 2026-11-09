@@ -103,6 +103,8 @@ export interface Payment {
   date: string;
   method: string;
   stripeSessionId?: string;
+  /** Set when the payment came from an event offer page */
+  event?: { slug: string; tierId: string };
 }
 
 export interface AddOnRequest {

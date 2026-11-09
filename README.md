@@ -5,7 +5,7 @@
 - `/courses`: your published courses, each with its own enrollment page
 - `/portal`: where clients and learners enter their access code
 - `/learn/...`: a learner's course (lessons, online workbook, sessions, payments)
-- `/admin`: your dashboard (clients, leads, courses, calendar, services, library, settings)
+- `/admin`: your dashboard. The sidebar is grouped: **People** (Clients, Leads, Calendar), **Money & events** (Payments, Events), **What you offer** (Services & add-ons, Courses, Shop & books, Wellness Library), and **Marketing** (Content)
 
 **Connected to admin:**
 - Contact page inquiries show up in **Admin > Leads**. Click **Create client portal** on a lead to make their portal and a consultation sheet already filled in with their answers.
@@ -378,9 +378,13 @@ Turn it on per client: Meeting view, "Money" in the Proposal and agreements box,
 Everything is entered by hand or imported from a bank file; nothing connects to a bank account. It is a planning tool, not accounting or tax advice, and the page says so.
 
 
+## Payments
+
+Admin, then **Payments**. Every payment on the site in one list: event seats, client package and add-on payments, course payments, shop orders, and paid guidebooks. Filter by time frame and type, and download a spreadsheet. Zelle payments people told you about but you have not confirmed yet are listed at the top, and the number shows next to **Payments** in the sidebar.
+
 ## Event offers (private pages for events)
 
-Admin, then **Event offers**. Each event has a private page at `/event/<address>` that is not linked anywhere on the site, and search engines are told not to list it.
+Admin, then **Events**, then the **Edit event pages** tab. The first tab, **Who's coming & payments**, lists everyone who signed up for each event: paid, Zelle to confirm, or started checkout and didn't finish, with seats left and money collected. Each event has a private page at `/event/<address>` that is not linked anywhere on the site, and search engines are told not to list it.
 - Edit everything there: event name, web address, closing date and time (Eastern), room code, welcome text, and each offer's name, price, "usually" price, deposit option, what is included, what happens after they pay, which services it becomes in their portal and agreement, and whether it is shown or highlighted. Save, and guests see it right away.
 - Turn a page off to show it as closed. Duplicate an event to reuse it for the next one.
 - **Print card** makes a two-sided 5 x 7 card (the Bloom Check, plus the offers, QR code, and room code) that always matches what you saved. Print it after you settle prices.
@@ -396,7 +400,7 @@ Admin, then **Event offers**. Each event has a private page at `/event/<address>
 
 ## Books & Tools
 
-Admin, then **Books & Tools** (this used to be called Library; the Wellness Library subscription is separate). Clients see it on their portal home and in the portal menu.
+Admin, then **Shop & books**, then the **Books & Tools in portals** tab (this used to be called Library; the Wellness Library subscription is separate). Clients see it on their portal home and in the portal menu.
 - **Books & guidebooks:** every client gets the client guidebook; add more on a client's Meeting view under Guidebooks. Event buyers get them all. Pour From Wholeness is for clients only.
 - **12 interactive tools**, saved in each client's portal as they type: The Bloom Check, Capacity Check, 90-Day Priority Planner, The Right Yes Decision Filter, Weekly CEO Review, Pricing & Pay Calculator, SOP Builder, Client Onboarding Checklist, Role Clarity Cards, Team Agreements, Conversation Planner (hard conversations and feedback), and Caseload & Calendar Planner. Every tool prints.
 - Clients can mark any tool private. The Capacity Check starts private. On a client's Meeting view, **Books & Tools** shows what they have shared with you, view only.
