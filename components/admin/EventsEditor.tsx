@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { usd, type EventTier } from "@/lib/event-def";
 
-type Ev = { slug: string; name: string; endsAt: string; intro: string; tiers: EventTier[]; active?: boolean; code: string; open?: boolean; headline?: string; details?: string; image?: string };
+type Ev = { slug: string; name: string; endsAt: string; intro: string; tiers: EventTier[]; active?: boolean; code: string; open?: boolean; headline?: string; details?: string; image?: string; giftable?: boolean };
 type Svc = { id: string; name: string; price: number | null };
 
 const TZ = "America/New_York";
@@ -89,6 +89,7 @@ export default function EventsEditor({ initial, services, origin }: { initial: E
                 <label>Welcome text<textarea rows={3} value={e.intro} onChange={(x) => upd(i, { intro: x.target.value })} /></label>
                 <label className="row" style={{ gap: 8 }}><input type="checkbox" style={{ width: "auto" }} checked={e.active !== false} onChange={(x) => upd(i, { active: x.target.checked })} />Show this page to guests (off = it shows as closed)</label>
                 <label className="row" style={{ gap: 8 }}><input type="checkbox" style={{ width: "auto" }} checked={!!e.open} onChange={(x) => upd(i, { open: x.target.checked })} />Open to the public: no room code, listed on your Workshops page (for workshops and public events)</label>
+                <label className="row" style={{ gap: 8 }}><input type="checkbox" style={{ width: "auto" }} checked={!!e.giftable} onChange={(x) => upd(i, { giftable: x.target.checked })} />Can be given as a gift: buyers can add a recipient and print a gift certificate</label>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12 }}>
                   <label>Headline <span className="hint">Blank = &ldquo;Leave empowered, with a next step.&rdquo;</span><input type="text" value={e.headline || ""} onChange={(x) => upd(i, { headline: x.target.value })} /></label>
                   <label>When and where <span className="hint">e.g. Sat, Nov 14 · 11 AM ET · On Zoom</span><input type="text" value={e.details || ""} onChange={(x) => upd(i, { details: x.target.value })} /></label>

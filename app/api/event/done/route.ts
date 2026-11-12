@@ -14,7 +14,8 @@ export async function GET(req: Request) {
     await recordCheckoutSession(session);
     // Only a portal created in this checkout is opened automatically. Existing clients sign in with their code.
     if (m.newClient === "1") await startClientSession(m.clientId);
-    return NextResponse.redirect(new URL(`/event/${m.slug}/welcome?t=${m.tierId}${m.newClient === "1" ? "" : "&existing=1"}`, req.url));
+    const gift = m.giftFor ? `&g=${encodeURIComponent(m.giftFor)}&gf=${encodeURIComponent(m.payerName || "")}${m.giftNote ? `&gn=${encodeURIComponent(m.giftNote)}` : ""}` : "";
+    return NextResponse.redirect(new URL(`/event/${m.slug}/welcome?t=${m.tierId}${m.newClient === "1" ? "" : "&existing=1"}${gift}`, req.url));
   } catch {
     return NextResponse.redirect(new URL("/portal", req.url));
   }

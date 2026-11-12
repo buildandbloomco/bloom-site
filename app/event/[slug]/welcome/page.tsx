@@ -11,7 +11,7 @@ import "@/components/event/event.css";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Welcome", robots: { index: false, follow: false } };
 
-export default async function EventWelcome({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ t?: string; z?: string; existing?: string }> }) {
+export default async function EventWelcome({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ t?: string; z?: string; existing?: string; g?: string; gf?: string; gn?: string }> }) {
   const { slug } = await params;
   const sp = await searchParams;
   const e = await getEvent(slug);
@@ -38,6 +38,13 @@ export default async function EventWelcome({ params, searchParams }: { params: P
           <span className="rule" aria-hidden="true" />
           <p className="ev-lede">{tier ? <>Thank you for choosing <strong>{tier.name}</strong>. </> : null}{sp.z ? "Your spot is saved. Once your Zelle payment arrives, we will confirm it in your portal." : "Your payment went through and a receipt is on its way to your email."}</p>
         </div>
+        {sp.g && (
+          <div className="card stack ev-gift" style={{ gap: 8 }}>
+            <strong>🎁 Your gift for {sp.g}</strong>
+            <span className="small">Print her gift certificate, or save it as a PDF to send. WePrint her gift certificate or save it as a PDF to send. {e.name} will reach out with all the details before the event.rsquo;ll share all the details before the event.</span>
+            <div><a className="btn btn-gold btn-sm" href={`/event/${e.slug}/gift?to=${encodeURIComponent(sp.g)}&from=${encodeURIComponent(sp.gf || "")}${sp.gn ? `&note=${encodeURIComponent(sp.gn)}` : ""}`} target="_blank" rel="noopener">Print her gift certificate</a></div>
+          </div>
+        )}
         {pending && (
           <div className="card stack" style={{ gap: 6 }}>
             <strong>Zelle: send {usd(pending.amount)} to {s.zelle}</strong>

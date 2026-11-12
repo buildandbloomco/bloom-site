@@ -40,6 +40,12 @@ export async function listEvents(): Promise<StoredEvent[]> {
       await kv().set("bb:events:mig:workshop1", true);
       return next;
     }
+    // One time: seats for the Reset Circle can be given as gifts
+    if (!(await kv().get("bb:events:mig:gift1"))) {
+      const next = saved.map((e) => (e.slug === "reset-circle" ? { ...e, giftable: true } : e));
+      await kv().set(KEY, next); saved.splice(0, saved.length, ...next);
+      await kv().set("bb:events:mig:gift1", true);
+    }
     // One time: the Reset Circle moved to Saturday, Jan 16, 2027 (full day, $157 early bird, $197), and the guest offer moved with it
     if (!(await kv().get("bb:events:mig:reset4"))) {
       const next = saved.map((e) => {
@@ -178,7 +184,7 @@ export function cleanEvents(input: unknown, serviceIds: Set<string>): StoredEven
       tiers.push(c);
     }
     if (!tiers.length) return `${name} needs at least one offer.`;
-    out.push({ slug, name, endsAt: new Date(endsAt).toISOString(), intro: str(raw.intro, 600), tiers, active: raw.active !== false, code, ...(raw.open === true ? { open: true } : {}), ...(str(raw.headline, 140) ? { headline: str(raw.headline, 140) } : {}), ...(str(raw.details, 200) ? { details: str(raw.details, 200) } : {}), ...(/^(\/|https:\/\/)\S+$/.test(str(raw.image, 300)) ? { image: str(raw.image, 300) } : {}) });
+    out.push({ slug, name, endsAt: new Date(endsAt).toISOString(), intro: str(raw.intro, 600), tiers, active: raw.active !== false, code, ...(raw.open === true ? { open: true } : {}), ...(str(raw.headline, 140) ? { headline: str(raw.headline, 140) } : {}), ...(str(raw.details, 200) ? { details: str(raw.details, 200) } : {}), ...(/^(\/|https:\/\/)\S+$/.test(str(raw.image, 300)) ? { image: str(raw.image, 300) } : {}), ...(raw.giftable === true ? { giftable: true } : {}) });
   }
   return out;
 }

@@ -55,6 +55,8 @@ export interface EventOffer {
   details?: string;
   /** Header photo for the page and link previews, e.g. "/events/reset-circle.jpg" */
   image?: string;
+  /** Buyers can give a seat as a gift and print a gift certificate */
+  giftable?: boolean;
 }
 
 /** Built-in header photos, used when an event has no image of its own */
@@ -224,6 +226,7 @@ export const RESET_CIRCLE: EventOffer = {
   slug: "reset-circle",
   name: "The Reset Circle",
   image: "/events/reset-circle.jpg",
+  giftable: true,
   headline: "The Reset Circle: a first quarter reset",
   details: "Saturday, January 16, 2027 · 10:00 AM to 4:00 PM · Peace on the Pond",
   endsAt: "2027-01-15T18:00:00-05:00",

@@ -30,6 +30,13 @@ export async function POST(req: Request) {
   if (!name) return error("Please add your name.");
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return error("Please add a valid email. Your receipt and portal details go there.");
   if (b.agree !== true) return error("Please check the box to agree to the terms.");
+  // A seat bought as a gift for someone else
+  const gb = (ev.giftable && b.gift && typeof b.gift === "object" ? b.gift : null) as Record<string, unknown> | null;
+  const gift = gb ? { to: str(gb.to, 120), email: str(gb.email, 200), note: str(gb.note, 160) } : null;
+  if (gift && !gift.to) return error("Please add the name of the person you are gifting this seat to.");
+  if (gift?.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(gift.email)) return error("Please check her email, or leave it blank.");
+  const giftLine = gift ? `GIFT: this seat is for ${gift.to}${gift.email ? ` (${gift.email})` : " (no email given, send details to the buyer)"}${gift.note ? `. Note: "${gift.note}"` : ""}.` : "";
+  const certUrl = gift ? `/event/${ev.slug}/gift?to=${encodeURIComponent(gift.to)}&from=${encodeURIComponent(name)}${gift.note ? `&note=${encodeURIComponent(gift.note)}` : ""}` : "";
   const method = b.method === "zelle" ? "zelle" : "card";
   const full = await getEvent(ev.slug);
   const fullTier = full?.tiers.find((t) => t.id === tier.id);
@@ -56,7 +63,7 @@ export async function POST(req: Request) {
   const tag = `${ev.name}: ${tier.name}`;
   const lead: Lead = existingLead ?? {
     id: newId(), createdAt: now, status: "new", lane: "business", name, email, phone, organization: business, role: "", website: "",
-    interests: [], goals: "", challenges: "", budget: "", timeline: "", heardFrom: ev.name, assessment: null, notes: "", clientId: null,
+    interests: [], goals: "", challenges: "", budget: "", timeline: "", heardFrom: ev.name, assessment: null, notes: giftLine, clientId: null,
   };
   if (!lead.interests.includes(tag)) lead.interests.push(tag);
   if (checkLine && !lead.challenges.includes(checkLine)) lead.challenges = [lead.challenges, checkLine].filter(Boolean).join("\n");
@@ -72,7 +79,7 @@ export async function POST(req: Request) {
     client.welcome = `Welcome, ${client.contactName}! It was so good to be in the room with you at ${ev.name}. Everything from here lives in this portal.`;
     client.package = { ...client.package, title: tier.name, summary: tier.tagline, serviceIds: tier.serviceIds, customItems: tier.includes.map((i) => ({ title: i, detail: "" })) };
     client.investment = { total: price, retainer: deposit || price, lineItems: [{ label: `${tier.name}, ${ev.name} ${early ? "decide-today " : ""}price`, amount: price }], note: deposit ? tier.depositNote || "" : "" };
-    client.notes = [client.notes, `Came from ${ev.name} (${now.slice(0, 10)}). Chose ${tier.name}${deposit ? " with a deposit" : ""}, paying by ${method === "zelle" ? "Zelle" : "card"}.`, checkLine].filter(Boolean).join("\n");
+    client.notes = [client.notes, `Came from ${ev.name} (${now.slice(0, 10)}). Chose ${tier.name}${deposit ? " with a deposit" : ""}, paying by ${method === "zelle" ? "Zelle" : "card"}.`, giftLine, checkLine].filter(Boolean).join("\n");
     // Card: the portal waits as "sent" until the payment clears, then becomes active (and gets its agreement) automatically
     if (method === "card") client.status = "sent";
     await saveClient(client);
@@ -90,9 +97,9 @@ export async function POST(req: Request) {
     if (!list.some((n) => n.status === "pending" && n.amount === amount))
       await saveNotices(client.id, [{ id: newId(), at: now, method: "zelle", amount, packageAmount: amount, addOnTotal: 0, addOnIds: [], label, name: str(b.zelleName, 120) || name, note: `${tag}${phone ? `. Phone ${phone}` : ""}`, status: "pending", event: { slug: ev.slug, tierId: tier.id } }, ...list]);
     if (tier.spots && tier.pool) await takeSpot(tier.pool, { ref: `zelle:${client.id}:${tier.id}`, clientId: client.id, at: now, event: ev.slug });
-    await notifyAdmin(`${name} chose ${tier.name} and is paying ${usd(amount)} by Zelle`, [`${name} (${email}${phone ? `, ${phone}` : ""}) chose ${tier.name} at ${ev.name}.`, "Check your bank, then confirm the Zelle payment on their Meeting view.", checkLine], `/admin/clients/${client.id}/desk`);
+    await notifyAdmin(`${name} chose ${tier.name} and is paying ${usd(amount)} by Zelle`, [`${name} (${email}${phone ? `, ${phone}` : ""}) chose ${tier.name} at ${ev.name}.`, "Check your bank, then confirm the Zelle payment on their Meeting view.", giftLine, checkLine], `/admin/clients/${client.id}/desk`);
     if (created) await startClientSession(client.id);
-    return json({ ok: true, zelle: { to: settings.zelle, name: settings.zelleName || settings.brandName, amount, memo: `${name.split(/\s+/)[0]} ${tier.name}` }, welcome: created ? `/event/${ev.slug}/welcome?t=${tier.id}&z=1` : null });
+    return json({ ok: true, zelle: { to: settings.zelle, name: settings.zelleName || settings.brandName, amount, memo: `${name.split(/\s+/)[0]} ${tier.name}` }, welcome: created ? `/event/${ev.slug}/welcome?t=${tier.id}&z=1${gift ? `&g=${encodeURIComponent(gift.to)}&gf=${encodeURIComponent(name)}${gift.note ? `&gn=${encodeURIComponent(gift.note)}` : ""}` : ""}` : null, cert: certUrl || null });
   }
 
   const origin = await siteOrigin();
@@ -100,7 +107,7 @@ export async function POST(req: Request) {
     mode: "payment",
     customer_email: email,
     line_items: [{ quantity: 1, price_data: { currency: "usd", unit_amount: Math.round(amount * 100), product_data: { name: `${tier.name}${deposit ? " (deposit)" : ""}`, description: `Build & Bloom, ${ev.name} price` } } }],
-    metadata: { kind: "event", slug: ev.slug, tierId: tier.id, clientId: client.id, packageAmount: String(amount), optionLabel: label, payerName: name, newClient: created ? "1" : "", noAgreement: tier.agreement ? "" : "1", pool: tier.spots && tier.pool ? tier.pool : "" },
+    metadata: { kind: "event", slug: ev.slug, tierId: tier.id, clientId: client.id, packageAmount: String(amount), optionLabel: label, payerName: name, newClient: created ? "1" : "", noAgreement: tier.agreement ? "" : "1", pool: tier.spots && tier.pool ? tier.pool : "", ...(gift ? { giftFor: gift.to.slice(0, 120), giftNote: gift.note.slice(0, 160), giftEmail: gift.email.slice(0, 200) } : {}) },
     success_url: `${origin}/api/event/done?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${origin}/event/${ev.slug}?canceled=1`,
   });

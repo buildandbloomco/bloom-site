@@ -1,0 +1,22 @@
+/* Printable gift certificate */
+.gc-page { min-height: 100vh; background: var(--cream); display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 28px 16px 48px; }
+.gc-bar { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; justify-content: center; }
+.gc { width: 100%; max-width: 7in; background: #fffdf8; border: 2px solid #2f4a3a; outline: 1px solid var(--gold); outline-offset: -10px; border-radius: 0 40px 0 0; overflow: hidden; box-shadow: var(--shadow); }
+.gc-img { width: 100%; height: 1.6in; object-fit: cover; display: block; border-bottom: 3px solid var(--gold); }
+.gc-body { padding: 0.3in 0.45in 0.32in; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px; color: #2f4a3a; }
+.gc-eyebrow { margin: 0; font-size: 0.78rem; letter-spacing: 0.28em; text-transform: uppercase; color: #9c4a26; }
+.gc-to { margin: 0; font-family: var(--display); font-size: clamp(2.2rem, 7vw, 3.2rem); line-height: 1.05; color: #2f4a3a; }
+.gc-what { margin: 4px 0 0; font-size: 1.15rem; }
+.gc-details { margin: 0; font-size: 0.98rem; color: #6b6152; }
+.gc-note { margin: 10px 0 0; font-family: var(--display); font-style: italic; font-size: 1.15rem; max-width: 30em; }
+.gc-foot { margin-top: 14px; width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 0.98rem; border-top: 1px solid #d6ccb8; padding-top: 10px; }
+.gc-brand { display: inline-flex; gap: 8px; align-items: center; font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; }
+.gc-brand img { width: 26px; height: 26px; border-radius: 4px; }
+.gc-small { margin: 4px 0 0; font-size: 0.78rem; color: #6b6152; }
+@media print {
+  @page { size: letter landscape; margin: 0.5in; }
+  .no-print { display: none !important; }
+  .gc-page { background: none; padding: 0; min-height: 0; }
+  .gc { box-shadow: none; margin: 0 auto; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

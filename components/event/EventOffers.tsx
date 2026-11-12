@@ -20,9 +20,11 @@ export default function EventOffers({ event, ends, canceled, contact, spots = {}
   const [pay, setPay] = useState<"full" | "deposit">("full");
   const [method, setMethod] = useState<"card" | "zelle">("card");
   const [agree, setAgree] = useState(false);
+  const [gift, setGift] = useState(false);
+  const [g, setG] = useState({ to: "", email: "", note: "" });
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState(canceled ? "Your card was not charged. Pick up where you left off whenever you are ready." : "");
-  const [zelle, setZelle] = useState<{ z: Zelle; welcome: string | null } | null>(null);
+  const [zelle, setZelle] = useState<{ z: Zelle; welcome: string | null; cert?: string | null } | null>(null);
   const formRef = useRef<HTMLDivElement>(null);
 
   const tier = event.tiers.find((t) => t.id === tierId);
@@ -43,11 +45,11 @@ export default function EventOffers({ event, ends, canceled, contact, spots = {}
     e.preventDefault();
     if (!tier) return;
     setBusy(true); setErr("");
-    const r = await fetch("/api/event/buy", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug: event.slug, tierId: tier.id, pay, method, agree, check, ...f }) });
+    const r = await fetch("/api/event/buy", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug: event.slug, tierId: tier.id, pay, method, agree, check, ...f, ...(gift ? { gift: g } : {}) }) });
     const d = await r.json().catch(() => ({}));
     if (!r.ok) { setErr(d.error || "Something went wrong. Please try again."); setBusy(false); return; }
     if (d.checkout) { window.location.href = d.checkout; return; }
-    if (d.zelle) { setZelle({ z: d.zelle, welcome: d.welcome }); setBusy(false); setTimeout(() => formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50); }
+    if (d.zelle) { setZelle({ z: d.zelle, welcome: d.welcome , cert: d.cert }); setBusy(false); setTimeout(() => formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50); }
   }
 
   return (
@@ -124,6 +126,7 @@ export default function EventOffers({ event, ends, canceled, contact, spots = {}
             <li>Amount: <strong>{usd(zelle.z.amount)}</strong>. In the memo, write <strong>{zelle.z.memo}</strong>.</li>
           </ol>
           <p className="small" style={{ margin: 0 }}>We will confirm it as soon as it arrives, and it will show as paid in your portal.</p>
+          {zelle.cert && <div><a className="btn btn-gold" href={zelle.cert} target="_blank" rel="noopener">Print her gift certificate</a></div>}
           {zelle.welcome ? <div><a className="btn btn-primary" href={zelle.welcome}>Open my portal</a></div> : <p className="small muted" style={{ margin: 0 }}>You already have a Build &amp; Bloom portal. Sign in with your access code to see it.</p>}
         </section>
       ) : tier && (
@@ -147,6 +150,21 @@ export default function EventOffers({ event, ends, canceled, contact, spots = {}
               <label>Phone<input type="tel" autoComplete="tel" value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} /></label>
               <label>Business or organization<input type="text" autoComplete="organization" value={f.business} onChange={(e) => setF({ ...f, business: e.target.value })} /></label>
             </div>
+            {event.giftable && (
+              <div className="ev-gift stack" style={{ gap: 10 }}>
+                <label className="row" style={{ gap: 10, alignItems: "flex-start", flexWrap: "nowrap" }}>
+                  <input type="checkbox" style={{ width: "auto", marginTop: 4 }} checked={gift} onChange={(e) => setGift(e.target.checked)} />
+                  <span><strong>This seat is a gift</strong> 🎁<br /><span className="small muted">You&rsquo;ll get a printable gift certificate to give her, and we&rsquo;ll send her the details before the event.</span></span>
+                </label>
+                {gift && (
+                  <div className="ev-fields">
+                    <label>Her name<input type="text" required value={g.to} onChange={(e) => setG({ ...g, to: e.target.value })} /></label>
+                    <label>Her email <span className="hint">Optional. Leave blank to keep it a surprise; we&rsquo;ll send the details to you.</span><input type="email" value={g.email} onChange={(e) => setG({ ...g, email: e.target.value })} /></label>
+                    <label style={{ gridColumn: "1 / -1" }}>A note for her <span className="hint">Optional, printed on the certificate</span><input type="text" maxLength={160} value={g.note} onChange={(e) => setG({ ...g, note: e.target.value })} /></label>
+                  </div>
+                )}
+              </div>
+            )}
             <div className="ev-opts" role="radiogroup" aria-label="How you are paying">
               <label className={method === "card" ? "on" : ""}><input type="radio" name="method" checked={method === "card"} onChange={() => setMethod("card")} /><span><strong>Card</strong><br /><span className="tiny muted">Secure checkout by Stripe</span></span></label>
               <label className={method === "zelle" ? "on" : ""}><input type="radio" name="method" checked={method === "zelle"} onChange={() => setMethod("zelle")} /><span><strong>Zelle</strong><br /><span className="tiny muted">We confirm when it arrives</span></span></label>
@@ -154,7 +172,7 @@ export default function EventOffers({ event, ends, canceled, contact, spots = {}
             {method === "zelle" && <label>Name on the Zelle account you will send from <span className="hint">If different from yours</span><input type="text" value={f.zelleName} onChange={(e) => setF({ ...f, zelleName: e.target.value })} /></label>}
             <label className="row small" style={{ gap: 10, alignItems: "flex-start", flexWrap: "nowrap" }}>
               <input type="checkbox" style={{ width: "auto", marginTop: 4 }} checked={agree} onChange={(e) => setAgree(e.target.checked)} />
-              <span>{event.open ? "I understand this is a ticket to a live workshop. " : `I understand this is a ${event.name} price, available through ${ends}. `}{tier.agreement ? "My short service agreement will be waiting in my portal to sign before my first session. " : ""}Build &amp; Bloom provides strategy and organizational wellness support, not therapy, legal, tax, or accounting services.</span>
+              <span>{event.open ? "I understand this is a ticket to a live event. " : `I understand this is a ${event.name} price, available through ${ends}. `}{tier.agreement ? "My short service agreement will be waiting in my portal to sign before my first session. " : ""}Build &amp; Bloom provides strategy and organizational wellness support, not therapy, legal, tax, or accounting services.</span>
             </label>
             {err && <p className="error-text" role="alert">{err}</p>}
             <button className="btn btn-primary btn-block" disabled={busy || !agree}>{busy ? "One moment..." : method === "card" ? `Pay ${usd(amount)} by card` : `Pay ${usd(amount)} by Zelle`}</button>
