@@ -230,7 +230,7 @@ export const RESET_CIRCLE: EventOffer = {
   headline: "The Reset Circle: a first quarter reset",
   details: "Saturday, January 16, 2027 · 10:00 AM to 4:00 PM · Peace on the Pond",
   endsAt: "2027-01-15T18:00:00-05:00",
-  intro: "Start the new year slowly, on purpose. A quiet day at Peace on the Pond to rest, reconnect with yourself and other women, let go of what last year asked of you, and leave rooted in your one priority for the first quarter. Built around the Collective Connection Experience. Low pressure, no experience needed. Full itinerary coming soon.",
+  intro: "Start the new year slowly, on purpose. A quiet day at Peace on the Pond to rest, reconnect with yourself and other women, let go of what last year asked of you, and leave rooted in your one priority for the first quarter. Built around the Collective Connection Experience, with a sound bowl meditation and a take-home gift for every guest. Low pressure, no experience needed. Full itinerary coming soon.",
   open: true,
   active: true,
   tiers: [{
@@ -238,10 +238,12 @@ export const RESET_CIRCLE: EventOffer = {
     early: { price: 157, until: "2026-12-15T23:59:00-05:00" },
     includes: [
       "A quiet morning to slow down and arrive",
+      "A sound bowl meditation",
       "The Collective Connection Experience, a guided circle of connection",
       "A reflection and release practice to let go of what last year asked of you",
       "Your Bloom Check and a One Priority plan for the first 90 days of 2027",
       "Lunch, warm drinks, and time to rest",
+      "A take-home gift: Mindful Bloom Reset, an herbal tea blend made by Jadon, plus a complimentary digital product",
       "A free 20-minute one-on-one follow-up call after the event",
     ],
     serviceIds: [], agreement: false, spots: 20, pool: "reset-circle-dec-2026",
