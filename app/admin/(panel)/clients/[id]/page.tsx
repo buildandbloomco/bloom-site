@@ -6,6 +6,7 @@ import ClientEditor, { type WorkspaceSummary } from "@/components/admin/ClientEd
 import PortalKind from "@/components/admin/PortalKind";
 import { ticketsFor } from "@/lib/ledger";
 import { GUIDES } from "@/lib/guides";
+import { accessOpen, getAccess } from "@/lib/library";
 import { getAssessment, getPlan, listResponses } from "@/lib/workspace";
 import { progress } from "@/lib/plan-types";
 
@@ -31,6 +32,7 @@ export default async function EditClient({ params }: { params: Promise<{ id: str
   const guestInvite = client.kind === "guest" ? {
     events: (await ticketsFor(client)).filter((t) => t.status !== "unpaid").map((t) => ({ name: t.e.name, details: t.e.details || "", gift: t.status === "comp" ? t.compCert?.from || "" : "" })),
     books: GUIDES.filter((g) => (client.guideSlugs ?? []).includes(g.slug)).map((g) => g.title),
+    library: await (async () => { const a = await getAccess(client.id); return accessOpen(a) ? a?.until || "always" : ""; })(),
   } : null;
   return (
     <div className="stack" style={{ gap: 24 }}>

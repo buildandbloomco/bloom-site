@@ -62,6 +62,8 @@ export interface EventOffer {
   access?: "guest";
   /** Guidebooks every guest gets in their portal once their seat is paid or given, e.g. ["right-yes"] */
   guideSlugs?: string[];
+  /** Guests get the Wellness Library through this day (YYYY-MM-DD) once their seat is paid or given */
+  libraryUntil?: string;
 }
 
 /** Personal events give buyers a guest pass instead of a business client portal */
@@ -248,6 +250,7 @@ export const RESET_CIRCLE: EventOffer = {
   giftable: true,
   access: "guest",
   guideSlugs: ["right-yes"],
+  libraryUntil: "2027-04-16",
   headline: "The Reset Circle: a first quarter reset",
   details: "Saturday, January 16, 2027 · 10:00 AM to 4:00 PM · Peace on the Pond",
   endsAt: "2027-01-15T18:00:00-05:00",
@@ -266,6 +269,7 @@ export const RESET_CIRCLE: EventOffer = {
       "Your Bloom Check and a One Priority plan for the first 90 days of 2027, built around your right yes",
       "Lunch, warm drinks, and time to rest",
       "A take-home gift: Mindful Bloom Reset, an herbal tea blend made by Jadon, plus The Right Yes, a 21-day guide from trying to doing, to keep going at home",
+      "Free access to the Wellness Library for 90 days after the event: guided audio, journaling, and readings",
       "A free 20-minute one-on-one follow-up call after the event",
     ],
     serviceIds: [], agreement: false, spots: 20, pool: "reset-circle-dec-2026",

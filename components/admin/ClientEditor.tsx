@@ -34,7 +34,7 @@ export default function ClientEditor({
   initialCode: string;
   workspace?: WorkspaceSummary;
   /** Event guests get an invite about their ticket instead of a proposal */
-  guestInvite?: { events: { name: string; details: string; gift: string }[]; books: string[] } | null;
+  guestInvite?: { events: { name: string; details: string; gift: string }[]; books: string[]; library?: string } | null;
 }) {
   const router = useRouter();
   const [c, setC] = useState<Client>(initial);
@@ -117,7 +117,7 @@ export default function ClientEditor({
   const invite = guestInvite
     ? `Hi ${hi}! ${ev ? `You're all set for ${ev.name}${when(ev.details)}.` : "Your guest pass is ready."}${ev?.gift ? ` Your seat is a gift from ${ev.gift}.` : ""}
 
-Your guest pass has your ticket, everything the day includes, what to know before you come, and a free follow-up call you can book after.${guestInvite.books.length ? ` Your copy of ${list(guestInvite.books)} is waiting for you there too.` : ""}
+Your guest pass has your ticket, everything the day includes, what to know before you come, and a free follow-up call you can book after.${guestInvite.books.length ? ` Your copy of ${list(guestInvite.books)} is waiting for you there too.` : ""}${guestInvite.library ? ` You also have the Wellness Library${guestInvite.library !== "always" ? ` through ${new Date(guestInvite.library + "T12:00:00").toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}` : ""}: guided audio, journaling, and readings to keep your reset going.` : ""}
 
 Open it here: ${origin}/portal
 Your access code: ${code}

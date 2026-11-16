@@ -7,6 +7,7 @@ import { stripe } from "./stripe";
 import { listEvents } from "./events";
 import { addEventBooks, isGuestEvent } from "./event-def";
 import { matchEvent, ticketsFor } from "./ledger";
+import { grantEventLibrary } from "./event-library";
 import { allNotices } from "./paynotices";
 import { listComps } from "./comps";
 import { listLeads, saveLead } from "./leads";
@@ -24,7 +25,7 @@ let running: Promise<void> | null = null;
  *  Anyone with any sign of business work (another payment, a proposal, sessions, a course, Money entries,
  *  an agreement, services in their package, shop purchases) keeps their full portal. Access codes don't change. */
 export async function migrateGuestPasses() {
-  const steps: [string, () => Promise<void>][] = [[FLAG, run], [BOOKS_FLAG, giveBooks], [LEADS_FLAG, guestsAsLeads], [GIFTS_FLAG, giftsFromStripe], [NAMES_FLAG, retireNameCodes], [LANE_FLAG, guestsAsIndividuals]];
+  const steps: [string, () => Promise<void>][] = [[FLAG, run], [BOOKS_FLAG, giveBooks], [LEADS_FLAG, guestsAsLeads], [GIFTS_FLAG, giftsFromStripe], [NAMES_FLAG, retireNameCodes], [LANE_FLAG, guestsAsIndividuals], [LIB_FLAG, giveLibrary]];
   const todo: typeof steps = [];
   for (const s of steps) if (!(await kv().get(s[0]))) todo.push(s);
   if (!todo.length) return;
@@ -42,6 +43,16 @@ async function guestsAsLeads() {
     if (lead?.status === "converted") await saveLead({ ...lead, status: "new" });
   }
   await kv().set(LEADS_FLAG, true);
+}
+
+const LIB_FLAG = "bb:mig:eventlibrary1";
+/** One time: everyone who already has a paid or complimentary seat gets that event's Wellness Library access */
+async function giveLibrary() {
+  for (const c of await listClients()) {
+    if (c.status === "archived") continue;
+    for (const t of await ticketsFor(c)) if (t.status === "paid" || t.status === "comp") await grantEventLibrary(c.id, t.e);
+  }
+  await kv().set(LIB_FLAG, true);
 }
 
 const LANE_FLAG = "bb:mig:guestlane1";

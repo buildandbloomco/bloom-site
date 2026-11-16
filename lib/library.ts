@@ -102,12 +102,19 @@ export interface Viewer {
   preview: boolean;
 }
 
+/** Active, and not past its end date (access lasts through the end of that day, Eastern time) */
+export function accessOpen(a: LibraryAccess | null | undefined, now = new Date()): boolean {
+  if (!a || a.status !== "active") return false;
+  if (!a.until) return true;
+  return now.getTime() < new Date(`${a.until}T23:59:59-05:00`).getTime();
+}
+
 /** Who is looking at the library, and are they allowed in */
 export async function libraryViewer(): Promise<Viewer | null> {
   const client = await currentClient();
   if (client) {
     const access = await getAccess(client.id);
-    if (access && access.status === "active") return { client, access, preview: false };
+    if (accessOpen(access)) return { client, access, preview: false };
   }
   if (await isAdmin()) return { client: null, access: { clientId: "", plan: "team", teamName: "", status: "active", founding: false, since: "", note: "" }, preview: true };
   return null;

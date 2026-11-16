@@ -14,6 +14,8 @@ export async function PATCH(req: Request, ctx: Ctx) {
   if (b.plan === "team" || b.plan === "individual") a.plan = b.plan;
   if (typeof b.teamName === "string") a.teamName = b.teamName.slice(0, 200);
   if (typeof b.founding === "boolean") a.founding = b.founding;
+  // Blank = no end date
+  if (typeof b.until === "string") { if (/^\d{4}-\d{2}-\d{2}$/.test(b.until)) a.until = b.until; else if (!b.until) delete a.until; }
   await saveAccess(a);
   return json(a);
 }

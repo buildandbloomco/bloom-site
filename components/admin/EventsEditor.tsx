@@ -4,7 +4,7 @@ import { GUIDES } from "@/lib/guides";
 import { useState } from "react";
 import { usd, type EventTier } from "@/lib/event-def";
 
-type Ev = { slug: string; name: string; endsAt: string; intro: string; tiers: EventTier[]; active?: boolean; code: string; open?: boolean; headline?: string; details?: string; image?: string; giftable?: boolean; access?: "guest"; guideSlugs?: string[] };
+type Ev = { slug: string; name: string; endsAt: string; intro: string; tiers: EventTier[]; active?: boolean; code: string; open?: boolean; headline?: string; details?: string; image?: string; giftable?: boolean; access?: "guest"; guideSlugs?: string[]; libraryUntil?: string };
 type Svc = { id: string; name: string; price: number | null };
 
 const TZ = "America/New_York";
@@ -108,6 +108,9 @@ export default function EventsEditor({ initial, services, origin }: { initial: E
                     ))}
                   </div>
                 </fieldset>
+                <label>Wellness Library for guests, through <span className="hint">blank = no library access; added once their seat is paid or given</span>
+                  <input type="date" value={e.libraryUntil || ""} onChange={(x) => upd(i, { libraryUntil: x.target.value || undefined })} />
+                </label>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12 }}>
                   <label>Headline <span className="hint">Blank = &ldquo;Leave empowered, with a next step.&rdquo;</span><input type="text" value={e.headline || ""} onChange={(x) => upd(i, { headline: x.target.value })} /></label>
                   <label>When and where <span className="hint">e.g. Sat, Nov 14 · 11 AM ET · On Zoom</span><input type="text" value={e.details || ""} onChange={(x) => upd(i, { details: x.target.value })} /></label>

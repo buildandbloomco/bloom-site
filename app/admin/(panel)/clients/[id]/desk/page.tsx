@@ -5,7 +5,7 @@ import { decryptCode } from "@/lib/crypto";
 import { getCourse, listAppointments, listEnrollments } from "@/lib/courses";
 import { courseProgress } from "@/lib/course-logic";
 import { getAssessment, getPlan, listResponses } from "@/lib/workspace";
-import { getAccess } from "@/lib/library";
+import { accessOpen, getAccess } from "@/lib/library";
 import { nowET, fmtTime } from "@/lib/booking";
 import { money, shortDate } from "@/lib/format";
 import { outstanding } from "@/lib/pricing";
@@ -106,7 +106,7 @@ export default async function ClientDesk({ params }: { params: Promise<{ id: str
                 <Row k="Balance" v={<strong>{money(outstanding(client.investment, paid))}</strong>} />
               </>
             )}
-            {lib?.status === "active" && <Row k="Wellness Library" v="Member" />}
+            {accessOpen(lib) && <Row k="Wellness Library" v={lib?.until ? `Member through ${lib.until}` : "Member"} />}
           </section>
 
           {scores.length > 0 && (

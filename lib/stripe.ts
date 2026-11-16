@@ -87,7 +87,7 @@ export async function recordCheckoutSession(session: Stripe.Checkout.Session): P
     const { getEvent } = await import("./events");
     const { addEventBooks } = await import("./event-def");
     const ev = await getEvent(session.metadata.slug);
-    if (ev) addEventBooks(client, ev);
+    if (ev) { addEventBooks(client, ev); const { grantEventLibrary } = await import("./event-library"); await grantEventLibrary(client.id, ev); }
   }
   await saveClient(client);
   if (becameActive && session.metadata?.noAgreement !== "1") await ensureAgreement(client, `${client.name} made their first payment.`);

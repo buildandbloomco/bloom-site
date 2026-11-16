@@ -32,7 +32,7 @@ import { listNotices } from "@/lib/paynotices";
 import { getReview } from "@/lib/reviews";
 import NeedsYou, { type Need, type NextUp } from "@/components/portal/NeedsYou";
 import MyCourses from "@/components/course/MyCourses";
-import { getAccess } from "@/lib/library";
+import { accessOpen, getAccess } from "@/lib/library";
 import { getCourse, listAppointments, listEnrollments } from "@/lib/courses";
 import GuestPass from "@/components/portal/GuestPass";
 import { ticketsFor } from "@/lib/ledger";
@@ -80,7 +80,8 @@ export default async function Portal({
     const owned = await ownedIds(client.id);
     const guides = GUIDES.filter((g) => (client!.guideSlugs ?? []).includes(g.slug)).map((g) => ({ title: g.title, href: g.file, note: g.tagline }));
     const products = (await listProducts()).filter((p) => owned.includes(p.id) && p.file && !guides.some((g) => g.href === p.file)).map((p) => ({ title: p.title, href: p.file, note: p.subtitle }));
-    return <GuestPass client={client} settings={settings} tickets={await ticketsFor(client)} appts={myAppts} books={[...guides, ...products]} paidBanner={paidBanner} />;
+    const lib = await getAccess(client.id);
+    return <GuestPass client={client} settings={settings} tickets={await ticketsFor(client)} appts={myAppts} books={[...guides, ...products]} paidBanner={paidBanner} library={accessOpen(lib) ? { until: lib?.until || "" } : null} />;
   }
 
   const pub = toPublic(client);
@@ -110,7 +111,7 @@ export default async function Portal({
     )
   ).filter((x): x is { e: typeof x.e; c: NonNullable<typeof x.c> } => !!x.c);
   const libAccess = await getAccess(client.id);
-  const hasLibrary = libAccess?.status === "active";
+  const hasLibrary = accessOpen(libAccess);
   const [plan, assessment] = await Promise.all([getPlan(client.id), getAssessment(client.id)]);
   const hasWorkspace = !!plan.enabled || !!assessment?.enabled;
   const [agreements, files, review] = await Promise.all([listAgreements(client.id), listFiles(client.id), getReview(client.id)]);

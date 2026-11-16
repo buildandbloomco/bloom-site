@@ -6,6 +6,7 @@ import { addEventBooks, isGuestEvent } from "@/lib/event-def";
 import { listLeads, saveLead } from "@/lib/leads";
 import { getEvent, releaseSpot, spotsLeft, takeSpot } from "@/lib/events";
 import { compRef, listComps, saveComps } from "@/lib/comps";
+import { endEventLibrary, grantEventLibrary } from "@/lib/event-library";
 import type { Lead } from "@/lib/types";
 
 const str = (v: unknown, max = 300) => String(v ?? "").trim().slice(0, max);
@@ -37,6 +38,7 @@ export async function POST(req: Request) {
   });
   const compLine = `Complimentary seat at ${ev.name} (${tier.name}), added by Jadon.${note ? ` ${note}` : ""}`;
   addEventBooks(client, ev);
+  await grantEventLibrary(client.id, ev);
   client.notes = [client.notes, compLine].filter(Boolean).join("\n");
   await saveClient(client);
 
@@ -75,6 +77,7 @@ export async function DELETE(req: Request) {
   for (const c of gone) {
     const t = ev?.tiers.find((x) => x.id === c.tierId);
     if (t?.pool) await releaseSpot(t.pool, compRef(clientId));
+    if (ev) await endEventLibrary(clientId, ev);
     // Take the event tag back off their lead if the comp put it there, so they don't show as "didn't finish paying"
     const lead = c.addedTag && ev && t ? leads.find((l) => l.clientId === clientId) : undefined;
     if (lead) await saveLead({ ...lead, interests: lead.interests.filter((x) => x !== `${ev!.name}: ${t!.name}`) });

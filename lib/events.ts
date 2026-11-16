@@ -14,6 +14,26 @@ const KEY = "bb:events";
 export async function listEvents(): Promise<StoredEvent[]> {
   const saved = await kv().get<StoredEvent[]>(KEY);
   if (saved) {
+    // One time: Reset Circle guests get the Wellness Library through April 16, 2027 (90 days after the event)
+    if (!(await kv().get("bb:events:mig:library1"))) {
+      const LIB = RESET_CIRCLE.tiers[0].includes.find((x) => x.startsWith("Free access to the Wellness Library"))!;
+      if (saved.some((e) => e.slug === "reset-circle")) {
+        const next = saved.map((e) => e.slug !== "reset-circle" ? e : {
+          ...e,
+          libraryUntil: e.libraryUntil || RESET_CIRCLE.libraryUntil,
+          tiers: e.tiers.map((t) => {
+            if (t.id !== "seat" || t.includes.some((x) => x.includes("Wellness Library"))) return t;
+            const at = t.includes.findIndex((x) => x.startsWith("A free 20-minute"));
+            const inc = [...t.includes];
+            inc.splice(at < 0 ? inc.length : at, 0, LIB);
+            return { ...t, includes: inc };
+          }),
+        });
+        await kv().set(KEY, next);
+        saved.splice(0, saved.length, ...next);
+      }
+      await kv().set("bb:events:mig:library1", true);
+    }
     // One time: C.R.E.A.T.E. is over and no one bought from it, so it comes off the list
     if (!(await kv().get("bb:events:mig:nocreate1"))) {
       if (saved.some((e) => e.slug === "create")) {
@@ -244,7 +264,7 @@ export function cleanEvents(input: unknown, serviceIds: Set<string>): StoredEven
       tiers.push(c);
     }
     if (!tiers.length) return `${name} needs at least one offer.`;
-    out.push({ slug, name, endsAt: new Date(endsAt).toISOString(), intro: str(raw.intro, 600), tiers, active: raw.active !== false, code, ...(raw.open === true ? { open: true } : {}), ...(str(raw.headline, 140) ? { headline: str(raw.headline, 140) } : {}), ...(str(raw.details, 200) ? { details: str(raw.details, 200) } : {}), ...(/^(\/|https:\/\/)\S+$/.test(str(raw.image, 300)) ? { image: str(raw.image, 300) } : {}), ...(raw.giftable === true ? { giftable: true } : {}), ...(raw.access === "guest" ? { access: "guest" as const } : {}), ...(guideSlugs(raw.guideSlugs).length ? { guideSlugs: guideSlugs(raw.guideSlugs) } : {}) });
+    out.push({ slug, name, endsAt: new Date(endsAt).toISOString(), intro: str(raw.intro, 600), tiers, active: raw.active !== false, code, ...(raw.open === true ? { open: true } : {}), ...(str(raw.headline, 140) ? { headline: str(raw.headline, 140) } : {}), ...(str(raw.details, 200) ? { details: str(raw.details, 200) } : {}), ...(/^(\/|https:\/\/)\S+$/.test(str(raw.image, 300)) ? { image: str(raw.image, 300) } : {}), ...(raw.giftable === true ? { giftable: true } : {}), ...(raw.access === "guest" ? { access: "guest" as const } : {}), ...(guideSlugs(raw.guideSlugs).length ? { guideSlugs: guideSlugs(raw.guideSlugs) } : {}), ...(/^\d{4}-\d{2}-\d{2}$/.test(str(raw.libraryUntil, 10)) ? { libraryUntil: str(raw.libraryUntil, 10) } : {}) });
   }
   return out;
 }

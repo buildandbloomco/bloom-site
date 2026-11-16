@@ -41,7 +41,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
       const { getEvent } = await import("@/lib/events");
       const { addEventBooks } = await import("@/lib/event-def");
       const ev = await getEvent(n.event.slug);
-      if (ev) addEventBooks(c, ev);
+      if (ev) { addEventBooks(c, ev); const { grantEventLibrary } = await import("@/lib/event-library"); await grantEventLibrary(c.id, ev); }
     }
     await saveClient(c);
     if (becameActive) await ensureAgreement(c, `${c.name} made their first payment.`);

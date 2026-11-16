@@ -58,4 +58,6 @@ export interface LibraryAccess {
   founding: boolean;
   since: string;
   note: string;
+  /** Last day of access (YYYY-MM-DD, Eastern). Not set = no end date. Event guests get access for a set time. */
+  until?: string;
 }

@@ -16,13 +16,15 @@ const STATUS: Record<Ticket["status"], [string, string]> = {
 
 /** A simple page for people who came to a personal event: their ticket, receipt, books, and follow-up call.
  *  No Money, business tools, or billing. */
-export default function GuestPass({ client, settings, tickets, appts, books, paidBanner }: {
+export default function GuestPass({ client, settings, tickets, appts, books, paidBanner, library }: {
   client: Client;
   settings: Settings;
   tickets: Ticket[];
   appts: Appointment[];
   books: { title: string; href: string; note?: string }[];
   paidBanner: boolean;
+  /** Wellness Library access, if they have it */
+  library?: { until: string } | null;
 }) {
   const first = (client.contactName || client.name).split(" ")[0];
   const receipts = [...client.payments].sort((a, b) => b.date.localeCompare(a.date));
@@ -40,6 +42,7 @@ export default function GuestPass({ client, settings, tickets, appts, books, pai
           <nav className="topnav" aria-label="Sections">
             <a href="#tickets">Your ticket</a>
             {books.length > 0 && <a href="#books">Your books</a>}
+            {library && <a href="#wellness-library">Wellness Library</a>}
             <a href="#follow-up">Follow-up call</a>
             {receipts.length > 0 && <a href="#receipt">Receipt</a>}
           </nav>
@@ -121,6 +124,19 @@ export default function GuestPass({ client, settings, tickets, appts, books, pai
                   <a className="btn btn-sm btn-ghost" href={b.href} target="_blank" rel="noopener noreferrer">Open</a>
                 </div>
               ))}
+            </div>
+          </section>
+        )}
+
+        {library && (
+          <section className="section" id="wellness-library">
+            <div className="wrap" style={{ maxWidth: 820 }}>
+              <div className="card stack" style={{ gap: 10, background: "var(--espresso)", color: "var(--cream)", padding: 28 }}>
+                <p className="eyebrow" style={{ margin: 0, color: "var(--gold)" }}>Included with your seat</p>
+                <h2 style={{ margin: 0, color: "var(--gold)", textTransform: "none", letterSpacing: 0 }}>The Wellness Library</h2>
+                <p style={{ margin: 0 }}>Guided audio, journaling, coping tools, and readings to keep your reset going. Start anywhere.{library.until ? ` Yours through ${new Date(`${library.until}T12:00:00`).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}.` : ""}</p>
+                <div><a className="btn btn-gold" href="/library">Open the Wellness Library</a></div>
+              </div>
             </div>
           </section>
         )}

@@ -33,7 +33,7 @@ export default function LibraryMembers({ members: initial, clients }: { members:
       )}
       <div className="table-wrap">
         <table className="table">
-          <thead><tr><th>Member</th><th>Plan</th><th>Since</th><th>Access code</th><th>Status</th><th><span className="sr-only">Actions</span></th></tr></thead>
+          <thead><tr><th>Member</th><th>Plan</th><th>Since · Through</th><th>Access code</th><th>Status</th><th><span className="sr-only">Actions</span></th></tr></thead>
           <tbody>
             {!rows.length && <tr><td colSpan={6} className="muted">No members yet. Add your founding members below.</td></tr>}
             {rows.map((r) => (
@@ -44,7 +44,13 @@ export default function LibraryMembers({ members: initial, clients }: { members:
                   {r.founding && <span className="tag" style={{ marginLeft: 6 }}>Founding</span>}
                   {r.plan === "team" && r.teamName && <div className="tiny muted" style={{ marginTop: 4 }}>{r.teamName}</div>}
                 </td>
-                <td className="small muted">{shortDate(r.since)}</td>
+                <td className="small muted">
+                  {shortDate(r.since)}
+                  <div className="row" style={{ gap: 6, marginTop: 4, flexWrap: "nowrap" }}>
+                    <input type="date" aria-label={`Access ends for ${r.name}`} value={r.until || ""} onChange={(e) => patch(r.clientId, { until: e.target.value })} style={{ minHeight: 34, padding: "4px 8px", fontSize: "0.85rem", width: "auto" }} />
+                  </div>
+                  <div className="tiny">{r.until ? (r.until < new Date().toISOString().slice(0, 10) ? "Ended" : "Has an end date") : "No end date"}{r.note ? ` · ${r.note}` : ""}</div>
+                </td>
                 <td className="small"><code>{r.code}</code></td>
                 <td>
                   <select aria-label={`Status for ${r.name}`} value={r.status} onChange={(e) => patch(r.clientId, { status: e.target.value as LibraryAccess["status"] })} style={{ minHeight: 38, padding: "6px 10px", fontSize: "0.95rem", width: "auto", minWidth: 110 }}>
