@@ -4,6 +4,8 @@ import { sign, verify } from "./crypto";
 import { getClient, getSettings, saveClient } from "./data";
 import { siteOrigin } from "./http";
 import { emailReady, sendEmail } from "./invite";
+import { renderEmail } from "./email-template";
+import { emailBrand } from "./email";
 import { findOrCreateClient } from "./enroll";
 import { DEFAULT_PRODUCTS, PRODUCT_KINDS, priceLabel, type Order, type Product } from "./shop-def";
 
@@ -84,12 +86,15 @@ async function emailDownloads(o: Order, items: Product[]) {
     if (!emailReady() || !items.length) return;
     const [s, origin] = await Promise.all([getSettings(), siteOrigin()]);
     const links = items.map((p) => ({ title: p.title, url: `${origin}/api/shop/download?t=${encodeURIComponent(dlToken(o.id, p.id))}` }));
-    await sendEmail({
-      to: [o.email],
-      subject: `Your download: ${o.title}`,
-      text: [`Hi ${o.name.split(" ")[0]},`, "", `Thank you for your order. Here ${links.length > 1 ? "are your downloads" : "is your download"}:`, ...links.map((l) => `${l.title}: ${l.url}`), "", "These links work for 90 days.", "", s.brandName].join("\n"),
-      html: `<div style="font-family:Georgia,serif;font-size:16px;line-height:1.5;color:#2C1B13;max-width:560px"><p>Hi ${o.name.split(" ")[0].replace(/</g, "")},</p><p>Thank you for your order. Here ${links.length > 1 ? "are your downloads" : "is your download"}:</p>${links.map((l) => `<p><a href="${l.url}" style="display:inline-block;background:#2C1B13;color:#fff;padding:9px 18px;border-radius:999px;text-decoration:none">Download ${l.title.replace(/</g, "")}</a></p>`).join("")}<p style="color:#6a574b;font-size:14px">These links work for 90 days.</p><p>${s.brandName}</p></div>`,
+    const { html, text } = renderEmail(await emailBrand(origin), {
+      eyebrow: "Your order", heading: links.length > 1 ? "Your downloads are ready" : "Your download is ready",
+      body: `Hi ${o.name.split(" ")[0]},\n\nThank you for your order. Here ${links.length > 1 ? "are your downloads" : "is your download"}.`,
+      buttons: links.slice(0, 2).map((l) => ({ label: `Download ${l.title}`.slice(0, 40), url: l.url })),
+      list: links.length > 2 ? links.slice(2).map((l) => `${l.title}: ${l.url}`) : undefined,
+      note: "These links work for 90 days. Your books are also in your portal.",
+      signoff: `With love,\n${s.brandName}`,
     });
+    await sendEmail({ to: [o.email], subject: `Your download: ${o.title}`, text, html });
   } catch {
     /* the order is still fulfilled; the download is on their thank-you page and in their portal */
   }

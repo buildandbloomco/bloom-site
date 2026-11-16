@@ -22,6 +22,7 @@ const GROUPS: [string, Item[]][] = [
     ["/admin/wellness", "Wellness Library", ["/admin/waitlist"]],
   ]],
   ["Marketing", [
+    ["/admin/email", "Email"],
     ["/admin/content", "Content"],
   ]],
 ];

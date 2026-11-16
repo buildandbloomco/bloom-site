@@ -384,6 +384,12 @@ The guide's words live in `guides/right-yes/content.mjs`. To change them, edit t
 
 Every Reset Circle guest gets it in their guest pass once their seat is paid or given. Pick which books an event gives under **Events > Edit event pages > Books every guest gets**. In the shop it is listed as coming soon until you turn it on in **Admin > Shop & books**.
 
+## Email
+
+Admin, then **Email** (under Marketing). Start from a ready-made email (event announcement, event reminder for guests, newsletter, invite to book a call) or a blank one. Choose a group (everyone with a seat at an event, people who didn't finish paying, active clients, event guests, leads, the waitlist, or everyone) or pick specific people. Write the message, add up to two buttons (an event page, booking a call, their portal or guest pass, the shop, or any link), and watch the preview as you type. Send yourself a test, then send.
+
+Every email the site sends, including your alerts, shop downloads, and session invites and reminders, uses the same Build & Bloom template. Emails from the Email page have an unsubscribe link, and anyone who unsubscribes is left off future sends. The template lives in `lib/email-template.ts`.
+
 ## Payments
 
 Admin, then **Payments**. Every payment on the site in one list: event seats, client package and add-on payments, course payments, shop orders, and paid guidebooks. Filter by time frame and type, and download a spreadsheet. Zelle payments people told you about but you have not confirmed yet are listed at the top, and the number shows next to **Payments** in the sidebar.
