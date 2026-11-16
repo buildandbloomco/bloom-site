@@ -19,7 +19,7 @@ export default async function GiftCertificate({ params, searchParams }: { params
   const img = eventImage(e);
   return (
     <main className="gc-page">
-      <div className="gc-bar no-print"><PrintButton /><span className="small muted">Tip: in the print window, turn on &ldquo;Background graphics.&rdquo;</span></div>
+      <div className="gc-bar no-print"><PrintButton /><span className="small muted">It prints as one full landscape page. In the print window, turn on &ldquo;Background graphics,&rdquo; and if it looks small, set Layout to Landscape and Margins to None.</span></div>
       <article className="gc">
         {img && <img className="gc-img" src={img} alt="" />}
         <div className="gc-body">
