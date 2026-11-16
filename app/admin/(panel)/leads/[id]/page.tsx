@@ -2,7 +2,8 @@ import { fmtTime, longDate } from "@/lib/booking";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getLead } from "@/lib/leads";
-import { getCatalog } from "@/lib/data";
+import { getCatalog, getClient } from "@/lib/data";
+import { decryptCode } from "@/lib/crypto";
 import { shortDate } from "@/lib/format";
 import LeadActions from "@/components/admin/LeadActions";
 
@@ -22,6 +23,8 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const [lead, catalog] = await Promise.all([getLead(id), getCatalog()]);
   if (!lead) notFound();
+  const linked = lead.clientId ? await getClient(lead.clientId) : null;
+  const guest = linked?.kind === "guest" ? { clientId: linked.id, code: linked.codeEnc ? decryptCode(linked.codeEnc) : "" } : null;
   const svc = (sid: string) => catalog.services.find((s) => s.id === sid)?.name ?? sid;
   const a = lead.assessment;
   return (
@@ -85,7 +88,7 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
           )}
         </div>
         <div className="sticky-col">
-          <LeadActions lead={lead} />
+          <LeadActions lead={lead} guest={guest} />
         </div>
       </div>
     </div>

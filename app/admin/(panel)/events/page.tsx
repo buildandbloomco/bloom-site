@@ -6,6 +6,7 @@ import { siteOrigin } from "@/lib/http";
 import { money, shortDate } from "@/lib/format";
 import EventsEditor from "@/components/admin/EventsEditor";
 import { CompForm, RemoveComp } from "@/components/admin/CompGuest";
+import MarkGift from "@/components/admin/MarkGift";
 
 export const dynamic = "force-dynamic";
 
@@ -127,6 +128,7 @@ async function Guests({ showAll }: { showAll: boolean }) {
                           <Link className="btn btn-sm btn-ghost" href={g.status === "zelle" ? `/admin/clients/${g.clientId}/desk` : `/admin/clients/${g.clientId}`}>{g.status === "zelle" ? "Confirm" : "Open"}</Link>
                           {g.status !== "unpaid" && <a className="linkbtn small" href={`/api/admin/clients/${g.clientId}/preview`} target="_blank" rel="noopener noreferrer" title={g.gift ? "Opens the buyer's pass, where this seat is listed" : undefined}>{g.guestPass ? "View ticket" : "View portal"} ↗</a>}
                           {g.gift && g.buyer && <a className="linkbtn small" href={certUrl(s.e.slug, g.gift, g.buyer.name)} target="_blank" rel="noopener noreferrer">Gift certificate ↗</a>}
+                          {s.e.giftable && !g.gift && (g.status === "paid" || g.status === "zelle") && <MarkGift slug={s.e.slug} clientId={g.clientId} tier={g.tier} />}
                           {g.comp && <RemoveComp slug={s.e.slug} clientId={g.clientId} name={g.name} />}
                         </div>
                       </td>

@@ -1,5 +1,6 @@
 import "server-only";
 import { findOrCreateClient } from "./enroll";
+import { setNameCode } from "./data";
 import { getFin, saveFin } from "./finance";
 import { getBuild, saveBuild } from "./builds";
 import { GUIDES } from "./guides";
@@ -21,6 +22,7 @@ export async function makeFullPortal(client: Client) {
  * Personal events (access "guest") get a guest pass named after the person.
  * Business events get a full client portal, named after their business if they gave one.
  * A guest who picks a business offer is upgraded to a full portal. A full client stays full.
+ * Guests sign in with their name and stay a lead until you make them an active client.
  * The caller saves the client.
  */
 export async function eventClient(ev: EventOffer, tier: EventTier, p: { name: string; email: string; business?: string; welcome: string }): Promise<{ client: Client; created: boolean; setUp: boolean }> {
@@ -36,6 +38,8 @@ export async function eventClient(ev: EventOffer, tier: EventTier, p: { name: st
     client.kind = "guest";
     client.tier = "";
     client.guideSlugs = [];
+    // Guests sign in with their name, not a random code
+    if (created) await setNameCode(client, p.name);
   } else {
     if (upgrade && p.business) client.name = p.business;
     await makeFullPortal(client);

@@ -88,7 +88,8 @@ export async function POST(req: Request) {
     if (tier.agreement && method === "zelle") await ensureAgreement(client, `${client.name} chose ${tier.name} at ${ev.name}.`);
   }
   lead.clientId = client.id;
-  lead.status = "converted";
+  // Event guests stay a lead (with their guest pass linked) until you make them an active client
+  if (client.kind !== "guest") lead.status = "converted";
   await saveLead(lead);
 
   if (method === "zelle") {

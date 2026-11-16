@@ -296,6 +296,8 @@ export interface Client {
   guideSlugs?: string[];
   codeEnc: string;
   codeIndex: string;
+  /** A second code that also opens the portal (their name, for event guests who had a code before) */
+  aliasIndex?: string;
   welcome: string;
   package: {
     title: string;
@@ -335,7 +337,7 @@ export interface Client {
 }
 
 /** What the browser is allowed to see about a client */
-export type PublicClient = Omit<Client, "codeEnc" | "codeIndex" | "notes">;
+export type PublicClient = Omit<Client, "codeEnc" | "codeIndex" | "aliasIndex" | "notes">;
 
 /** Someone who joined the Wellness Library waitlist */
 export interface WaitlistEntry {

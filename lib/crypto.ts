@@ -11,7 +11,9 @@ function secret(): string {
 }
 
 export function normalizeCode(code: string): string {
-  return code.trim().toUpperCase().replace(/\s+/g, "");
+  // Accents and punctuation are dropped so a name works as a code: "José O'Neil" -> "JOSEONEIL".
+  // Codes are only ever letters, numbers, and dashes, so this doesn't change any existing code.
+  return code.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toUpperCase().replace(/[^A-Z0-9-]/g, "");
 }
 
 /** Lookup key for an access code (the code itself is never stored in plain text) */

@@ -13,7 +13,10 @@ export const dynamic = "force-dynamic";
 const STATUS_TAG: Record<string, string> = { draft: "", sent: "gold", active: "green", completed: "green", archived: "" };
 
 export default async function AdminHome() {
-  const [clients, catalog, proposals] = await Promise.all([listClients(), getCatalog(), allProposals()]);
+  const [everyone, catalog, proposals] = await Promise.all([listClients(), getCatalog(), allProposals()]);
+  // Event guests are leads until you make them an active client
+  const clients = everyone.filter((c) => c.kind !== "guest");
+  const guestCount = everyone.length - clients.length;
   const today = nowET().date;
   const live = clients.filter((c) => c.status !== "archived");
   const collected = clients.reduce((s, c) => s + totalCollected(c), 0);
@@ -30,6 +33,8 @@ export default async function AdminHome() {
         </div>
         <NewClient />
       </div>
+
+      {guestCount > 0 && <p className="small muted" style={{ margin: 0 }}>{guestCount} event {guestCount === 1 ? "guest is" : "guests are"} under <Link href="/admin/leads">Leads</Link> until you make them active clients.</p>}
 
       <div className="stat-tiles">
         <div className="panel"><span className="muted small">Active clients</span><span className="v">{live.filter((c) => c.status === "active").length}</span></div>
@@ -88,7 +93,6 @@ export default async function AdminHome() {
                   </td>
                   <td>
                     <span className={`tag ${STATUS_TAG[c.status] ?? ""}`}>{c.status}</span>
-                    {c.kind === "guest" && <div style={{ marginTop: 6 }}><span className="tag gold">Guest pass</span></div>}
                     {(() => { const ps = proposalState(proposals[c.id] ?? null, today); return ps ? <div style={{ marginTop: 6 }}><Link href={`/admin/clients/${c.id}/proposal`} className={`tag ${ps.tone}`} style={{ textDecoration: "none" }}>{ps.label}</Link></div> : null; })()}
                     {reqs > 0 && <div style={{ marginTop: 6 }}><span className="tag rust">{reqs} new request{reqs > 1 ? "s" : ""}</span></div>}
                   </td>

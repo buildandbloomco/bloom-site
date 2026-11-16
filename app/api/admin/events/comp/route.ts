@@ -51,7 +51,8 @@ export async function POST(req: Request) {
   if (addedTag) lead.interests.push(tag);
   if (!lead.notes.includes(compLine)) lead.notes = [lead.notes, compLine].filter(Boolean).join("\n");
   lead.clientId = client.id;
-  lead.status = "converted";
+  // Event guests stay a lead (with their guest pass linked) until you make them an active client
+  if (client.kind !== "guest") lead.status = "converted";
   await saveLead(lead);
 
   if (tier.spots && tier.pool) await takeSpot(tier.pool, { ref: compRef(client.id), clientId: client.id, at: now, event: slug });

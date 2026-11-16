@@ -1,6 +1,7 @@
 import { fmtTime } from "@/lib/booking";
 import Link from "next/link";
 import { listLeads } from "@/lib/leads";
+import { listClients } from "@/lib/data";
 import { shortDate } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -9,13 +10,14 @@ const LANE: Record<string, string> = { orgs: "Helping organization", business: "
 const STATUS_TAG: Record<string, string> = { new: "rust", contacted: "gold", converted: "green", closed: "" };
 
 export default async function LeadsPage() {
-  const leads = await listLeads();
+  const [leads, clients] = await Promise.all([listLeads(), listClients()]);
+  const guestIds = new Set(clients.filter((c) => c.kind === "guest").map((c) => c.id));
   return (
     <div className="stack" style={{ gap: 24 }}>
       <div className="stack" style={{ gap: 4 }}>
         <p className="eyebrow">Admin</p>
         <h2>Leads</h2>
-        <p className="muted small">Everyone who sends an inquiry, books a consult, or requests a guidebook.</p>
+        <p className="muted small">Everyone who sends an inquiry, books a consult, requests a guidebook, or gets a ticket to a personal event like the Reset Circle.</p>
       </div>
       <div className="table-wrap">
         <table className="table">
@@ -29,6 +31,7 @@ export default async function LeadsPage() {
                 <td>
                   <Link href={`/admin/leads/${l.id}`} style={{ color: "var(--ink)", fontWeight: 600 }}>{l.name}</Link>
                   <div className="tiny muted">{[l.organization, l.role].filter(Boolean).join(" · ") || l.email}</div>
+                  {l.clientId && guestIds.has(l.clientId) && <div className="tiny" style={{ marginTop: 4 }}><span className="tag gold">Event guest</span> has a guest pass</div>}
                 </td>
                 <td className="small">{LANE[l.lane]}</td>
                 <td className="small">{l.interests.length ? `${l.interests.length} selected` : "Not specified"}{l.assessment ? " · snapshot" : ""}{l.guides?.map((g) => <div key={g.slug} className="tiny" style={{ marginTop: 4 }}><span className="tag gold">Guide{g.paid > 0 ? ` · paid $${g.paid}` : ""}</span> {g.title}</div>)}</td>

@@ -1,12 +1,13 @@
 import "server-only";
 import { kv } from "./kv";
-import { listClients, saveClient } from "./data";
+import { listClients, saveClient, setNameCode } from "./data";
+import { stripe } from "./stripe";
 import { listEvents } from "./events";
 import { addEventBooks, isGuestEvent } from "./event-def";
 import { matchEvent, ticketsFor } from "./ledger";
 import { allNotices } from "./paynotices";
 import { listComps } from "./comps";
-import { listLeads } from "./leads";
+import { listLeads, saveLead } from "./leads";
 import { listEnrollments } from "./courses";
 import { allProposals } from "./proposals";
 import { getAssessment, getPlan } from "./workspace";
@@ -21,12 +22,47 @@ let running: Promise<void> | null = null;
  *  Anyone with any sign of business work (another payment, a proposal, sessions, a course, Money entries,
  *  an agreement, services in their package, shop purchases) keeps their full portal. Access codes don't change. */
 export async function migrateGuestPasses() {
-  if ((await kv().get(FLAG)) && (await kv().get(BOOKS_FLAG))) return;
-  running ??= (async () => {
-    if (!(await kv().get(FLAG))) await run();
-    if (!(await kv().get(BOOKS_FLAG))) await giveBooks();
-  })().finally(() => { running = null; });
+  const steps: [string, () => Promise<void>][] = [[FLAG, run], [BOOKS_FLAG, giveBooks], [LEADS_FLAG, guestsAsLeads], [GIFTS_FLAG, giftsFromStripe]];
+  const todo: typeof steps = [];
+  for (const s of steps) if (!(await kv().get(s[0]))) todo.push(s);
+  if (!todo.length) return;
+  running ??= (async () => { for (const [flag, fn] of todo) if (!(await kv().get(flag))) await fn(); })().finally(() => { running = null; });
   await running;
+}
+
+const LEADS_FLAG = "bb:mig:guestlead1";
+/** One time: event guests go back to being leads, and their name opens their guest pass (their old code keeps working too) */
+async function guestsAsLeads() {
+  const leads = await listLeads();
+  for (const c of await listClients()) {
+    if (c.kind !== "guest" || c.status === "archived") continue;
+    const lead = leads.find((l) => l.clientId === c.id);
+    if (lead?.status === "converted") await saveLead({ ...lead, status: "new" });
+    try { await setNameCode(c, lead?.name || c.name, true); } catch { /* keep their existing code */ }
+  }
+  await kv().set(LEADS_FLAG, true);
+}
+
+const GIFTS_FLAG = "bb:mig:giftstripe1";
+/** One time: card payments for gifted seats made before gift details were saved on the payment get them from Stripe */
+async function giftsFromStripe() {
+  const s = stripe();
+  if (!s) { await kv().set(GIFTS_FLAG, true); return; }
+  const events = await listEvents();
+  for (const c of await listClients()) {
+    let changed = false;
+    for (const p of c.payments) {
+      if (p.gift || !p.stripeSessionId) continue;
+      const m = matchEvent(events, p);
+      if (!m?.e.giftable) continue;
+      try {
+        const meta = (await s.checkout.sessions.retrieve(p.stripeSessionId)).metadata ?? {};
+        if (meta.giftFor) { p.gift = { to: meta.giftFor, email: meta.giftEmail || "", note: meta.giftNote || "" }; changed = true; }
+      } catch { /* leave it; you can add the gift by hand on the Events page */ }
+    }
+    if (changed) await saveClient(c);
+  }
+  await kv().set(GIFTS_FLAG, true);
 }
 
 const BOOKS_FLAG = "bb:mig:eventbooks1";

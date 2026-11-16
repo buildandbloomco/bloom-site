@@ -24,7 +24,7 @@ export async function GET(req: Request) {
   if (denied) return denied;
   const only = new URL(req.url).searchParams.get("client") || "";
   const db = kv();
-  const safe = (c: Client) => { const { codeEnc, codeIndex, ...rest } = c; void codeEnc; void codeIndex; return rest; };
+  const safe = (c: Client) => { const { codeEnc, codeIndex, aliasIndex, ...rest } = c; void codeEnc; void codeIndex; void aliasIndex; return rest; };
   const allClients = await db.hgetall<Client>("bb:clients");
   const plans = await db.hgetall<StrategyPlan>("bb:plans");
   const ids = Object.keys(allClients).filter((id) => !only || id === only);

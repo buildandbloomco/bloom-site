@@ -57,7 +57,7 @@ export default async function EventWelcome({ params, searchParams }: { params: P
             <div className="stack" style={{ gap: 4 }}>
               <span className="small muted">Your access code</span>
               <strong style={{ fontFamily: "var(--display)", fontSize: "1.8rem", letterSpacing: "0.04em" }}>{code || "Sent to your email"}</strong>
-              <span className="small">Screenshot or save this. It is how you sign in to your {gp ? "guest pass" : "portal"} from any device.</span>
+              <span className="small">Screenshot or save this. {client.kind === "guest" ? <>Your code is your name{/\d$/.test(code) ? ", with the number at the end" : ""}. Use it to open your guest pass from any device at the Client login page.</> : "It is how you sign in to your portal from any device."}</span>
             </div>
             <a className="btn btn-primary btn-block" href={`/p/${client.slug}`}>{gp ? "Open my guest pass" : "Open my portal"}</a>
           </div>

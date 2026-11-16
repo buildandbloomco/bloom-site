@@ -1,6 +1,6 @@
 import "server-only";
 import { kv } from "./kv";
-import { codeIndex, encryptCode, newId, normalizeCode } from "./crypto";
+import { codeIndex, encryptCode, generateCode, newId, normalizeCode } from "./crypto";
 import { DEFAULT_CATALOG, DEFAULT_SETTINGS, NEW_ORG_SERVICES } from "./seed";
 import type { Catalog, Client, PublicClient, Service, Settings } from "./types";
 import { normalizeConsult } from "./consult";
@@ -374,6 +374,7 @@ export async function writeClientRaw(c: Client) {
 
 export async function deleteClient(c: Client) {
   if (c.codeIndex) await kv().hdel(K.codes, c.codeIndex);
+  if (c.aliasIndex) await kv().hdel(K.codes, c.aliasIndex);
   await kv().hdel(K.clients, c.id);
 }
 
@@ -393,9 +394,40 @@ export async function setClientCode(c: Client, code: string) {
   await saveClient(c);
 }
 
+/** Event guests sign in with their name. Two guests with the same name get "Name 2", "Name 3". Returns the code. */
+export async function setNameCode(c: Client, name: string, asAlias = false): Promise<string> {
+  const base = normalizeCode(name).replace(/-/g, "") || "GUEST";
+  for (let n = 1; n < 100; n++) {
+    const code = n === 1 ? (base.length >= 3 ? base : `${base}GUEST`) : `${base}${n}`;
+    const idx = codeIndex(code);
+    const owner = await kv().hget<string>(K.codes, idx);
+    if (owner && owner !== c.id) continue;
+    if (asAlias) {
+      if (c.aliasIndex && c.aliasIndex !== idx) await kv().hdel(K.codes, c.aliasIndex);
+      if (idx !== c.codeIndex) { c.aliasIndex = idx; await kv().hset(K.codes, idx, c.id); }
+    } else {
+      if (c.codeIndex && c.codeIndex !== idx) await kv().hdel(K.codes, c.codeIndex);
+      await kv().hset(K.codes, idx, c.id);
+      c.codeIndex = idx;
+      c.codeEnc = encryptCode(code);
+    }
+    await saveClient(c);
+    return code;
+  }
+  throw new Error("Could not make a name code.");
+}
+
+/** Give a client a private random code and retire any name code (for guests who become clients) */
+export async function setPrivateCode(c: Client) {
+  if (c.aliasIndex) { await kv().hdel(K.codes, c.aliasIndex); delete c.aliasIndex; }
+  for (let i = 0; i < 5; i++) {
+    try { await setClientCode(c, generateCode()); return; } catch { /* taken, try again */ }
+  }
+}
+
 export function toPublic(c: Client): PublicClient {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { codeEnc, codeIndex, notes, ...rest } = c;
+  const { codeEnc, codeIndex, aliasIndex, notes, ...rest } = c;
   return {
     ...rest,
     // Only sheets you chose to share, and never your private notes
