@@ -27,11 +27,14 @@ export default function ClientEditor({
   catalog,
   initialCode,
   workspace,
+  guestInvite,
 }: {
   initial: Client;
   catalog: Catalog;
   initialCode: string;
   workspace?: WorkspaceSummary;
+  /** Event guests get an invite about their ticket instead of a proposal */
+  guestInvite?: { events: { name: string; details: string; gift: string }[]; books: string[] } | null;
 }) {
   const router = useRouter();
   const [c, setC] = useState<Client>(initial);
@@ -102,7 +105,25 @@ export default function ClientEditor({
     setCodeMsg("New code is live.");
   }
 
-  const invite = `Hi ${c.contactName || c.name}! Your Build & Bloom Collective portal is ready. It has your proposal, investment, add-ons, resources, and next steps in one place.
+  const hi = c.contactName || c.name.split(" ")[0];
+  const ev = guestInvite?.events[0];
+  // "Saturday, January 16, 2027 · 10:00 AM to 4:00 PM · Peace on the Pond" -> " on Saturday, January 16, 2027, from 10:00 AM to 4:00 PM at Peace on the Pond"
+  const when = (d: string) => {
+    const [date, time, ...place] = d.split(" · ").map((x) => x.trim()).filter(Boolean);
+    if (!date) return "";
+    return ` on ${date}${time ? `, ${/ to /.test(time) ? "from " : ""}${time}` : ""}${place.length ? ` at ${place.join(", ")}` : ""}`;
+  };
+  const list = (xs: string[]) => (xs.length < 2 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`);
+  const invite = guestInvite
+    ? `Hi ${hi}! ${ev ? `You're all set for ${ev.name}${when(ev.details)}.` : "Your guest pass is ready."}${ev?.gift ? ` Your seat is a gift from ${ev.gift}.` : ""}
+
+Your guest pass has your ticket, everything the day includes, what to know before you come, and a free follow-up call you can book after.${guestInvite.books.length ? ` Your copy of ${list(guestInvite.books)} is waiting for you there too.` : ""}
+
+Open it here: ${origin}/portal
+Your access code: ${code}
+
+Can't wait to see you there!`
+    : `Hi ${hi}! Your Build & Bloom Collective portal is ready. It has your proposal, investment, add-ons, resources, and next steps in one place.
 
 Open it here: ${origin}/portal
 Your access code: ${code}

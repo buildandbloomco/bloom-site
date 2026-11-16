@@ -4,6 +4,8 @@ import { getCatalog, getClient } from "@/lib/data";
 import { decryptCode } from "@/lib/crypto";
 import ClientEditor, { type WorkspaceSummary } from "@/components/admin/ClientEditor";
 import PortalKind from "@/components/admin/PortalKind";
+import { ticketsFor } from "@/lib/ledger";
+import { GUIDES } from "@/lib/guides";
 import { getAssessment, getPlan, listResponses } from "@/lib/workspace";
 import { progress } from "@/lib/plan-types";
 
@@ -25,11 +27,16 @@ export default async function EditClient({ params }: { params: Promise<{ id: str
     assessment: a ? { enabled: a.enabled, status: a.status, responses: responses.length } : null,
   };
   const code = client.codeEnc ? decryptCode(client.codeEnc) : "";
+  // Event guests get an invite about their ticket, not a proposal
+  const guestInvite = client.kind === "guest" ? {
+    events: (await ticketsFor(client)).filter((t) => t.status !== "unpaid").map((t) => ({ name: t.e.name, details: t.e.details || "", gift: t.status === "comp" ? t.compCert?.from || "" : "" })),
+    books: GUIDES.filter((g) => (client.guideSlugs ?? []).includes(g.slug)).map((g) => g.title),
+  } : null;
   return (
     <div className="stack" style={{ gap: 24 }}>
       <Link href="/admin" className="small">← All clients</Link>
       <PortalKind clientId={client.id} guest={client.kind === "guest"} />
-      <ClientEditor initial={client} catalog={catalog} initialCode={code} workspace={workspace} />
+      <ClientEditor guestInvite={guestInvite} initial={client} catalog={catalog} initialCode={code} workspace={workspace} />
     </div>
   );
 }
