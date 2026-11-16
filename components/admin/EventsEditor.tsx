@@ -1,9 +1,10 @@
 "use client";
 
+import { GUIDES } from "@/lib/guides";
 import { useState } from "react";
 import { usd, type EventTier } from "@/lib/event-def";
 
-type Ev = { slug: string; name: string; endsAt: string; intro: string; tiers: EventTier[]; active?: boolean; code: string; open?: boolean; headline?: string; details?: string; image?: string; giftable?: boolean; access?: "guest" };
+type Ev = { slug: string; name: string; endsAt: string; intro: string; tiers: EventTier[]; active?: boolean; code: string; open?: boolean; headline?: string; details?: string; image?: string; giftable?: boolean; access?: "guest"; guideSlugs?: string[] };
 type Svc = { id: string; name: string; price: number | null };
 
 const TZ = "America/New_York";
@@ -96,6 +97,17 @@ export default function EventsEditor({ initial, services, origin }: { initial: E
                     <option value="portal">A full client portal: Money, business tools, and billing (for business events)</option>
                   </select>
                 </label>
+                <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
+                  <legend className="small" style={{ fontWeight: 600, marginBottom: 6 }}>Books every guest gets <span className="hint">added to their portal once their seat is paid or given</span></legend>
+                  <div className="row" style={{ gap: 16, flexWrap: "wrap" }}>
+                    {GUIDES.map((g) => (
+                      <label key={g.slug} className="row small" style={{ gap: 6 }}>
+                        <input type="checkbox" style={{ width: "auto" }} checked={!!e.guideSlugs?.includes(g.slug)} onChange={(x) => upd(i, { guideSlugs: x.target.checked ? [...(e.guideSlugs ?? []), g.slug] : (e.guideSlugs ?? []).filter((s) => s !== g.slug) })} />
+                        {g.title}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12 }}>
                   <label>Headline <span className="hint">Blank = &ldquo;Leave empowered, with a next step.&rdquo;</span><input type="text" value={e.headline || ""} onChange={(x) => upd(i, { headline: x.target.value })} /></label>
                   <label>When and where <span className="hint">e.g. Sat, Nov 14 · 11 AM ET · On Zoom</span><input type="text" value={e.details || ""} onChange={(x) => upd(i, { details: x.target.value })} /></label>

@@ -2,7 +2,7 @@ import { listClients, saveClient } from "@/lib/data";
 import { error, json, requireAdmin } from "@/lib/http";
 import { newId } from "@/lib/crypto";
 import { eventClient } from "@/lib/event-client";
-import { isGuestEvent } from "@/lib/event-def";
+import { addEventBooks, isGuestEvent } from "@/lib/event-def";
 import { listLeads, saveLead } from "@/lib/leads";
 import { getEvent, releaseSpot, spotsLeft, takeSpot } from "@/lib/events";
 import { compRef, listComps, saveComps } from "@/lib/comps";
@@ -36,6 +36,7 @@ export async function POST(req: Request) {
     welcome: isGuestEvent(ev) ? `Welcome, ${first}! Your seat at ${ev.name} is saved. Your ticket and everything you need for the day are right here.` : `Welcome, ${first}! We're so glad you're joining us at ${ev.name}. Everything from here lives in this portal.`,
   });
   const compLine = `Complimentary seat at ${ev.name} (${tier.name}), added by Jadon.${note ? ` ${note}` : ""}`;
+  addEventBooks(client, ev);
   client.notes = [client.notes, compLine].filter(Boolean).join("\n");
   await saveClient(client);
 

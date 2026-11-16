@@ -81,6 +81,13 @@ export async function recordCheckoutSession(session: Stripe.Checkout.Session): P
   }
   const becameActive = client.status === "draft" || client.status === "sent";
   if (becameActive) client.status = "active";
+  // A paid event seat brings the event's books with it
+  if (session.metadata?.kind === "event" && session.metadata.slug) {
+    const { getEvent } = await import("./events");
+    const { addEventBooks } = await import("./event-def");
+    const ev = await getEvent(session.metadata.slug);
+    if (ev) addEventBooks(client, ev);
+  }
   await saveClient(client);
   if (becameActive && session.metadata?.noAgreement !== "1") await ensureAgreement(client, `${client.name} made their first payment.`);
   await notifyAdmin(`${client.name} paid $${total.toFixed(2)}`, [`${client.name} paid $${total.toFixed(2)} by card${payer}.`, session.metadata?.optionLabel || "", session.metadata?.giftFor ? `GIFT: this seat is for ${session.metadata.giftFor}${session.metadata.giftEmail ? ` (${session.metadata.giftEmail})` : " (no email given, send details to the buyer)"}.` : ""], `/admin/clients/${client.id}`);

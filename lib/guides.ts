@@ -89,6 +89,25 @@ export const GUIDES: Guide[] = [
     lane: "orgs",
     public: false,
   },
+  {
+    slug: "right-yes",
+    title: "The Right Yes",
+    tagline: "A 21-day guide from trying to doing.",
+    inside: [
+      "Week 1, Hear It: the six signs of trying",
+      "Week 2, Clear It: the no's that make room, with four no scripts",
+      "Week 3, Say It: the six marks of a right yes, your vision, and your first step",
+      "A reading, scripture, journal prompt, and Right Yes step for every day",
+      "Your signed Right Yes commitment page",
+      "The Right Yes Circle: the practice in one sitting, for groups",
+    ],
+    // Source and build script: guides/right-yes (node guides/right-yes/build.mjs)
+    file: "/guides/The-Right-Yes.pdf",
+    pages: 55,
+    price: 0,
+    lane: "business",
+    public: false,
+  },
 ];
 
 export const getGuide = (slug: string) => GUIDES.find((g) => g.slug === slug);

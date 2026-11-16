@@ -378,6 +378,12 @@ Turn it on per client: Meeting view, "Money" in the Proposal and agreements box,
 Everything is entered by hand or imported from a bank file; nothing connects to a bank account. It is a planning tool, not accounting or tax advice, and the page says so.
 
 
+## The Right Yes (21-day guide)
+
+The guide's words live in `guides/right-yes/content.mjs`. To change them, edit that file, then run `node guides/right-yes/build.mjs` from this folder. It rebuilds `public/guides/The-Right-Yes.pdf` and the shop cover, and warns you if any page runs too long.
+
+Every Reset Circle guest gets it in their guest pass once their seat is paid or given. Pick which books an event gives under **Events > Edit event pages > Books every guest gets**. In the shop it is listed as coming soon until you turn it on in **Admin > Shop & books**.
+
 ## Payments
 
 Admin, then **Payments**. Every payment on the site in one list: event seats, client package and add-on payments, course payments, shop orders, and paid guidebooks. Filter by time frame and type, and download a spreadsheet. Zelle payments people told you about but you have not confirmed yet are listed at the top, and the number shows next to **Payments** in the sidebar.

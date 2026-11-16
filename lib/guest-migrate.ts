@@ -2,8 +2,8 @@ import "server-only";
 import { kv } from "./kv";
 import { listClients, saveClient } from "./data";
 import { listEvents } from "./events";
-import { isGuestEvent } from "./event-def";
-import { matchEvent } from "./ledger";
+import { addEventBooks, isGuestEvent } from "./event-def";
+import { matchEvent, ticketsFor } from "./ledger";
 import { allNotices } from "./paynotices";
 import { listComps } from "./comps";
 import { listLeads } from "./leads";
@@ -21,9 +21,24 @@ let running: Promise<void> | null = null;
  *  Anyone with any sign of business work (another payment, a proposal, sessions, a course, Money entries,
  *  an agreement, services in their package, shop purchases) keeps their full portal. Access codes don't change. */
 export async function migrateGuestPasses() {
-  if (await kv().get(FLAG)) return;
-  running ??= run().finally(() => { running = null; });
+  if ((await kv().get(FLAG)) && (await kv().get(BOOKS_FLAG))) return;
+  running ??= (async () => {
+    if (!(await kv().get(FLAG))) await run();
+    if (!(await kv().get(BOOKS_FLAG))) await giveBooks();
+  })().finally(() => { running = null; });
   await running;
+}
+
+const BOOKS_FLAG = "bb:mig:eventbooks1";
+/** One time: everyone who already has a paid or complimentary seat gets that event's books (The Right Yes for the Reset Circle) */
+async function giveBooks() {
+  for (const c of await listClients()) {
+    if (c.status === "archived") continue;
+    let changed = false;
+    for (const t of await ticketsFor(c)) if (t.status === "paid" || t.status === "comp") changed = addEventBooks(c, t.e) || changed;
+    if (changed) await saveClient(c);
+  }
+  await kv().set(BOOKS_FLAG, true);
 }
 
 async function run() {

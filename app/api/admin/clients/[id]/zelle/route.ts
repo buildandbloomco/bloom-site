@@ -36,6 +36,13 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     }
     const becameActive = c.status === "draft" || c.status === "sent";
     if (becameActive) c.status = "active";
+    // A confirmed event seat brings the event's books with it
+    if (n.event) {
+      const { getEvent } = await import("@/lib/events");
+      const { addEventBooks } = await import("@/lib/event-def");
+      const ev = await getEvent(n.event.slug);
+      if (ev) addEventBooks(c, ev);
+    }
     await saveClient(c);
     if (becameActive) await ensureAgreement(c, `${c.name} made their first payment.`);
     n.status = "confirmed"; n.amount = got;

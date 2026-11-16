@@ -65,7 +65,7 @@ export const DEFAULT_PRODUCTS: Product[] = [
   {
     id: "the-right-yes", slug: "the-right-yes", title: "The Right Yes", subtitle: "A 21-day guide to purpose, discernment, and the difference between trying and doing.",
     description: "Saying yes to the wrong thing is saying no to the right one. Over 21 days, slow down, listen, and learn to recognize the yes that is really yours. Faith is present, and gentle.",
-    price: 27, kind: "Ebook", cover: "", file: "", includes: ["21 short daily readings", "Reflection questions for each day", "The Right Yes Decision Filter"], status: "soon",
+    price: 27, kind: "Ebook", cover: "/shop/the-right-yes.png", file: "/guides/The-Right-Yes.pdf", guideSlug: "right-yes", includes: ["21 daily readings with scripture", "A journal prompt and a Right Yes step for each day", "Four no scripts and the six marks of a right yes", "Your signed Right Yes commitment page"], pages: "55 pages", status: "soon",
   },
   {
     id: "bloom-coloring-book", slug: "bloom-coloring-book", title: "Bloom: A Self-Care Coloring Book", subtitle: "Pages to slow down with: heritage patterns, florals, mandalas, and affirmations.",

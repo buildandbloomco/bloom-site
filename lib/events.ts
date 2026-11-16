@@ -2,6 +2,7 @@ import "server-only";
 import crypto from "crypto";
 import { cookies } from "next/headers";
 import { kv } from "./kv";
+import { GUIDES } from "./guides";
 import { normalizeCode, safeEqual, sign, verify } from "./crypto";
 import { DEFAULT_EVENTS, RESET_CIRCLE, eventOpen, type EventOffer, type EventTier } from "./event-def";
 
@@ -13,6 +14,29 @@ const KEY = "bb:events";
 export async function listEvents(): Promise<StoredEvent[]> {
   const saved = await kv().get<StoredEvent[]>(KEY);
   if (saved) {
+    // One time: The Right Yes joins the Reset Circle as an activity on the day and the take-home guide.
+    // Only lines that still read the way they were written are changed, so your own edits stay.
+    if (!(await kv().get("bb:events:mig:rightyes1"))) {
+      const OLD_GIFT = "plus a complimentary digital product";
+      const RELEASE = "A reflection and release practice to let go of what last year asked of you";
+      const CHECK = "Your Bloom Check and a One Priority plan for the first 90 days of 2027";
+      const [circleLine, checkLine] = RESET_CIRCLE.tiers[0].includes.filter((x) => x.startsWith("The Right Yes Circle") || x.startsWith(CHECK + ","));
+      const giftLine = RESET_CIRCLE.tiers[0].includes.find((x) => x.startsWith("A take-home gift"))!;
+      if (saved.some((e) => e.slug === "reset-circle")) {
+        const next = saved.map((e) => e.slug !== "reset-circle" ? e : {
+          ...e,
+          guideSlugs: Array.from(new Set([...(e.guideSlugs ?? []), "right-yes"])),
+          tiers: e.tiers.map((t) => {
+            if (t.id !== "seat" || t.includes.some((x) => x.startsWith("The Right Yes Circle"))) return t;
+            const inc = t.includes.flatMap((x) => x === RELEASE ? [x, circleLine] : x === CHECK ? [checkLine] : x.includes(OLD_GIFT) ? [giftLine] : [x]);
+            return { ...t, includes: inc };
+          }),
+        });
+        await kv().set(KEY, next);
+        saved.splice(0, saved.length, ...next);
+      }
+      await kv().set("bb:events:mig:rightyes1", true);
+    }
     // One time: Reset Circle buyers get a guest pass, not a business client portal
     if (!(await kv().get("bb:events:mig:guest1"))) {
       if (saved.some((e) => e.slug === "reset-circle")) {
@@ -183,6 +207,8 @@ function cleanTier(t: Record<string, unknown>, i: number, serviceIds: Set<string
   };
 }
 
+const guideSlugs = (v: unknown) => (Array.isArray(v) ? v.map(String) : []).filter((s) => GUIDES.some((g) => g.slug === s));
+
 export function cleanEvents(input: unknown, serviceIds: Set<string>): StoredEvent[] | string {
   if (!Array.isArray(input)) return "Nothing to save.";
   const out: StoredEvent[] = [];
@@ -209,7 +235,7 @@ export function cleanEvents(input: unknown, serviceIds: Set<string>): StoredEven
       tiers.push(c);
     }
     if (!tiers.length) return `${name} needs at least one offer.`;
-    out.push({ slug, name, endsAt: new Date(endsAt).toISOString(), intro: str(raw.intro, 600), tiers, active: raw.active !== false, code, ...(raw.open === true ? { open: true } : {}), ...(str(raw.headline, 140) ? { headline: str(raw.headline, 140) } : {}), ...(str(raw.details, 200) ? { details: str(raw.details, 200) } : {}), ...(/^(\/|https:\/\/)\S+$/.test(str(raw.image, 300)) ? { image: str(raw.image, 300) } : {}), ...(raw.giftable === true ? { giftable: true } : {}), ...(raw.access === "guest" ? { access: "guest" as const } : {}) });
+    out.push({ slug, name, endsAt: new Date(endsAt).toISOString(), intro: str(raw.intro, 600), tiers, active: raw.active !== false, code, ...(raw.open === true ? { open: true } : {}), ...(str(raw.headline, 140) ? { headline: str(raw.headline, 140) } : {}), ...(str(raw.details, 200) ? { details: str(raw.details, 200) } : {}), ...(/^(\/|https:\/\/)\S+$/.test(str(raw.image, 300)) ? { image: str(raw.image, 300) } : {}), ...(raw.giftable === true ? { giftable: true } : {}), ...(raw.access === "guest" ? { access: "guest" as const } : {}), ...(guideSlugs(raw.guideSlugs).length ? { guideSlugs: guideSlugs(raw.guideSlugs) } : {}) });
   }
   return out;
 }
