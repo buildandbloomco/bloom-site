@@ -17,6 +17,8 @@ export interface PayNotice {
   status: "pending" | "confirmed" | "dismissed";
   /** Set when the notice came from an event offer page */
   event?: { slug: string; tierId: string };
+  /** Set when the seat is a gift for someone else */
+  gift?: import("./types").SeatGift;
 }
 const KEY = "bb:paynotices";
 export async function listNotices(clientId: string): Promise<PayNotice[]> { return (await kv().hget<PayNotice[]>(KEY, clientId)) ?? []; }

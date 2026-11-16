@@ -105,7 +105,12 @@ export interface Payment {
   stripeSessionId?: string;
   /** Set when the payment came from an event offer page */
   event?: { slug: string; tierId: string };
+  /** Set when the seat was bought as a gift for someone else */
+  gift?: SeatGift;
 }
+
+/** Who a gifted event seat is for */
+export interface SeatGift { to: string; email: string; note: string }
 
 export interface AddOnRequest {
   id: string;

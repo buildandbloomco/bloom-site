@@ -1,7 +1,7 @@
 import { bookProps, fmtTime, longDate } from "@/lib/booking";
 import { money, shortDate } from "@/lib/format";
 import { eventImage } from "@/lib/event-def";
-import type { Ticket } from "@/lib/ledger";
+import { certUrl, type Ticket } from "@/lib/ledger";
 import type { Client, Settings } from "@/lib/types";
 import type { Appointment } from "@/lib/course-types";
 import SignOut from "@/components/SignOut";
@@ -78,6 +78,12 @@ export default function GuestPass({ client, settings, tickets, appts, books, pai
                       </div>
                       <span className={`tag ${STATUS[t.status][1]}`}>{STATUS[t.status][0]}</span>
                     </div>
+                    {t.gifts.map((g) => (
+                      <div key={g.to} className="row between" style={{ gap: 10, background: "var(--cream)", borderRadius: 12, padding: "10px 14px" }}>
+                        <span className="small">🎁 This seat is a gift for <strong>{g.to}</strong>.{g.email ? "" : " We'll send her the details through you."}</span>
+                        <a className="btn btn-sm btn-ghost" href={certUrl(t.e.slug, g, client.name)} target="_blank" rel="noopener noreferrer">Gift certificate</a>
+                      </div>
+                    ))}
                     {t.status === "unpaid" && <p className="small" style={{ margin: 0 }}>Your seat isn&rsquo;t saved yet because the payment didn&rsquo;t go through. <a href={`/event/${t.e.slug}`}>Finish getting your seat</a>.</p>}
                     {t.status === "zelle" && <p className="small" style={{ margin: 0 }}>Your seat is held. We&rsquo;ll confirm here as soon as your Zelle payment arrives.</p>}
                     {t.tier && t.tier.includes.length > 0 && (

@@ -6,7 +6,7 @@ import { listLeads } from "./leads";
 import { allNotices } from "./paynotices";
 import { listEvents, spotHolds, type StoredEvent } from "./events";
 import { listComps } from "./comps";
-import type { Client, Lead, Payment } from "./types";
+import type { Client, Lead, Payment, SeatGift } from "./types";
 
 /** Where a payment came from */
 export type Source = "event" | "client" | "course" | "shop" | "guide";
@@ -122,7 +122,27 @@ export interface Guest {
   comp?: boolean;
   paid: number;
   date: string;
+  /** Has a guest pass (personal events) rather than a full client portal */
+  guestPass: boolean;
+  /** The seat is a gift: name/email above are the person coming, buyer is who paid */
+  gift?: SeatGift;
+  buyer?: { name: string; email: string };
 }
+
+/** Printable gift certificate for a gifted seat */
+export const certUrl = (slug: string, gift: SeatGift, from: string) =>
+  `/event/${slug}/gift?to=${encodeURIComponent(gift.to)}&from=${encodeURIComponent(from)}${gift.note ? `&note=${encodeURIComponent(gift.note)}` : ""}`;
+
+/** Gifts saved only as a note at checkout (seats bought before gift details were stored on the payment) */
+function giftsInNotes(text: string): SeatGift[] {
+  const out: SeatGift[] = [];
+  for (const m of text.matchAll(/GIFT: this seat is for (.+?)(?: \(([^)]*)\))?(?:\. Note: "(.*?)")?\.$/gm)) {
+    const email = /@/.test(m[2] || "") ? m[2] : "";
+    if (!out.some((g) => g.to === m[1])) out.push({ to: m[1], email, note: m[3] || "" });
+  }
+  return out;
+}
+
 export interface EventSummary {
   e: StoredEvent;
   label: string;
@@ -144,9 +164,11 @@ export async function eventSummaries(): Promise<EventSummary[]> {
 
   for (const e of events) {
     const guests = new Map<string, Guest>();
-    const add = (c: Client, tier: string, patch: Partial<Guest>) => {
-      const key = `${c.id}|${tier}`;
-      const g = guests.get(key) ?? { clientId: c.id, name: c.name, email: c.email, phone: leadFor(c)?.phone || "", tier, status: "unpaid" as GuestStatus, paid: 0, date: "" };
+    const add = (c: Client, tier: string, patch: Partial<Guest>, gift?: SeatGift) => {
+      // A gifted seat is its own row, named for the person coming
+      const key = `${c.id}|${tier}${gift ? `|gift:${gift.to.toLowerCase()}` : ""}`;
+      const base: Guest = { clientId: c.id, name: c.name, email: c.email, phone: leadFor(c)?.phone || "", tier, status: "unpaid", paid: 0, date: "", guestPass: c.kind === "guest" };
+      const g = guests.get(key) ?? (gift ? { ...base, name: gift.to, email: gift.email, phone: "", gift, buyer: { name: c.name, email: c.email } } : base);
       if (patch.paid) g.paid += patch.paid;
       if (patch.status === "comp") g.comp = true;
       if (patch.status && order(patch.status) < order(g.status)) g.status = patch.status;
@@ -157,12 +179,12 @@ export async function eventSummaries(): Promise<EventSummary[]> {
     for (const c of clients) {
       for (const p of c.payments) {
         const m = matchEvent(events, p);
-        if (m?.e.slug === e.slug) add(c, m.t?.name || "Offer", { status: "paid", paid: Number(p.amount) || 0, date: p.date });
+        if (m?.e.slug === e.slug) add(c, m.t?.name || "Offer", { status: "paid", paid: Number(p.amount) || 0, date: p.date }, p.gift);
       }
       for (const n of notices[c.id] ?? []) {
         if (n.status !== "pending") continue;
         const m = matchEvent(events, n);
-        if (m?.e.slug === e.slug) add(c, m.t?.name || "Offer", { status: "zelle", date: n.at });
+        if (m?.e.slug === e.slug) add(c, m.t?.name || "Offer", { status: "zelle", date: n.at }, n.gift);
       }
     }
     // Complimentary seats: they hold a seat, $0, never "didn't finish paying"
@@ -175,9 +197,20 @@ export async function eventSummaries(): Promise<EventSummary[]> {
       if (!l.clientId) continue;
       const c = byId.get(l.clientId);
       if (!c) continue;
-      for (const t of e.tiers) if (l.interests.includes(`${e.name}: ${t.name}`) && !guests.has(`${c.id}|${t.name}`)) {
+      for (const t of e.tiers) if (l.interests.includes(`${e.name}: ${t.name}`) && ![...guests.keys()].some((k) => k === `${c.id}|${t.name}` || k.startsWith(`${c.id}|${t.name}|gift:`))) {
         // Shared names (the Reset Circle and its guest offer) are told apart by tier name, so this is safe
         add(c, t.name, { date: l.createdAt });
+      }
+    }
+
+    // Older gifted seats: the gift was saved as a note. Turn the buyer's row into the recipient's.
+    if (e.giftable) {
+      for (const [key, g] of [...guests.entries()]) {
+        if (g.gift || g.status === "unpaid" || g.status === "comp") continue;
+        const c = byId.get(g.clientId)!;
+        const taken = new Set([...guests.values()].filter((x) => x.clientId === c.id && x.gift).map((x) => x.gift!.to));
+        const gift = giftsInNotes([c.notes, leadFor(c)?.notes ?? ""].join("\n")).find((x) => !taken.has(x.to));
+        if (gift) guests.set(key, { ...g, name: gift.to, email: gift.email, phone: "", gift, buyer: { name: c.name, email: c.email } });
       }
     }
 
@@ -207,6 +240,8 @@ export interface Ticket {
   tier: StoredEvent["tiers"][number] | null;
   status: GuestStatus;
   paid: number;
+  /** Seats bought as gifts for other people */
+  gifts: SeatGift[];
 }
 
 /** Every event this client has a seat at, or started checkout for */
@@ -214,18 +249,22 @@ export async function ticketsFor(c: Client): Promise<Ticket[]> {
   const [events, notices, leads] = await Promise.all([listEvents(), allNotices(), listLeads()]);
   const lead = leads.find((l) => l.clientId === c.id) ?? leads.find((l) => l.email && l.email.toLowerCase() === c.email.toLowerCase());
   const out = new Map<string, Ticket>();
-  const add = (e: StoredEvent, tier: Ticket["tier"], status: GuestStatus, paid = 0) => {
+  const add = (e: StoredEvent, tier: Ticket["tier"], status: GuestStatus, paid = 0, gift?: SeatGift) => {
     const k = `${e.slug}|${tier?.id ?? ""}`;
-    const t = out.get(k) ?? { e, tier, status, paid: 0 };
+    const t = out.get(k) ?? { e, tier, status, paid: 0, gifts: [] };
     t.paid += paid;
+    if (gift && !t.gifts.some((g) => g.to === gift.to)) t.gifts.push(gift);
     if (order(status) < order(t.status)) t.status = status;
     out.set(k, t);
   };
-  for (const p of c.payments) { const m = matchEvent(events, p); if (m) add(m.e, m.t, "paid", Number(p.amount) || 0); }
-  for (const n of notices[c.id] ?? []) { if (n.status !== "pending") continue; const m = matchEvent(events, n); if (m) add(m.e, m.t, "zelle"); }
+  for (const p of c.payments) { const m = matchEvent(events, p); if (m) add(m.e, m.t, "paid", Number(p.amount) || 0, p.gift); }
+  for (const n of notices[c.id] ?? []) { if (n.status !== "pending") continue; const m = matchEvent(events, n); if (m) add(m.e, m.t, "zelle", 0, n.gift); }
   for (const e of events) {
     for (const x of await listComps(e.slug)) if (x.clientId === c.id) add(e, e.tiers.find((t) => t.id === x.tierId) ?? null, "comp");
     for (const t of e.tiers) if (lead?.interests.includes(`${e.name}: ${t.name}`)) add(e, t, "unpaid");
   }
+  // Older gifted seats: the gift was saved as a note at checkout
+  const noted = giftsInNotes([c.notes, lead?.notes ?? ""].join("\n"));
+  for (const t of out.values()) if (t.e.giftable && !t.gifts.length && t.status !== "unpaid" && t.status !== "comp" && noted.length) t.gifts.push(...noted);
   return [...out.values()].sort((a, b) => a.e.endsAt.localeCompare(b.e.endsAt));
 }

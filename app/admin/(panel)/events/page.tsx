@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getCatalog } from "@/lib/data";
 import { listEvents } from "@/lib/events";
-import { eventSummaries, type GuestStatus } from "@/lib/ledger";
+import { certUrl, eventSummaries, type GuestStatus } from "@/lib/ledger";
 import { siteOrigin } from "@/lib/http";
 import { money, shortDate } from "@/lib/format";
 import EventsEditor from "@/components/admin/EventsEditor";
@@ -83,6 +83,12 @@ async function Guests({ showAll }: { showAll: boolean }) {
             <div className="stack" style={{ gap: 2, textAlign: "right" }}>
               <span className="tiny muted">Collected</span>
               <strong style={{ fontSize: "1.5rem", color: "var(--rust)" }}>{money(s.revenue)}</strong>
+              {s.guests.some((g) => g.status !== "unpaid") && (
+                <div className="row" style={{ gap: 8, justifyContent: "flex-end", marginTop: 6 }}>
+                  <a className="btn btn-sm btn-ghost" href={`/admin/guests/${s.e.slug}`} target="_blank" rel="noopener noreferrer">Guest list ↗</a>
+                  <a className="btn btn-sm btn-ghost" href={`/api/admin/events/guests?slug=${s.e.slug}`}>Spreadsheet</a>
+                </div>
+              )}
             </div>
           </div>
 
@@ -106,15 +112,21 @@ async function Guests({ showAll }: { showAll: boolean }) {
                 <thead><tr><th>Name</th><th>Offer</th><th>Status</th><th style={{ textAlign: "right" }}>Paid</th><th>Date</th><th><span className="sr-only">Open</span></th></tr></thead>
                 <tbody>
                   {s.guests.map((g) => (
-                    <tr key={`${g.clientId}-${g.tier}`}>
-                      <td><strong>{g.name}</strong><div className="tiny muted">{[g.email, g.phone].filter(Boolean).join(" · ")}</div></td>
+                    <tr key={`${g.clientId}-${g.tier}-${g.gift?.to ?? ""}`}>
+                      <td>
+                        <strong>{g.name}</strong>
+                        <div className="tiny muted">{[g.email, g.phone].filter(Boolean).join(" · ") || (g.gift ? "No email given. Send her details to the buyer." : "")}</div>
+                        {g.buyer && <div className="tiny" style={{ marginTop: 4 }}><span className="tag gold" style={{ padding: "2px 8px" }}>Gift</span> from {g.buyer.name}{g.buyer.email ? ` · ${g.buyer.email}` : ""}</div>}
+                      </td>
                       <td className="small">{g.tier}</td>
                       <td><span className={`tag ${STATUS[g.status][1]}`}>{STATUS[g.status][0]}</span></td>
                       <td style={{ textAlign: "right" }}>{g.paid ? money(g.paid) : g.status === "comp" ? money(0) : "—"}</td>
                       <td className="small muted" style={{ whiteSpace: "nowrap" }}>{shortDate(g.date)}</td>
                       <td>
-                        <div className="row" style={{ gap: 10, flexWrap: "nowrap" }}>
+                        <div className="stack" style={{ gap: 6, alignItems: "flex-start", whiteSpace: "nowrap" }}>
                           <Link className="btn btn-sm btn-ghost" href={g.status === "zelle" ? `/admin/clients/${g.clientId}/desk` : `/admin/clients/${g.clientId}`}>{g.status === "zelle" ? "Confirm" : "Open"}</Link>
+                          {g.status !== "unpaid" && <a className="linkbtn small" href={`/api/admin/clients/${g.clientId}/preview`} target="_blank" rel="noopener noreferrer" title={g.gift ? "Opens the buyer's pass, where this seat is listed" : undefined}>{g.guestPass ? "View ticket" : "View portal"} ↗</a>}
+                          {g.gift && g.buyer && <a className="linkbtn small" href={certUrl(s.e.slug, g.gift, g.buyer.name)} target="_blank" rel="noopener noreferrer">Gift certificate ↗</a>}
                           {g.comp && <RemoveComp slug={s.e.slug} clientId={g.clientId} name={g.name} />}
                         </div>
                       </td>
