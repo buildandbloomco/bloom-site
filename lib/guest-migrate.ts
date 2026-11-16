@@ -1,6 +1,8 @@
 import "server-only";
 import { kv } from "./kv";
-import { listClients, saveClient, setNameCode } from "./data";
+import { listClients, newClientCode, saveClient } from "./data";
+import { decryptCode, normalizeCode } from "./crypto";
+import { notifyAdmin } from "./notify";
 import { stripe } from "./stripe";
 import { listEvents } from "./events";
 import { addEventBooks, isGuestEvent } from "./event-def";
@@ -22,7 +24,7 @@ let running: Promise<void> | null = null;
  *  Anyone with any sign of business work (another payment, a proposal, sessions, a course, Money entries,
  *  an agreement, services in their package, shop purchases) keeps their full portal. Access codes don't change. */
 export async function migrateGuestPasses() {
-  const steps: [string, () => Promise<void>][] = [[FLAG, run], [BOOKS_FLAG, giveBooks], [LEADS_FLAG, guestsAsLeads], [GIFTS_FLAG, giftsFromStripe]];
+  const steps: [string, () => Promise<void>][] = [[FLAG, run], [BOOKS_FLAG, giveBooks], [LEADS_FLAG, guestsAsLeads], [GIFTS_FLAG, giftsFromStripe], [NAMES_FLAG, retireNameCodes]];
   const todo: typeof steps = [];
   for (const s of steps) if (!(await kv().get(s[0]))) todo.push(s);
   if (!todo.length) return;
@@ -31,16 +33,37 @@ export async function migrateGuestPasses() {
 }
 
 const LEADS_FLAG = "bb:mig:guestlead1";
-/** One time: event guests go back to being leads, and their name opens their guest pass (their old code keeps working too) */
+/** One time: event guests go back to being leads */
 async function guestsAsLeads() {
   const leads = await listLeads();
   for (const c of await listClients()) {
     if (c.kind !== "guest" || c.status === "archived") continue;
     const lead = leads.find((l) => l.clientId === c.id);
     if (lead?.status === "converted") await saveLead({ ...lead, status: "new" });
-    try { await setNameCode(c, lead?.name || c.name, true); } catch { /* keep their existing code */ }
   }
   await kv().set(LEADS_FLAG, true);
+}
+
+const NAMES_FLAG = "bb:mig:nonamecodes1";
+/** One time: names are too easy to guess, so they stop opening portals. Anyone whose only code was their name
+ *  gets a new word code, and you get one email listing them so you can send each person theirs. */
+async function retireNameCodes() {
+  const leads = await listLeads();
+  const changed: string[] = [];
+  for (const c of await listClients()) {
+    if (c.aliasIndex) { await kv().hdel("bb:codes", c.aliasIndex); delete c.aliasIndex; await saveClient(c); }
+    if (c.kind !== "guest" || !c.codeEnc) continue;
+    const name = normalizeCode(leads.find((l) => l.clientId === c.id)?.name || c.name);
+    const code = decryptCode(c.codeEnc);
+    if (!name || code.replace(/\d+$/, "") !== name) continue;
+    const next = await newClientCode(c);
+    if (!next) continue;
+    c.notes = [c.notes, `Access code changed from their name to ${next} (${new Date().toISOString().slice(0, 10)}).`].join("\n");
+    await saveClient(c);
+    changed.push(`${c.name} (${c.email}): ${next}`);
+  }
+  if (changed.length) await notifyAdmin(`New access codes for ${changed.length} event ${changed.length === 1 ? "guest" : "guests"}`, ["Names no longer open guest passes. These guests had their name as their code, so they have a new one. Please send each person theirs:", ...changed], "/admin/leads");
+  await kv().set(NAMES_FLAG, true);
 }
 
 const GIFTS_FLAG = "bb:mig:giftstripe1";

@@ -138,8 +138,8 @@ const VIP_SYSTEMS = (endsNote: string): EventTier => ({
   next: ["Sign your service agreement at the top of your portal.", "Book your first strategy session from your portal. VIP clients get a session within 7 days.", "Start your build questionnaire under \"Your build\". It saves as you go."],
 });
 
-export const DEFAULT_EVENTS: EventOffer[] = [
-  {
+// C.R.E.A.T.E. (Oct 2026) is over and no longer offered. Its offers stay here only as the template for the mastermind below.
+const CREATE_TEMPLATE: EventOffer = {
     slug: "create",
     name: "C.R.E.A.T.E.",
     endsAt: "2026-10-18T23:59:00-04:00",
@@ -184,12 +184,13 @@ export const DEFAULT_EVENTS: EventOffer[] = [
       SYSTEMS("your C.R.E.A.T.E."),
       VIP_SYSTEMS("your C.R.E.A.T.E."),
     ],
-  },
-];
+};
+
+export const DEFAULT_EVENTS: EventOffer[] = [];
 
 // The October 26 mastermind: same offers, its own dates. Off until you add its name and dates in admin.
 {
-  const c = DEFAULT_EVENTS[0];
+  const c = CREATE_TEMPLATE;
   DEFAULT_EVENTS.push({
     slug: "oct26",
     name: "the October 26 mastermind",

@@ -33,15 +33,14 @@ export default function LeadActions({ lead, guest }: { lead: Lead; guest?: { cli
         <h3>Next step</h3>
         {guest ? (
           <>
-            <p className="small" style={{ margin: 0 }}><span className="tag gold">Event guest</span> They have a guest pass for their event ticket. They sign in with their name{guest.code ? <>: <strong>{guest.code}</strong></> : null}.</p>
+            <p className="small" style={{ margin: 0 }}><span className="tag gold">Event guest</span> They have a guest pass for their event ticket. {guest.code ? <>Their access code is <strong>{guest.code}</strong>.</> : null}</p>
             <a className="btn btn-sm btn-ghost" href={`/api/admin/clients/${guest.clientId}/preview`} target="_blank" rel="noopener noreferrer">View their ticket ↗</a>
             <button type="button" className="btn btn-sm btn-primary" disabled={busy} onClick={async () => {
-              if (!confirm("Make them an active client? They'll move to Clients with a full portal (Money, business tools, billing) and get a new private access code in place of their name.")) return;
+              if (!confirm("Make them an active client? They'll move to Clients with a full portal (Money, business tools, billing) Their access code stays the same.")) return;
               setBusy(true);
               const r = await fetch(`/api/admin/clients/${guest.clientId}/access`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind: "full" }) });
               const j = await r.json().catch(() => ({}));
               if (!r.ok) { setBusy(false); return setMsg("That didn't work. Try again."); }
-              if (j.code) alert(`Done. Their new access code is ${j.code}. Send it to them; their name no longer opens the portal.`);
               window.location.href = `/admin/clients/${guest.clientId}`;
             }}>{busy ? "Working..." : "Make active client"}</button>
             <p className="tiny muted">Do this when they start working with you.</p>

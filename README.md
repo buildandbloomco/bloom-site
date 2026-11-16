@@ -397,9 +397,9 @@ Admin, then **Events**, then the **Edit event pages** tab. The first tab, **Who'
 - Changing the web address breaks QR codes already printed. Changing the room code asks guests to enter the new one.
 - Choosing an offer creates a client portal (with Money on and every guidebook), a lead tagged with the event and their Bloom Check scores, and the agreement when the offer needs one.
 - Card: Stripe checkout. The portal waits as "sent" until the payment clears. Zelle: the guest sees your Zelle details, and the payment shows on their Meeting view for you to confirm.
-- **Limited spots:** give an offer a number of spots and a spot group. Offers in the same group share spots across events (the Systems Build has 5 spots shared by C.R.E.A.T.E. and the October 26 mastermind). A card payment or Zelle notice takes a spot; dismissing a Zelle payment gives it back. When spots run out, the offer shows as full.
+- **Limited spots:** give an offer a number of spots and a spot group. Offers in the same group share spots across events (the Systems Build has 5 spots in its group). A card payment or Zelle notice takes a spot; dismissing a Zelle payment gives it back. When spots run out, the offer shows as full.
 - **Reserve with a deposit only:** for big offers like the Systems Build, guests pay the deposit and the rest is settled in their portal after the consult. An offer can also turn on the build workspace in their portal.
-- The October 26 mastermind is set up as a copy of C.R.E.A.T.E. and is off. Add its name, closing time, and room code, then turn it on.
+- The October 26 mastermind is off. Its offers (Strategy Intensive, VIP Bloom Plan, Systems Build) are a ready template for your next mastermind: change its name, closing time, and room code, then turn it on.
 - Someone who uses an email that already has a portal is never signed in automatically. They sign in with their own code.
 - Your regular service prices are under **Services & add-ons**; event prices are set separately so a special price never changes your normal rates.
 

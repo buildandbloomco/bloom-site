@@ -14,6 +14,15 @@ const KEY = "bb:events";
 export async function listEvents(): Promise<StoredEvent[]> {
   const saved = await kv().get<StoredEvent[]>(KEY);
   if (saved) {
+    // One time: C.R.E.A.T.E. is over and no one bought from it, so it comes off the list
+    if (!(await kv().get("bb:events:mig:nocreate1"))) {
+      if (saved.some((e) => e.slug === "create")) {
+        const next = saved.filter((e) => e.slug !== "create");
+        await kv().set(KEY, next);
+        saved.splice(0, saved.length, ...next);
+      }
+      await kv().set("bb:events:mig:nocreate1", true);
+    }
     // One time: The Right Yes joins the Reset Circle as an activity on the day and the take-home guide.
     // Only lines that still read the way they were written are changed, so your own edits stay.
     if (!(await kv().get("bb:events:mig:rightyes1"))) {

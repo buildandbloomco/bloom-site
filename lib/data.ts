@@ -337,9 +337,12 @@ export async function getClientBySlug(slug: string): Promise<Client | null> {
 export async function findClientByCode(code: string): Promise<Client | null> {
   await ensureSeeded();
   if (!normalizeCode(code)) return null;
-  const id = await kv().hget<string>(K.codes, codeIndex(code));
-  if (!id) return null;
-  return getClient(id);
+  // "peony meadow 418" works the same as "PEONY-MEADOW-418"
+  for (const tryCode of new Set([code, code.trim().replace(/[\s_]+/g, "-")])) {
+    const id = await kv().hget<string>(K.codes, codeIndex(tryCode));
+    if (id) return getClient(id);
+  }
+  return null;
 }
 
 export function slugify(s: string): string {
@@ -394,35 +397,14 @@ export async function setClientCode(c: Client, code: string) {
   await saveClient(c);
 }
 
-/** Event guests sign in with their name. Two guests with the same name get "Name 2", "Name 3". Returns the code. */
-export async function setNameCode(c: Client, name: string, asAlias = false): Promise<string> {
-  const base = normalizeCode(name).replace(/-/g, "") || "GUEST";
-  for (let n = 1; n < 100; n++) {
-    const code = n === 1 ? (base.length >= 3 ? base : `${base}GUEST`) : `${base}${n}`;
-    const idx = codeIndex(code);
-    const owner = await kv().hget<string>(K.codes, idx);
-    if (owner && owner !== c.id) continue;
-    if (asAlias) {
-      if (c.aliasIndex && c.aliasIndex !== idx) await kv().hdel(K.codes, c.aliasIndex);
-      if (idx !== c.codeIndex) { c.aliasIndex = idx; await kv().hset(K.codes, idx, c.id); }
-    } else {
-      if (c.codeIndex && c.codeIndex !== idx) await kv().hdel(K.codes, c.codeIndex);
-      await kv().hset(K.codes, idx, c.id);
-      c.codeIndex = idx;
-      c.codeEnc = encryptCode(code);
-    }
-    await saveClient(c);
-    return code;
-  }
-  throw new Error("Could not make a name code.");
-}
-
-/** Give a client a private random code and retire any name code (for guests who become clients) */
-export async function setPrivateCode(c: Client) {
+/** Give a client a new random code (and retire any extra code that also opened their portal). Returns the code. */
+export async function newClientCode(c: Client): Promise<string> {
   if (c.aliasIndex) { await kv().hdel(K.codes, c.aliasIndex); delete c.aliasIndex; }
   for (let i = 0; i < 5; i++) {
-    try { await setClientCode(c, generateCode()); return; } catch { /* taken, try again */ }
+    const code = generateCode();
+    try { await setClientCode(c, code); return code; } catch { /* taken, try again */ }
   }
+  return "";
 }
 
 export function toPublic(c: Client): PublicClient {

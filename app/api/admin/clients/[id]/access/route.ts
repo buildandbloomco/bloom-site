@@ -1,4 +1,4 @@
-import { getClient, saveClient, setPrivateCode } from "@/lib/data";
+import { getClient, saveClient } from "@/lib/data";
 import { decryptCode } from "@/lib/crypto";
 import { error, json, requireAdmin } from "@/lib/http";
 import { makeFullPortal } from "@/lib/event-client";
@@ -16,11 +16,10 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
   if (b.kind === "full") {
     await makeFullPortal(c);
     c.status = "active";
-    // A full portal holds Money and business details, so it gets a private code instead of their name
-    await setPrivateCode(c);
     await saveClient(c);
     const lead = (await listLeads()).find((l) => l.clientId === c.id);
     if (lead && lead.status !== "converted") await saveLead({ ...lead, status: "converted" });
+    // Their access code stays the same
     return json({ ok: true, code: c.codeEnc ? decryptCode(c.codeEnc) : "" });
   }
   if (b.kind === "guest") {
