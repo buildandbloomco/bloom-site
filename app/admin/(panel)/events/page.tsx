@@ -5,11 +5,12 @@ import { eventSummaries, type GuestStatus } from "@/lib/ledger";
 import { siteOrigin } from "@/lib/http";
 import { money, shortDate } from "@/lib/format";
 import EventsEditor from "@/components/admin/EventsEditor";
+import { CompForm, RemoveComp } from "@/components/admin/CompGuest";
 
 export const dynamic = "force-dynamic";
 
 const TABS = [["guests", "Who's coming & payments"], ["offers", "Edit event pages"]] as const;
-const STATUS: Record<GuestStatus, [string, string]> = { paid: ["Paid", "green"], zelle: ["Zelle to confirm", "gold"], unpaid: ["Didn't finish paying", "rust"] };
+const STATUS: Record<GuestStatus, [string, string]> = { paid: ["Paid", "green"], comp: ["Complimentary", "green"], zelle: ["Zelle to confirm", "gold"], unpaid: ["Didn't finish paying", "rust"] };
 const STATE: Record<string, [string, string]> = { open: ["Open", "green"], closed: ["Closed", ""], off: ["Turned off", ""] };
 
 const when = (iso: string) => new Date(iso).toLocaleString("en-US", { timeZone: "America/New_York", month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
@@ -52,6 +53,7 @@ async function Guests({ showAll }: { showAll: boolean }) {
   const list = showAll ? all : all.filter((s) => s.state === "open" || s.guests.length > 0);
   const hidden = all.length - list.length;
   const paidCount = all.reduce((n, s) => n + s.guests.filter((g) => g.status === "paid").length, 0);
+  const compCount = all.reduce((n, s) => n + s.guests.filter((g) => g.status === "comp").length, 0);
   const pending = all.reduce((n, s) => n + s.pending, 0);
   const unpaid = all.reduce((n, s) => n + s.guests.filter((g) => g.status === "unpaid").length, 0);
 
@@ -59,7 +61,7 @@ async function Guests({ showAll }: { showAll: boolean }) {
     <div className="stack" style={{ gap: 24 }}>
       <div className="stat-tiles">
         <div className="panel"><span className="muted small">Open now</span><span className="v">{all.filter((s) => s.state === "open").length}</span></div>
-        <div className="panel"><span className="muted small">Paid sign-ups</span><span className="v">{paidCount}</span></div>
+        <div className="panel"><span className="muted small">Paid sign-ups</span><span className="v">{paidCount}</span>{compCount > 0 && <span className="tiny muted">+ {compCount} complimentary</span>}</div>
         <div className="panel"><span className="muted small">Event revenue</span><span className="v">{money(all.reduce((n, s) => n + s.revenue, 0))}</span></div>
         <div className="panel"><span className="muted small">To follow up</span><span className="v">{pending + unpaid}</span></div>
       </div>
@@ -108,16 +110,25 @@ async function Guests({ showAll }: { showAll: boolean }) {
                       <td><strong>{g.name}</strong><div className="tiny muted">{[g.email, g.phone].filter(Boolean).join(" · ")}</div></td>
                       <td className="small">{g.tier}</td>
                       <td><span className={`tag ${STATUS[g.status][1]}`}>{STATUS[g.status][0]}</span></td>
-                      <td style={{ textAlign: "right" }}>{g.paid ? money(g.paid) : "—"}</td>
+                      <td style={{ textAlign: "right" }}>{g.paid ? money(g.paid) : g.status === "comp" ? money(0) : "—"}</td>
                       <td className="small muted" style={{ whiteSpace: "nowrap" }}>{shortDate(g.date)}</td>
                       <td>
-                        <Link className="btn btn-sm btn-ghost" href={g.status === "zelle" ? `/admin/clients/${g.clientId}/desk` : `/admin/clients/${g.clientId}`}>{g.status === "zelle" ? "Confirm" : "Open"}</Link>
+                        <div className="row" style={{ gap: 10, flexWrap: "nowrap" }}>
+                          <Link className="btn btn-sm btn-ghost" href={g.status === "zelle" ? `/admin/clients/${g.clientId}/desk` : `/admin/clients/${g.clientId}`}>{g.status === "zelle" ? "Confirm" : "Open"}</Link>
+                          {g.comp && <RemoveComp slug={s.e.slug} clientId={g.clientId} name={g.name} />}
+                        </div>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
+          )}
+          {s.state === "open" && (
+            <CompForm slug={s.e.slug} tiers={s.e.tiers.filter((t) => t.active !== false).map((t) => {
+              const seat = s.seats.find((x) => x.tier === t.name);
+              return { id: t.id, name: t.name, left: seat ? Math.max(0, seat.total - seat.taken) : null };
+            })} />
           )}
           {s.guests.some((g) => g.status === "unpaid") && <p className="tiny muted" style={{ margin: 0 }}>&ldquo;Didn&rsquo;t finish paying&rdquo; means they picked an offer and went to checkout but the payment never came through. A quick follow-up email often helps.</p>}
         </section>

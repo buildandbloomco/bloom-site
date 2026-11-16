@@ -5,6 +5,7 @@ import { listOrders } from "./shop";
 import { listLeads } from "./leads";
 import { allNotices } from "./paynotices";
 import { listEvents, spotHolds, type StoredEvent } from "./events";
+import { listComps } from "./comps";
 import type { Client, Lead, Payment } from "./types";
 
 /** Where a payment came from */
@@ -108,7 +109,8 @@ export function eventLabel(e: StoredEvent) {
 
 /* ---------- Events ---------- */
 
-export type GuestStatus = "paid" | "zelle" | "unpaid";
+/** "comp" = a complimentary seat you gave them (no payment) */
+export type GuestStatus = "paid" | "comp" | "zelle" | "unpaid";
 export interface Guest {
   clientId: string;
   name: string;
@@ -116,6 +118,8 @@ export interface Guest {
   phone: string;
   tier: string;
   status: GuestStatus;
+  /** Has a complimentary seat you can take back */
+  comp?: boolean;
   paid: number;
   date: string;
 }
@@ -144,7 +148,8 @@ export async function eventSummaries(): Promise<EventSummary[]> {
       const key = `${c.id}|${tier}`;
       const g = guests.get(key) ?? { clientId: c.id, name: c.name, email: c.email, phone: leadFor(c)?.phone || "", tier, status: "unpaid" as GuestStatus, paid: 0, date: "" };
       if (patch.paid) g.paid += patch.paid;
-      if (patch.status === "paid" || (patch.status === "zelle" && g.status === "unpaid")) g.status = patch.status;
+      if (patch.status === "comp") g.comp = true;
+      if (patch.status && order(patch.status) < order(g.status)) g.status = patch.status;
       if (patch.date && (!g.date || patch.date < g.date)) g.date = patch.date;
       guests.set(key, g);
     };
@@ -159,6 +164,11 @@ export async function eventSummaries(): Promise<EventSummary[]> {
         const m = matchEvent(events, n);
         if (m?.e.slug === e.slug) add(c, m.t?.name || "Offer", { status: "zelle", date: n.at });
       }
+    }
+    // Complimentary seats: they hold a seat, $0, never "didn't finish paying"
+    for (const x of await listComps(e.slug)) {
+      const c = byId.get(x.clientId);
+      if (c) add(c, e.tiers.find((t) => t.id === x.tierId)?.name || "Offer", { status: "comp", date: x.at });
     }
     // People who chose an offer but have not paid yet (lead tag "<event>: <tier>")
     for (const l of leads) {
@@ -186,6 +196,6 @@ export async function eventSummaries(): Promise<EventSummary[]> {
   }
   return out.sort((a, b) => stateOrder(a.state) - stateOrder(b.state) || b.e.endsAt.localeCompare(a.e.endsAt));
 }
-const order = (s: GuestStatus) => (s === "paid" ? 0 : s === "zelle" ? 1 : 2);
+const order = (s: GuestStatus) => ({ paid: 0, comp: 1, zelle: 2, unpaid: 3 })[s];
 const stateOrder = (s: EventSummary["state"]) => (s === "open" ? 0 : s === "closed" ? 1 : 2);
 
