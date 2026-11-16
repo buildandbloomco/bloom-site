@@ -57,7 +57,13 @@ export interface EventOffer {
   image?: string;
   /** Buyers can give a seat as a gift and print a gift certificate */
   giftable?: boolean;
+  /** What buyers get: "guest" = a simple guest pass (ticket, receipt, follow-up call), for personal events.
+   *  Not set = a full client portal (Money, business tools, billing), for business events. */
+  access?: "guest";
 }
+
+/** Personal events give buyers a guest pass instead of a business client portal */
+export const isGuestEvent = (e: Pick<EventOffer, "access">) => e.access === "guest";
 
 /** Built-in header photos, used when an event has no image of its own */
 const EVENT_IMAGES: Record<string, string> = { "reset-circle": "/events/reset-circle.jpg" };
@@ -227,6 +233,7 @@ export const RESET_CIRCLE: EventOffer = {
   name: "The Reset Circle",
   image: "/events/reset-circle.jpg",
   giftable: true,
+  access: "guest",
   headline: "The Reset Circle: a first quarter reset",
   details: "Saturday, January 16, 2027 · 10:00 AM to 4:00 PM · Peace on the Pond",
   endsAt: "2027-01-15T18:00:00-05:00",
@@ -251,7 +258,7 @@ export const RESET_CIRCLE: EventOffer = {
       "Your full itinerary, the address, parking, and what to bring will be emailed to you before the event.",
       "Dress warm and comfortable. Part of the day is outdoors, weather permitting.",
       "Coming with a friend? Each person grabs their own seat so we save a spot for both of you.",
-      "After the event, book your free 20-minute follow-up call from your portal.",
+      "After the event, book your free 20-minute follow-up call from your guest pass.",
     ],
   }],
 };

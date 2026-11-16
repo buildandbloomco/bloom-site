@@ -5,14 +5,11 @@ import { listLeads, saveLead } from "@/lib/leads";
 import { notifyAdmin } from "@/lib/notify";
 import { stripe } from "@/lib/stripe";
 import { startClientSession } from "@/lib/auth";
-import { findOrCreateClient } from "@/lib/enroll";
+import { eventClient } from "@/lib/event-client";
 import { ensureAgreement } from "@/lib/agreements";
-import { getFin, saveFin } from "@/lib/finance";
 import { listNotices, saveNotices } from "@/lib/paynotices";
-import { BLOOM_CHECK, earlyOn, tierPrice, usd } from "@/lib/event-def";
+import { BLOOM_CHECK, earlyOn, isGuestEvent, tierPrice, usd } from "@/lib/event-def";
 import { eventAccess, getEvent, spotsLeft, takeSpot } from "@/lib/events";
-import { getBuild, saveBuild } from "@/lib/builds";
-import { GUIDES } from "@/lib/guides";
 import type { Lead } from "@/lib/types";
 
 const str = (v: unknown, max = 300) => String(v ?? "").trim().slice(0, max);
@@ -71,21 +68,23 @@ export async function POST(req: Request) {
   if (!lead.organization) lead.organization = business;
 
   // Their client portal
-  const { client, created } = await findOrCreateClient(business ? `${business}` : name, email);
-  if (created) {
-    client.contactName = name.split(/\s+/)[0] || name;
-    client.tier = "business";
-    client.guideSlugs = GUIDES.map((g) => g.slug);
-    client.welcome = `Welcome, ${client.contactName}! It was so good to be in the room with you at ${ev.name}. Everything from here lives in this portal.`;
-    client.package = { ...client.package, title: tier.name, summary: tier.tagline, serviceIds: tier.serviceIds, customItems: tier.includes.map((i) => ({ title: i, detail: "" })) };
-    client.investment = { total: price, retainer: deposit || price, lineItems: [{ label: `${tier.name}, ${ev.name} ${early ? "decide-today " : ""}price`, amount: price }], note: deposit ? tier.depositNote || "" : "" };
+  const guestEv = isGuestEvent(ev);
+  const first = name.split(/\s+/)[0] || name;
+  const { client, created, setUp } = await eventClient(ev, tier, {
+    name, email, business,
+    welcome: guestEv ? `Welcome, ${first}! Your seat at ${ev.name} is saved. Your ticket and everything you need for the day are right here.` : `Welcome, ${first}! It was so good to be in the room with you at ${ev.name}. Everything from here lives in this portal.`,
+  });
+  if (setUp) {
+    // A guest upgrading to a full portal keeps what they already paid for (their ticket) on the bill
+    const prev = created ? null : client.investment;
+    const line = { label: `${tier.name}, ${ev.name} ${early ? "decide-today " : ""}price`, amount: price };
+    client.investment = prev && prev.total > 0
+      ? { total: prev.total + price, retainer: prev.total + (deposit || price), lineItems: [...prev.lineItems, line], note: deposit ? tier.depositNote || "" : prev.note }
+      : { total: price, retainer: deposit || price, lineItems: [line], note: deposit ? tier.depositNote || "" : "" };
     client.notes = [client.notes, `Came from ${ev.name} (${now.slice(0, 10)}). Chose ${tier.name}${deposit ? " with a deposit" : ""}, paying by ${method === "zelle" ? "Zelle" : "card"}.`, giftLine, checkLine].filter(Boolean).join("\n");
     // Card: the portal waits as "sent" until the payment clears, then becomes active (and gets its agreement) automatically
     if (method === "card") client.status = "sent";
     await saveClient(client);
-    const fin = await getFin(client.id);
-    if (!fin.enabled) await saveFin(client.id, { ...fin, enabled: true });
-    if (tier.build) { const bd = await getBuild(client.id); await saveBuild(client.id, { ...bd, enabled: true, kind: tier.build }); }
     if (tier.agreement && method === "zelle") await ensureAgreement(client, `${client.name} chose ${tier.name} at ${ev.name}.`);
   }
   lead.clientId = client.id;

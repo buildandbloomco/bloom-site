@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { usd } from "@/lib/event-def";
+import { isGuestEvent, usd } from "@/lib/event-def";
 import { getEvent } from "@/lib/events";
 import { currentClient } from "@/lib/auth";
 import { getSettings } from "@/lib/data";
@@ -17,6 +17,7 @@ export default async function EventWelcome({ params, searchParams }: { params: P
   const e = await getEvent(slug);
   if (!e) notFound();
   const tier = e.tiers.find((t) => t.id === sp.t);
+  const gp = isGuestEvent(e);
   const s = await getSettings();
   const client = sp.existing ? null : await currentClient();
   // Show the access code only to a portal made in the last day, in this browser
@@ -34,14 +35,14 @@ export default async function EventWelcome({ params, searchParams }: { params: P
       <div className="ev-narrow stack" style={{ gap: 22 }}>
         <div className="stack" style={{ gap: 12 }}>
           <p className="eyebrow">{e.name} · Welcome</p>
-          <h1>You&rsquo;re in. <span className="ink">Let&rsquo;s build.</span></h1>
+          <h1>You&rsquo;re in. <span className="ink">{gp ? "See you there." : "Let\u2019s build."}</span></h1>
           <span className="rule" aria-hidden="true" />
-          <p className="ev-lede">{tier ? <>Thank you for choosing <strong>{tier.name}</strong>. </> : null}{sp.z ? "Your spot is saved. Once your Zelle payment arrives, we will confirm it in your portal." : "Your payment went through and a receipt is on its way to your email."}</p>
+          <p className="ev-lede">{tier ? <>Thank you for choosing <strong>{tier.name}</strong>. </> : null}{sp.z ? `Your spot is saved. Once your Zelle payment arrives, we will confirm it in your ${gp ? "guest pass" : "portal"}.` : "Your payment went through and a receipt is on its way to your email."}</p>
         </div>
         {sp.g && (
           <div className="card stack ev-gift" style={{ gap: 8 }}>
             <strong>🎁 Your gift for {sp.g}</strong>
-            <span className="small">Print her gift certificate, or save it as a PDF to send. WePrint her gift certificate or save it as a PDF to send. {e.name} will reach out with all the details before the event.rsquo;ll share all the details before the event.</span>
+            <span className="small">Print her gift certificate, or save it as a PDF to send. We&rsquo;ll share all the details before the event.</span>
             <div><a className="btn btn-gold btn-sm" href={`/event/${e.slug}/gift?to=${encodeURIComponent(sp.g)}&from=${encodeURIComponent(sp.gf || "")}${sp.gn ? `&note=${encodeURIComponent(sp.gn)}` : ""}`} target="_blank" rel="noopener">Print her gift certificate</a></div>
           </div>
         )}
@@ -54,16 +55,16 @@ export default async function EventWelcome({ params, searchParams }: { params: P
         {client && fresh ? (
           <div className="gate-card boxed">
             <div className="stack" style={{ gap: 4 }}>
-              <span className="small muted">Your portal access code</span>
+              <span className="small muted">Your access code</span>
               <strong style={{ fontFamily: "var(--display)", fontSize: "1.8rem", letterSpacing: "0.04em" }}>{code || "Sent to your email"}</strong>
-              <span className="small">Screenshot or save this. It is how you sign in to your portal from any device.</span>
+              <span className="small">Screenshot or save this. It is how you sign in to your {gp ? "guest pass" : "portal"} from any device.</span>
             </div>
-            <a className="btn btn-primary btn-block" href={`/p/${client.slug}`}>Open my portal</a>
+            <a className="btn btn-primary btn-block" href={`/p/${client.slug}`}>{gp ? "Open my guest pass" : "Open my portal"}</a>
           </div>
         ) : (
           <div className="gate-card boxed">
-            <p style={{ margin: 0 }}>You already have a Build &amp; Bloom portal. Sign in with your access code to see this added.</p>
-            <a className="btn btn-primary btn-block" href="/portal">Go to my portal</a>
+            <p style={{ margin: 0 }}>You already have a Build &amp; Bloom login. Sign in with your access code to see this added.</p>
+            <a className="btn btn-primary btn-block" href="/portal">Sign in</a>
           </div>
         )}
         {tier && (

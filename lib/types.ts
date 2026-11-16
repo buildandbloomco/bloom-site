@@ -285,6 +285,8 @@ export interface Client {
   billing?: "standard" | "none";
   /** Small business or organization. Sets which add-on prices they see and pay in the portal */
   tier?: "business" | "org" | "";
+  /** "guest" = a guest pass for a personal event (ticket, receipt, follow-up call). Not set = a full client portal */
+  kind?: "guest";
   /** Guidebooks shown in their portal. Not set = just the client guidebook */
   guideSlugs?: string[];
   codeEnc: string;

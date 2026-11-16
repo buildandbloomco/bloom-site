@@ -34,6 +34,9 @@ import NeedsYou, { type Need, type NextUp } from "@/components/portal/NeedsYou";
 import MyCourses from "@/components/course/MyCourses";
 import { getAccess } from "@/lib/library";
 import { getCourse, listAppointments, listEnrollments } from "@/lib/courses";
+import GuestPass from "@/components/portal/GuestPass";
+import { ticketsFor } from "@/lib/ledger";
+import { migrateGuestPasses } from "@/lib/guest-migrate";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Your Portal", robots: { index: false, follow: false } };
@@ -47,6 +50,7 @@ export default async function Portal({
 }) {
   const { slug } = await params;
   const sp = await searchParams;
+  await migrateGuestPasses();
   let client = await currentClient();
   if (!client || client.slug !== slug || client.status === "archived") redirect("/portal");
 
@@ -70,6 +74,15 @@ export default async function Portal({
   const [catalog, settings, allAppts] = await Promise.all([getCatalog(), getSettings(), listAppointments()]);
   const today = nowET().date;
   const myAppts = allAppts.filter((x) => x.clientId === client.id && !x.enrollmentId && x.date >= today).sort((x, y) => (x.date + x.start).localeCompare(y.date + y.start)).slice(0, 5);
+
+  // Personal-event guests get a simple guest pass instead of the business portal
+  if (client.kind === "guest") {
+    const owned = await ownedIds(client.id);
+    const guides = GUIDES.filter((g) => (client!.guideSlugs ?? []).includes(g.slug)).map((g) => ({ title: g.title, href: g.file, note: g.tagline }));
+    const products = (await listProducts()).filter((p) => owned.includes(p.id) && p.file && !guides.some((g) => g.href === p.file)).map((p) => ({ title: p.title, href: p.file, note: p.subtitle }));
+    return <GuestPass client={client} settings={settings} tickets={await ticketsFor(client)} appts={myAppts} books={[...guides, ...products]} paidBanner={paidBanner} />;
+  }
+
   const pub = toPublic(client);
   const services = pricedFor(catalog.services, client.tier);
   const included = client.package.serviceIds

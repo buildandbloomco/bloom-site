@@ -88,6 +88,7 @@ export default async function AdminHome() {
                   </td>
                   <td>
                     <span className={`tag ${STATUS_TAG[c.status] ?? ""}`}>{c.status}</span>
+                    {c.kind === "guest" && <div style={{ marginTop: 6 }}><span className="tag gold">Guest pass</span></div>}
                     {(() => { const ps = proposalState(proposals[c.id] ?? null, today); return ps ? <div style={{ marginTop: 6 }}><Link href={`/admin/clients/${c.id}/proposal`} className={`tag ${ps.tone}`} style={{ textDecoration: "none" }}>{ps.label}</Link></div> : null; })()}
                     {reqs > 0 && <div style={{ marginTop: 6 }}><span className="tag rust">{reqs} new request{reqs > 1 ? "s" : ""}</span></div>}
                   </td>

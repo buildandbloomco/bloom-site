@@ -199,3 +199,33 @@ export async function eventSummaries(): Promise<EventSummary[]> {
 const order = (s: GuestStatus) => ({ paid: 0, comp: 1, zelle: 2, unpaid: 3 })[s];
 const stateOrder = (s: EventSummary["state"]) => (s === "open" ? 0 : s === "closed" ? 1 : 2);
 
+
+/* ---------- One person's tickets (for their guest pass) ---------- */
+
+export interface Ticket {
+  e: StoredEvent;
+  tier: StoredEvent["tiers"][number] | null;
+  status: GuestStatus;
+  paid: number;
+}
+
+/** Every event this client has a seat at, or started checkout for */
+export async function ticketsFor(c: Client): Promise<Ticket[]> {
+  const [events, notices, leads] = await Promise.all([listEvents(), allNotices(), listLeads()]);
+  const lead = leads.find((l) => l.clientId === c.id) ?? leads.find((l) => l.email && l.email.toLowerCase() === c.email.toLowerCase());
+  const out = new Map<string, Ticket>();
+  const add = (e: StoredEvent, tier: Ticket["tier"], status: GuestStatus, paid = 0) => {
+    const k = `${e.slug}|${tier?.id ?? ""}`;
+    const t = out.get(k) ?? { e, tier, status, paid: 0 };
+    t.paid += paid;
+    if (order(status) < order(t.status)) t.status = status;
+    out.set(k, t);
+  };
+  for (const p of c.payments) { const m = matchEvent(events, p); if (m) add(m.e, m.t, "paid", Number(p.amount) || 0); }
+  for (const n of notices[c.id] ?? []) { if (n.status !== "pending") continue; const m = matchEvent(events, n); if (m) add(m.e, m.t, "zelle"); }
+  for (const e of events) {
+    for (const x of await listComps(e.slug)) if (x.clientId === c.id) add(e, e.tiers.find((t) => t.id === x.tierId) ?? null, "comp");
+    for (const t of e.tiers) if (lead?.interests.includes(`${e.name}: ${t.name}`)) add(e, t, "unpaid");
+  }
+  return [...out.values()].sort((a, b) => a.e.endsAt.localeCompare(b.e.endsAt));
+}

@@ -1,11 +1,11 @@
-import { saveClient } from "@/lib/data";
+import { listClients, saveClient } from "@/lib/data";
 import { error, json, requireAdmin } from "@/lib/http";
 import { newId } from "@/lib/crypto";
-import { findOrCreateClient } from "@/lib/enroll";
+import { eventClient } from "@/lib/event-client";
+import { isGuestEvent } from "@/lib/event-def";
 import { listLeads, saveLead } from "@/lib/leads";
 import { getEvent, releaseSpot, spotsLeft, takeSpot } from "@/lib/events";
 import { compRef, listComps, saveComps } from "@/lib/comps";
-import { GUIDES } from "@/lib/guides";
 import type { Lead } from "@/lib/types";
 
 const str = (v: unknown, max = 300) => String(v ?? "").trim().slice(0, max);
@@ -26,18 +26,16 @@ export async function POST(req: Request) {
   if ((await spotsLeft(tier)) === 0) return error(`All the seats for ${tier.name} are taken.`);
 
   const now = new Date().toISOString();
-  const { client, created } = await findOrCreateClient(name, email);
   const comps = await listComps(slug);
-  if (comps.some((c) => c.clientId === client.id)) return error(`${client.name} already has a complimentary seat at ${ev.name}.`);
+  const already = (await listClients()).find((c) => c.email.trim().toLowerCase() === email.toLowerCase() && c.status !== "archived");
+  if (already && comps.some((c) => c.clientId === already.id)) return error(`${already.name} already has a complimentary seat at ${ev.name}.`);
 
+  const first = name.split(/\s+/)[0] || name;
+  const { client, created } = await eventClient(ev, tier, {
+    name, email,
+    welcome: isGuestEvent(ev) ? `Welcome, ${first}! Your seat at ${ev.name} is saved. Your ticket and everything you need for the day are right here.` : `Welcome, ${first}! We're so glad you're joining us at ${ev.name}. Everything from here lives in this portal.`,
+  });
   const compLine = `Complimentary seat at ${ev.name} (${tier.name}), added by Jadon.${note ? ` ${note}` : ""}`;
-  if (created) {
-    client.contactName = name.split(/\s+/)[0] || name;
-    client.tier = "business";
-    client.guideSlugs = GUIDES.map((g) => g.slug);
-    client.welcome = `Welcome, ${client.contactName}! We're so glad you're joining us at ${ev.name}. Everything from here lives in this portal.`;
-    client.package = { ...client.package, title: tier.name, summary: tier.tagline, serviceIds: tier.serviceIds, customItems: tier.includes.map((i) => ({ title: i, detail: "" })) };
-  }
   client.notes = [client.notes, compLine].filter(Boolean).join("\n");
   await saveClient(client);
 

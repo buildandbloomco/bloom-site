@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getCatalog, getClient } from "@/lib/data";
 import { decryptCode } from "@/lib/crypto";
 import ClientEditor, { type WorkspaceSummary } from "@/components/admin/ClientEditor";
+import PortalKind from "@/components/admin/PortalKind";
 import { getAssessment, getPlan, listResponses } from "@/lib/workspace";
 import { progress } from "@/lib/plan-types";
 
@@ -27,6 +28,7 @@ export default async function EditClient({ params }: { params: Promise<{ id: str
   return (
     <div className="stack" style={{ gap: 24 }}>
       <Link href="/admin" className="small">← All clients</Link>
+      <PortalKind clientId={client.id} guest={client.kind === "guest"} />
       <ClientEditor initial={client} catalog={catalog} initialCode={code} workspace={workspace} />
     </div>
   );

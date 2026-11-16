@@ -16,6 +16,7 @@ export default function EventOffers({ event, ends, canceled, contact, spots = {}
   const [check, setCheck] = useState<Record<string, number>>({});
   const [showCheck, setShowCheck] = useState(false);
   const [tierId, setTierId] = useState("");
+  const gp = event.access === "guest";
   const [f, setF] = useState({ name: "", email: "", phone: "", business: "", zelleName: "" });
   const [pay, setPay] = useState<"full" | "deposit">("full");
   const [method, setMethod] = useState<"card" | "zelle">("card");
@@ -125,9 +126,9 @@ export default function EventOffers({ event, ends, canceled, contact, spots = {}
             <li>Send to <strong>{zelle.z.to}</strong> ({zelle.z.name}).</li>
             <li>Amount: <strong>{usd(zelle.z.amount)}</strong>. In the memo, write <strong>{zelle.z.memo}</strong>.</li>
           </ol>
-          <p className="small" style={{ margin: 0 }}>We will confirm it as soon as it arrives, and it will show as paid in your portal.</p>
+          <p className="small" style={{ margin: 0 }}>We will confirm it as soon as it arrives, and it will show as paid in your {gp ? "guest pass" : "portal"}.</p>
           {zelle.cert && <div><a className="btn btn-gold" href={zelle.cert} target="_blank" rel="noopener">Print her gift certificate</a></div>}
-          {zelle.welcome ? <div><a className="btn btn-primary" href={zelle.welcome}>Open my portal</a></div> : <p className="small muted" style={{ margin: 0 }}>You already have a Build &amp; Bloom portal. Sign in with your access code to see it.</p>}
+          {zelle.welcome ? <div><a className="btn btn-primary" href={zelle.welcome}>{gp ? "Open my guest pass" : "Open my portal"}</a></div> : <p className="small muted" style={{ margin: 0 }}>You already have a Build &amp; Bloom login. Sign in with your access code to see it.</p>}
         </section>
       ) : tier && (
         <section className="card stack" style={{ gap: 14 }}>
@@ -148,7 +149,7 @@ export default function EventOffers({ event, ends, canceled, contact, spots = {}
               <label>Your name<input type="text" required autoComplete="name" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></label>
               <label>Email<input type="email" required autoComplete="email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} /></label>
               <label>Phone<input type="tel" autoComplete="tel" value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} /></label>
-              <label>Business or organization<input type="text" autoComplete="organization" value={f.business} onChange={(e) => setF({ ...f, business: e.target.value })} /></label>
+              {!gp && <label>Business or organization<input type="text" autoComplete="organization" value={f.business} onChange={(e) => setF({ ...f, business: e.target.value })} /></label>}
             </div>
             {event.giftable && (
               <div className="ev-gift stack" style={{ gap: 10 }}>
@@ -176,7 +177,7 @@ export default function EventOffers({ event, ends, canceled, contact, spots = {}
             </label>
             {err && <p className="error-text" role="alert">{err}</p>}
             <button className="btn btn-primary btn-block" disabled={busy || !agree}>{busy ? "One moment..." : method === "card" ? `Pay ${usd(amount)} by card` : `Pay ${usd(amount)} by Zelle`}</button>
-            <p className="tiny muted" style={{ margin: 0, textAlign: "center" }}>Your own private client portal opens as soon as you finish.</p>
+            <p className="tiny muted" style={{ margin: 0, textAlign: "center" }}>{gp ? "Your guest pass, with your ticket and receipt, opens as soon as you finish." : "Your own private client portal opens as soon as you finish."}</p>
           </form>
         </section>
       )}

@@ -4,12 +4,14 @@ import AdminNav from "@/components/admin/AdminNav";
 import { listLeads } from "@/lib/leads";
 import { allNotices } from "@/lib/paynotices";
 import { listOrders } from "@/lib/shop";
+import { migrateGuestPasses } from "@/lib/guest-migrate";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Admin", robots: { index: false, follow: false } };
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   if (!(await isAdmin())) redirect("/admin/login");
+  await migrateGuestPasses();
   const [leads, notices, orders] = await Promise.all([listLeads(), allNotices(), listOrders()]);
   const toConfirm = Object.values(notices).flat().filter((n) => n.status === "pending").length + orders.filter((o) => o.status === "pending" && o.method === "zelle").length;
   return (

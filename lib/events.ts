@@ -13,6 +13,15 @@ const KEY = "bb:events";
 export async function listEvents(): Promise<StoredEvent[]> {
   const saved = await kv().get<StoredEvent[]>(KEY);
   if (saved) {
+    // One time: Reset Circle buyers get a guest pass, not a business client portal
+    if (!(await kv().get("bb:events:mig:guest1"))) {
+      if (saved.some((e) => e.slug === "reset-circle")) {
+        const next = saved.map((e) => e.slug !== "reset-circle" ? e : { ...e, access: "guest" as const, tiers: e.tiers.map((t) => ({ ...t, next: t.next.map((n) => n.replace("follow-up call from your portal", "follow-up call from your guest pass")) })) });
+        await kv().set(KEY, next);
+        saved.splice(0, saved.length, ...next);
+      }
+      await kv().set("bb:events:mig:guest1", true);
+    }
     // One time: the Reset Circle early bird now ends Dec 15 instead of Dec 31 (only if it was still Dec 31)
     if (!(await kv().get("bb:events:mig:reset6"))) {
       const dec31 = new Date("2026-12-31T23:59:00-05:00").getTime();
@@ -200,7 +209,7 @@ export function cleanEvents(input: unknown, serviceIds: Set<string>): StoredEven
       tiers.push(c);
     }
     if (!tiers.length) return `${name} needs at least one offer.`;
-    out.push({ slug, name, endsAt: new Date(endsAt).toISOString(), intro: str(raw.intro, 600), tiers, active: raw.active !== false, code, ...(raw.open === true ? { open: true } : {}), ...(str(raw.headline, 140) ? { headline: str(raw.headline, 140) } : {}), ...(str(raw.details, 200) ? { details: str(raw.details, 200) } : {}), ...(/^(\/|https:\/\/)\S+$/.test(str(raw.image, 300)) ? { image: str(raw.image, 300) } : {}), ...(raw.giftable === true ? { giftable: true } : {}) });
+    out.push({ slug, name, endsAt: new Date(endsAt).toISOString(), intro: str(raw.intro, 600), tiers, active: raw.active !== false, code, ...(raw.open === true ? { open: true } : {}), ...(str(raw.headline, 140) ? { headline: str(raw.headline, 140) } : {}), ...(str(raw.details, 200) ? { details: str(raw.details, 200) } : {}), ...(/^(\/|https:\/\/)\S+$/.test(str(raw.image, 300)) ? { image: str(raw.image, 300) } : {}), ...(raw.giftable === true ? { giftable: true } : {}), ...(raw.access === "guest" ? { access: "guest" as const } : {}) });
   }
   return out;
 }
