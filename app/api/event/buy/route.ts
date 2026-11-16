@@ -59,7 +59,7 @@ export async function POST(req: Request) {
   const existingLead = (await listLeads()).find((l) => l.email.toLowerCase() === email.toLowerCase());
   const tag = `${ev.name}: ${tier.name}`;
   const lead: Lead = existingLead ?? {
-    id: newId(), createdAt: now, status: "new", lane: "business", name, email, phone, organization: business, role: "", website: "",
+    id: newId(), createdAt: now, status: "new", lane: isGuestEvent(ev) && !business ? "personal" : "business", name, email, phone, organization: business, role: "", website: "",
     interests: [], goals: "", challenges: "", budget: "", timeline: "", heardFrom: ev.name, assessment: null, notes: giftLine, clientId: null,
   };
   if (!lead.interests.includes(tag)) lead.interests.push(tag);

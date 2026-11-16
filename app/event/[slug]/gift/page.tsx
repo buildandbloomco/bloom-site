@@ -14,7 +14,7 @@ export default async function GiftCertificate({ params, searchParams }: { params
   const { slug } = await params;
   const sp = await searchParams;
   const e = await getEvent(slug);
-  if (!e || !e.giftable) notFound();
+  if (!e) notFound();
   const to = clean(sp.to, 120), from = clean(sp.from, 120), note = clean(sp.note, 160);
   const img = eventImage(e);
   return (

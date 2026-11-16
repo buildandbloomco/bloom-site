@@ -24,7 +24,7 @@ let running: Promise<void> | null = null;
  *  Anyone with any sign of business work (another payment, a proposal, sessions, a course, Money entries,
  *  an agreement, services in their package, shop purchases) keeps their full portal. Access codes don't change. */
 export async function migrateGuestPasses() {
-  const steps: [string, () => Promise<void>][] = [[FLAG, run], [BOOKS_FLAG, giveBooks], [LEADS_FLAG, guestsAsLeads], [GIFTS_FLAG, giftsFromStripe], [NAMES_FLAG, retireNameCodes]];
+  const steps: [string, () => Promise<void>][] = [[FLAG, run], [BOOKS_FLAG, giveBooks], [LEADS_FLAG, guestsAsLeads], [GIFTS_FLAG, giftsFromStripe], [NAMES_FLAG, retireNameCodes], [LANE_FLAG, guestsAsIndividuals]];
   const todo: typeof steps = [];
   for (const s of steps) if (!(await kv().get(s[0]))) todo.push(s);
   if (!todo.length) return;
@@ -42,6 +42,16 @@ async function guestsAsLeads() {
     if (lead?.status === "converted") await saveLead({ ...lead, status: "new" });
   }
   await kv().set(LEADS_FLAG, true);
+}
+
+const LANE_FLAG = "bb:mig:guestlane1";
+/** One time: event guests were saved as Business leads. Anyone with a guest pass and no business name becomes Individual. */
+async function guestsAsIndividuals() {
+  const guests = new Set((await listClients()).filter((c) => c.kind === "guest").map((c) => c.id));
+  for (const l of await listLeads()) {
+    if (l.clientId && guests.has(l.clientId) && l.lane === "business" && !l.organization.trim()) await saveLead({ ...l, lane: "personal" });
+  }
+  await kv().set(LANE_FLAG, true);
 }
 
 const NAMES_FLAG = "bb:mig:nonamecodes1";

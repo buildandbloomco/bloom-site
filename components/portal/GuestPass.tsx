@@ -78,6 +78,12 @@ export default function GuestPass({ client, settings, tickets, appts, books, pai
                       </div>
                       <span className={`tag ${STATUS[t.status][1]}`}>{STATUS[t.status][0]}</span>
                     </div>
+                    {t.compCert && (
+                      <div className="row between" style={{ gap: 10, background: "var(--cream)", borderRadius: 12, padding: "10px 14px" }}>
+                        <span className="small">🎁 Your seat is a gift from {t.compCert.from}.</span>
+                        <a className="btn btn-sm btn-ghost" href={certUrl(t.e.slug, t.compCert, t.compCert.from)} target="_blank" rel="noopener noreferrer">Your gift certificate</a>
+                      </div>
+                    )}
                     {t.gifts.map((g) => (
                       <div key={g.to} className="row between" style={{ gap: 10, background: "var(--cream)", borderRadius: 12, padding: "10px 14px" }}>
                         <span className="small">🎁 This seat is a gift for <strong>{g.to}</strong>.{g.email ? "" : " We'll send her the details through you."}</span>

@@ -240,7 +240,8 @@ export interface Lead {
   id: string;
   createdAt: string;
   status: "new" | "contacted" | "converted" | "closed";
-  lane: "orgs" | "business" | "other";
+  /** "personal" = an individual, e.g. a Reset Circle guest who is not here for a business */
+  lane: "orgs" | "business" | "personal" | "other";
   name: string;
   email: string;
   phone: string;

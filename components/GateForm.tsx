@@ -36,7 +36,7 @@ export default function GateForm() {
           autoComplete="off"
           autoCapitalize="characters"
           spellCheck={false}
-          placeholder="PEONY-MEADOW-418"
+          placeholder="BLOOM-4821"
           value={code}
           onChange={(e) => setCode(e.target.value)}
           required

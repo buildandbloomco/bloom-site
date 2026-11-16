@@ -12,6 +12,7 @@ export async function PATCH(req: Request, ctx: Ctx) {
   const b = await req.json().catch(() => ({}));
   if (["new", "contacted", "converted", "closed"].includes(b.status)) lead.status = b.status;
   if (typeof b.notes === "string") lead.notes = b.notes.slice(0, 20000);
+  if (["orgs", "business", "personal", "other"].includes(b.lane)) lead.lane = b.lane;
   await saveLead(lead);
   return json(lead);
 }

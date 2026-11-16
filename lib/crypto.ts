@@ -44,13 +44,9 @@ export function decryptCode(payload: string): string {
   }
 }
 
-// Access codes are a flower, a garden word, and three numbers, e.g. PEONY-MEADOW-418:
-// easy to read out and type, and about 3.7 million combinations, so they can't be guessed.
-const FLOWERS = ["ASTER", "AZALEA", "BEGONIA", "BLUEBELL", "CAMELLIA", "CLOVER", "COSMOS", "DAHLIA", "DAISY", "FERN", "FREESIA", "GARDENIA", "HAZEL", "HEATHER", "HIBISCUS", "HOLLY", "IRIS", "IVY", "JASMINE", "JUNIPER", "LAVENDER", "LILAC", "LILY", "LOTUS", "MAGNOLIA", "MAPLE", "MARIGOLD", "MIMOSA", "MINT", "MYRTLE", "OLIVE", "ORCHID", "PANSY", "PEONY", "PERIWINKLE", "POPPY", "PRIMROSE", "ROSE", "SAFFRON", "SAGE", "SORREL", "SUNFLOWER", "THYME", "TULIP", "VIOLET", "WILLOW", "WISTERIA", "YARROW", "ZINNIA", "ACACIA", "ALOE", "BASIL", "CEDAR", "CYPRESS", "ELDER", "FIG", "GINGER", "HONEYSUCKLE", "LAUREL", "MOSS", "PINE", "ROSEMARY", "SEQUOIA", "TANSY"];
-const GARDEN = ["MEADOW", "RIVER", "GARDEN", "SUNRISE", "HARBOR", "MORNING", "BREEZE", "SPRING", "BLOSSOM", "ORCHARD", "PRAIRIE", "VALLEY", "CANYON", "COAST", "DAWN", "DEW", "EMBER", "FIELD", "GROVE", "HAVEN", "HILL", "HOLLOW", "ISLAND", "LAKE", "LANTERN", "MEADOWLARK", "MESA", "MIST", "MOON", "NEST", "OCEAN", "PATH", "PEBBLE", "POND", "RAIN", "RIDGE", "ROOT", "SEED", "SHORE", "SKY", "SPROUT", "STAR", "STONE", "STREAM", "SUMMER", "SUN", "THICKET", "TIDE", "TRAIL", "WATER", "WAVE", "WILD", "WIND", "WINTER", "AUTUMN", "BROOK", "CLOUD", "CREEK", "FOREST", "GLADE", "HARVEST", "LIGHT", "PETAL", "SOIL"];
-const pick = <T,>(list: T[]) => list[crypto.randomInt(list.length)];
+// Access codes are BLOOM and four numbers, e.g. BLOOM-4821: short and easy to read out.
 export function generateCode(): string {
-  return `${pick(FLOWERS)}-${pick(GARDEN)}-${crypto.randomInt(100, 1000)}`;
+  return `BLOOM-${crypto.randomInt(1000, 10000)}`;
 }
 
 export function newId(): string {

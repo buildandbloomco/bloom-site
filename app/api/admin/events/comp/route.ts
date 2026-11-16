@@ -20,7 +20,7 @@ export async function POST(req: Request) {
   if (!ev) return error("That event wasn't found.", 404);
   const tier = ev.tiers.find((t) => t.id === str(b.tierId, 40));
   if (!tier) return error("Choose an offer.");
-  const name = str(b.name, 120), email = str(b.email, 200), note = str(b.note, 300);
+  const name = str(b.name, 120), email = str(b.email, 200), note = str(b.note, 300), message = str(b.message, 160);
   if (!name) return error("Add the guest's name.");
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return error("Add a valid email. Their portal details go there.");
   if ((await spotsLeft(tier)) === 0) return error(`All the seats for ${tier.name} are taken.`);
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
   const tag = `${ev.name}: ${tier.name}`;
   const existing = (await listLeads()).find((l) => l.email.toLowerCase() === email.toLowerCase());
   const lead: Lead = existing ?? {
-    id: newId(), createdAt: now, status: "new", lane: "business", name, email, phone: "", organization: "", role: "", website: "",
+    id: newId(), createdAt: now, status: "new", lane: isGuestEvent(ev) ? "personal" : "business", name, email, phone: "", organization: "", role: "", website: "",
     interests: [], goals: "", challenges: "", budget: "", timeline: "", heardFrom: "Complimentary", assessment: null, notes: "", clientId: null,
   };
   const addedTag = !lead.interests.includes(tag);
@@ -56,7 +56,7 @@ export async function POST(req: Request) {
   await saveLead(lead);
 
   if (tier.spots && tier.pool) await takeSpot(tier.pool, { ref: compRef(client.id), clientId: client.id, at: now, event: slug });
-  await saveComps(slug, [...comps, { clientId: client.id, tierId: tier.id, at: now, note, addedTag }]);
+  await saveComps(slug, [...comps, { clientId: client.id, tierId: tier.id, at: now, note, addedTag, ...(message ? { message } : {}) }]);
   return json({ ok: true, clientId: client.id, created });
 }
 
@@ -79,5 +79,17 @@ export async function DELETE(req: Request) {
     const lead = c.addedTag && ev && t ? leads.find((l) => l.clientId === clientId) : undefined;
     if (lead) await saveLead({ ...lead, interests: lead.interests.filter((x) => x !== `${ev!.name}: ${t!.name}`) });
   }
+  return json({ ok: true });
+}
+
+// Change the message printed on a complimentary guest's gift certificate
+export async function PATCH(req: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+  const b = await req.json().catch(() => ({}));
+  const slug = str(b.slug, 60), clientId = str(b.clientId, 60), message = str(b.message, 160);
+  const comps = await listComps(slug);
+  if (!comps.some((c) => c.clientId === clientId)) return error("That complimentary seat wasn't found.", 404);
+  await saveComps(slug, comps.map((c) => (c.clientId === clientId ? { ...c, message } : c)));
   return json({ ok: true });
 }

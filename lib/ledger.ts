@@ -127,10 +127,15 @@ export interface Guest {
   /** The seat is a gift: name/email above are the person coming, buyer is who paid */
   gift?: SeatGift;
   buyer?: { name: string; email: string };
+  /** Gift certificate for this seat: gifts from a buyer, and complimentary seats from you */
+  cert?: { to: string; from: string; note: string };
 }
 
+/** Who a complimentary seat's certificate is from */
+export const COMP_FROM = "Jadon";
+
 /** Printable gift certificate for a gifted seat */
-export const certUrl = (slug: string, gift: SeatGift, from: string) =>
+export const certUrl = (slug: string, gift: { to: string; note: string }, from: string) =>
   `/event/${slug}/gift?to=${encodeURIComponent(gift.to)}&from=${encodeURIComponent(from)}${gift.note ? `&note=${encodeURIComponent(gift.note)}` : ""}`;
 
 /** Gifts saved only as a note at checkout (seats bought before gift details were stored on the payment) */
@@ -168,9 +173,10 @@ export async function eventSummaries(): Promise<EventSummary[]> {
       // A gifted seat is its own row, named for the person coming
       const key = `${c.id}|${tier}${gift ? `|gift:${gift.to.toLowerCase()}` : ""}`;
       const base: Guest = { clientId: c.id, name: c.name, email: c.email, phone: leadFor(c)?.phone || "", tier, status: "unpaid", paid: 0, date: "", guestPass: c.kind === "guest" };
-      const g = guests.get(key) ?? (gift ? { ...base, name: gift.to, email: gift.email, phone: "", gift, buyer: { name: c.name, email: c.email } } : base);
+      const g = guests.get(key) ?? (gift ? { ...base, name: gift.to, email: gift.email, phone: "", gift, buyer: { name: c.name, email: c.email }, cert: { to: gift.to, from: c.name, note: gift.note } } : base);
       if (patch.paid) g.paid += patch.paid;
       if (patch.status === "comp") g.comp = true;
+      if (patch.cert && !g.cert) g.cert = patch.cert;
       if (patch.status && order(patch.status) < order(g.status)) g.status = patch.status;
       if (patch.date && (!g.date || patch.date < g.date)) g.date = patch.date;
       guests.set(key, g);
@@ -190,7 +196,7 @@ export async function eventSummaries(): Promise<EventSummary[]> {
     // Complimentary seats: they hold a seat, $0, never "didn't finish paying"
     for (const x of await listComps(e.slug)) {
       const c = byId.get(x.clientId);
-      if (c) add(c, e.tiers.find((t) => t.id === x.tierId)?.name || "Offer", { status: "comp", date: x.at });
+      if (c) add(c, e.tiers.find((t) => t.id === x.tierId)?.name || "Offer", { status: "comp", date: x.at, cert: { to: c.name, from: COMP_FROM, note: x.message || "" } });
     }
     // People who chose an offer but have not paid yet (lead tag "<event>: <tier>")
     for (const l of leads) {
@@ -210,7 +216,7 @@ export async function eventSummaries(): Promise<EventSummary[]> {
         const c = byId.get(g.clientId)!;
         const taken = new Set([...guests.values()].filter((x) => x.clientId === c.id && x.gift).map((x) => x.gift!.to));
         const gift = giftsInNotes([c.notes, leadFor(c)?.notes ?? ""].join("\n")).find((x) => !taken.has(x.to));
-        if (gift) guests.set(key, { ...g, name: gift.to, email: gift.email, phone: "", gift, buyer: { name: c.name, email: c.email } });
+        if (gift) guests.set(key, { ...g, name: gift.to, email: gift.email, phone: "", gift, buyer: { name: c.name, email: c.email }, cert: { to: gift.to, from: c.name, note: gift.note } });
       }
     }
 
@@ -242,6 +248,8 @@ export interface Ticket {
   paid: number;
   /** Seats bought as gifts for other people */
   gifts: SeatGift[];
+  /** A complimentary seat's certificate, addressed to them */
+  compCert?: { to: string; from: string; note: string };
 }
 
 /** Every event this client has a seat at, or started checkout for */
@@ -260,7 +268,11 @@ export async function ticketsFor(c: Client): Promise<Ticket[]> {
   for (const p of c.payments) { const m = matchEvent(events, p); if (m) add(m.e, m.t, "paid", Number(p.amount) || 0, p.gift); }
   for (const n of notices[c.id] ?? []) { if (n.status !== "pending") continue; const m = matchEvent(events, n); if (m) add(m.e, m.t, "zelle", 0, n.gift); }
   for (const e of events) {
-    for (const x of await listComps(e.slug)) if (x.clientId === c.id) add(e, e.tiers.find((t) => t.id === x.tierId) ?? null, "comp");
+    for (const x of await listComps(e.slug)) if (x.clientId === c.id) {
+      add(e, e.tiers.find((t) => t.id === x.tierId) ?? null, "comp");
+      const t = out.get(`${e.slug}|${x.tierId}`);
+      if (t) t.compCert = { to: c.name, from: COMP_FROM, note: x.message || "" };
+    }
     for (const t of e.tiers) if (lead?.interests.includes(`${e.name}: ${t.name}`)) add(e, t, "unpaid");
   }
   // Older gifted seats: the gift was saved as a note at checkout

@@ -6,7 +6,7 @@ import { shortDate } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
-const LANE: Record<string, string> = { orgs: "Helping organization", business: "Business", other: "Other" };
+const LANE: Record<string, string> = { orgs: "Helping organization", business: "Business", personal: "Individual", other: "Other" };
 const STATUS_TAG: Record<string, string> = { new: "rust", contacted: "gold", converted: "green", closed: "" };
 
 export default async function LeadsPage() {

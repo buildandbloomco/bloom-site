@@ -7,6 +7,8 @@ export interface Comp {
   tierId: string;
   at: string;
   note: string;
+  /** Printed on her gift certificate */
+  message?: string;
   /** The event tag was added to their lead by this comp (so removing the comp takes it off again) */
   addedTag?: boolean;
 }

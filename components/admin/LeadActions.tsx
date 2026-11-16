@@ -6,6 +6,7 @@ import { firstName } from "@/lib/format";
 
 export default function LeadActions({ lead, guest }: { lead: Lead; guest?: { clientId: string; code: string } | null }) {
   const [status, setStatus] = useState(lead.status);
+  const [lane, setLane] = useState(lead.lane);
   const [notes, setNotes] = useState(lead.notes);
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
@@ -58,6 +59,13 @@ export default function LeadActions({ lead, guest }: { lead: Lead; guest?: { cli
         <a className="btn btn-sm btn-ghost" href={`mailto:${lead.email}?subject=${encodeURIComponent("Your inquiry with Build & Bloom Collective")}`}>Email {firstName(lead.name)}</a>
       </section>
       <section className="panel">
+        <h3>Type</h3>
+        <select value={lane} onChange={(e) => { const v = e.target.value as Lead["lane"]; setLane(v); patch({ lane: v }); }}>
+          <option value="personal">Individual</option>
+          <option value="business">Business</option>
+          <option value="orgs">Helping organization</option>
+          <option value="other">Other</option>
+        </select>
         <h3>Status</h3>
         <select value={status} onChange={(e) => { const v = e.target.value as Lead["status"]; setStatus(v); patch({ status: v }); }}>
           <option value="new">New</option>
