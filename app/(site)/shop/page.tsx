@@ -10,7 +10,7 @@ export const metadata = { title: "Shop", description: "Guides, workbooks, and to
 
 export default async function Shop() {
   const products = (await listProducts()).filter((p) => p.status !== "hidden");
-  const sorted = [...products.filter((p) => p.status === "live" && p.featured), ...products.filter((p) => p.status === "live" && !p.featured), ...products.filter((p) => p.status === "soon")];
+  const sorted = [...products.filter((p) => p.featured && p.kind === "Journal"), ...products.filter((p) => p.status === "live" && p.featured && p.kind !== "Journal"), ...products.filter((p) => p.status === "live" && !p.featured), ...products.filter((p) => p.status === "soon" && !(p.featured && p.kind === "Journal"))];
   return (
     <>
       <section className="page-hero">
@@ -26,7 +26,7 @@ export default async function Shop() {
           {sorted.map((p) => (
             <Link key={p.id} href={productPath(p)} className="sh-card">
               <Cover p={p} />
-              <div className="sh-meta">{p.status === "soon" ? <span className="sh-soon">Coming soon</span> : <span className="sh-price">{priceLabel(p)}</span>}<span className="small muted">{p.kind}</span></div>
+              <div className="sh-meta">{p.status === "soon" ? <span className="sh-soon">Coming soon</span> : <span className="sh-price">{priceLabel(p)}{p.buyUrl && /amazon\./i.test(p.buyUrl) ? <span className="small muted"> on Amazon</span> : null}</span>}<span className="small muted">{p.kind}</span></div>
               <h3>{p.title}</h3>
               <p className="small muted" style={{ margin: 0 }}>{p.subtitle}</p>
             </Link>

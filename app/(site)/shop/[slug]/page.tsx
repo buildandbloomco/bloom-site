@@ -39,7 +39,17 @@ export default async function ProductPage({ params, searchParams }: { params: Pr
                 <ul style={{ margin: 0, paddingLeft: 20 }}>{p.includes.map((x) => <li key={x}>{x}</li>)}</ul>
               </div>
             )}
-            <ShopBuy product={{ id: p.id, title: p.title, price: p.price, status: p.status }} canceled={(await searchParams).canceled === "1"} zelle={!!s.zelle} />
+            {p.buyUrl && p.status === "live" ? (
+              <a className="btn btn-primary" href={p.buyUrl} target="_blank" rel="noopener noreferrer" style={{ alignSelf: "flex-start" }}>{/amazon\./i.test(p.buyUrl) ? "Buy on Amazon" : "Buy now"}</a>
+            ) : (
+              <>
+                {p.status === "soon" && p.kind === "Journal" && <p className="small muted" style={{ margin: 0 }}>Coming soon to Amazon. Leave your email and we&rsquo;ll let you know the day it&rsquo;s out.</p>}
+                <ShopBuy product={{ id: p.id, title: p.title, price: p.price, status: p.status }} canceled={(await searchParams).canceled === "1"} zelle={!!s.zelle} />
+              </>
+            )}
+            {p.extrasUrl && (
+              <p className="small" style={{ margin: 0 }}>Already have it? <Link href={p.extrasUrl}>Get the free companion: practices, printables, and the 30-day follow-along.</Link></p>
+            )}
           </div>
         </div>
       </div>

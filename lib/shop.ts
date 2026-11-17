@@ -7,14 +7,22 @@ import { emailReady, sendEmail } from "./invite";
 import { renderEmail } from "./email-template";
 import { emailBrand } from "./email";
 import { findOrCreateClient } from "./enroll";
-import { DEFAULT_PRODUCTS, PRODUCT_KINDS, priceLabel, type Order, type Product } from "./shop-def";
+import { BLOOM_AGAIN, DEFAULT_PRODUCTS, PRODUCT_KINDS, priceLabel, type Order, type Product } from "./shop-def";
 
 const PK = "bb:shop:products";
 const OK = "bb:shop:orders";
 const OWN = "bb:shop:owned";
 
 export async function listProducts(): Promise<Product[]> {
-  return (await kv().get<Product[]>(PK)) ?? DEFAULT_PRODUCTS;
+  const saved = await kv().get<Product[]>(PK);
+  let list = saved ?? DEFAULT_PRODUCTS;
+  // One-time: add the Bloom Again journal to the shop, at the top
+  if (!(await kv().get("bb:shop:mig:bloomagain1"))) {
+    if (!list.some((p) => p.id === BLOOM_AGAIN.id)) list = [BLOOM_AGAIN, ...list];
+    await kv().set(PK, list);
+    await kv().set("bb:shop:mig:bloomagain1", 1);
+  }
+  return list;
 }
 export async function saveProducts(p: Product[]) { await kv().set(PK, p); }
 export async function getProduct(slugOrId: string) {
@@ -121,10 +129,11 @@ export function cleanProducts(input: unknown): Product[] | string {
     const price = Math.max(0, Math.round(Number(raw.price) * 100) / 100 || 0);
     if (price > 0 && price < 1) return `${title}: paid products need a price of at least $1.`;
     const was = Math.round(Number(raw.was) * 100) / 100 || 0;
-    const cover = str(raw.cover, 600), file = str(raw.file, 600);
-    if (!okUrl(cover) || !okUrl(file)) return `${title}: links must start with https://, or upload the file.`;
+    const cover = str(raw.cover, 600), file = str(raw.file, 600), buyUrl = str(raw.buyUrl, 600), extrasUrl = str(raw.extrasUrl, 600);
+    if (!okUrl(cover) || !okUrl(file) || !okUrl(extrasUrl)) return `${title}: links must start with https://, or upload the file.`;
+    if (buyUrl && !/^https:\/\//.test(buyUrl)) return `${title}: the store link must start with https://.`;
     const status = (["live", "soon", "hidden"] as const).includes(raw.status as "live") ? (raw.status as Product["status"]) : "hidden";
-    if (status === "live" && !file) return `${title}: add the file buyers get before making it live, or set it to Coming soon.`;
+    if (status === "live" && !file && !buyUrl) return `${title}: add the file buyers get (or a store link, like Amazon) before making it live, or set it to Coming soon.`;
     out.push({
       id, slug, title, subtitle: str(raw.subtitle, 240), description: str(raw.description, 4000), price,
       ...(was > price ? { was } : {}),
@@ -133,6 +142,7 @@ export function cleanProducts(input: unknown): Product[] | string {
       ...(Array.isArray(raw.alsoGrants) && raw.alsoGrants.length ? { alsoGrants: raw.alsoGrants.map(String).slice(0, 20) } : {}),
       includes: (Array.isArray(raw.includes) ? raw.includes : []).map((x) => str(x, 200)).filter(Boolean).slice(0, 12),
       ...(str(raw.pages, 40) ? { pages: str(raw.pages, 40) } : {}),
+      ...(buyUrl ? { buyUrl } : {}), ...(extrasUrl ? { extrasUrl } : {}),
       status, featured: raw.featured === true,
     });
   }

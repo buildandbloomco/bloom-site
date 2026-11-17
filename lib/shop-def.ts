@@ -1,7 +1,7 @@
 /** The shop: digital products sold on the website and delivered in the buyer's portal. Shared by browser and server. */
 
 export type ProductStatus = "live" | "soon" | "hidden";
-export const PRODUCT_KINDS = ["Ebook", "Guide", "Workbook", "Coloring book", "Template", "Bundle", "Recording", "Toolkit"] as const;
+export const PRODUCT_KINDS = ["Ebook", "Guide", "Workbook", "Coloring book", "Template", "Bundle", "Recording", "Toolkit", "Journal"] as const;
 
 export interface Product {
   id: string;
@@ -24,6 +24,10 @@ export interface Product {
   alsoGrants?: string[];
   includes: string[];
   pages?: string;
+  /** Sold somewhere else, like Amazon: the button sends buyers there instead of checkout */
+  buyUrl?: string;
+  /** Optional free extras for buyers, like a companion page */
+  extrasUrl?: string;
   status: ProductStatus;
   featured?: boolean;
 }
@@ -73,6 +77,14 @@ export const DEFAULT_PRODUCTS: Product[] = [
     price: 15, kind: "Coloring book", cover: "", file: "", includes: ["Printable pages, color as many times as you like", "Affirmation pages", "Heritage patterns, florals, and mandalas"], status: "soon",
   },
 ];
+
+export const BLOOM_AGAIN: Product = {
+  id: "bloom-again", slug: "bloom-again", title: "Bloom Again", subtitle: "A guided journal to rest, reconnect, release, and root, for the woman ready to come back to herself.",
+  description: "You have been carrying so much, for so long. This is where you set it down.\n\nBloom Again is a guided journal for women who pour into their families, their work, and their communities, and are ready to come back to themselves. It walks you gently through four seasons of renewal: Rest, Reconnect, Release, and Root.\n\nEvery copy comes with a free companion online: a 30-day follow-along by email, every practice step by step, and printable pages.\n\nGo at your own pace. There is no falling behind here. Just you, coming home.",
+  price: 14.99, kind: "Journal", cover: "/bloom-again/cover.jpg", file: "",
+  includes: ["48 guided prompts across four seasons", "8 simple practices for calm and clarity", "The Bloom Check self-assessment and a burnout warning signs checklist", "30 daily check-ins and 8 weekly reflections", "A monthly mood tracker and affirmations for every season", "Free 30-day email follow-along and printables"],
+  pages: "144-page paperback", status: "soon", featured: true, extrasUrl: "/bloom-again",
+};
 
 export const priceLabel = (p: Pick<Product, "price">) => (p.price > 0 ? `$${p.price % 1 ? p.price.toFixed(2) : p.price}` : "Free");
 export const productPath = (p: Pick<Product, "slug">) => `/shop/${p.slug}`;

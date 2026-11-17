@@ -66,10 +66,14 @@ export default function ShopEditor({ initial, orders: initialOrders, guides }: {
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12 }}>
                   <label>Title<input type="text" value={p.title} onChange={(e) => up(i, { title: e.target.value })} /></label>
                   <label>Type<select value={p.kind} onChange={(e) => up(i, { kind: e.target.value })}>{PRODUCT_KINDS.map((k) => <option key={k}>{k}</option>)}</select></label>
-                  <label>Price <span className="hint">0 = free download</span><input type="number" min={0} step="1" value={p.price} onChange={(e) => up(i, { price: Number(e.target.value) || 0 })} /></label>
-                  <label>Was <span className="hint">Optional, crossed out</span><input type="number" min={0} step="1" value={p.was || ""} onChange={(e) => up(i, { was: Number(e.target.value) || undefined })} /></label>
+                  <label>Price <span className="hint">0 = free download</span><input type="number" min={0} step="0.01" value={p.price} onChange={(e) => up(i, { price: Number(e.target.value) || 0 })} /></label>
+                  <label>Was <span className="hint">Optional, crossed out</span><input type="number" min={0} step="0.01" value={p.was || ""} onChange={(e) => up(i, { was: Number(e.target.value) || undefined })} /></label>
                   <label>Status<select value={p.status} onChange={(e) => up(i, { status: e.target.value as Product["status"] })}><option value="live">Live: people can buy it</option><option value="soon">Coming soon: collect a waitlist</option><option value="hidden">Hidden</option></select></label>
                   <label>Length <span className="hint">e.g. 10 pages</span><input type="text" value={p.pages || ""} onChange={(e) => up(i, { pages: e.target.value })} /></label>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12 }}>
+                  <label>Store link <span className="hint">Optional. Sold on Amazon? Paste the link and the button goes there.</span><input type="url" placeholder="https://www.amazon.com/dp/..." value={p.buyUrl || ""} onChange={(e) => up(i, { buyUrl: e.target.value || undefined })} /></label>
+                  <label>Free extras link <span className="hint">Optional, e.g. /bloom-again</span><input type="text" value={p.extrasUrl || ""} onChange={(e) => up(i, { extrasUrl: e.target.value || undefined })} /></label>
                 </div>
                 <label>One-line description<input type="text" value={p.subtitle} onChange={(e) => up(i, { subtitle: e.target.value })} /></label>
                 <label>Description <span className="hint">Leave a blank line between paragraphs</span><textarea rows={5} value={p.description} onChange={(e) => up(i, { description: e.target.value })} /></label>
