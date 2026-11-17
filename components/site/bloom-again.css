@@ -1,0 +1,15 @@
+/* Bloom Again journal companion */
+.ba-hero { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 48px; align-items: center; }
+.ba-cover { width: 100%; max-width: 320px; height: auto; justify-self: center; border-radius: 4px 10px 10px 4px; box-shadow: 0 24px 48px rgba(23, 38, 30, .28), 0 4px 10px rgba(23, 38, 30, .18); transform: rotate(2deg); }
+.ba-part + .ba-part { margin-top: 36px; }
+.ba-part-name { font-family: var(--display); color: var(--rust); margin: 0 0 14px; }
+.ba-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.ba-practice { scroll-margin-top: 110px; }
+.ba-practice:target { outline: 3px solid var(--gold); outline-offset: 2px; }
+.ba-dl { text-decoration: none; color: inherit; transition: transform .15s ease; }
+.ba-dl:hover { transform: translateY(-2px); }
+.ba-link { margin-top: auto; font-weight: 600; color: var(--rust, #854327); }
+@media (max-width: 820px) {
+  .ba-hero, .ba-grid { grid-template-columns: minmax(0, 1fr); }
+  .ba-cover { max-width: 220px; transform: none; }
+}

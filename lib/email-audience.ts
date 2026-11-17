@@ -2,6 +2,7 @@ import "server-only";
 import { listClients } from "./data";
 import { listLeads } from "./leads";
 import { listWaitlist } from "./waitlist";
+import { listReaders } from "./bloom-again";
 import { eventSummaries } from "./ledger";
 import { firstName } from "./format";
 
@@ -18,7 +19,7 @@ const person = (name: string, email: string, tag: string, first?: string): Perso
 
 /** Everyone you can email, grouped the ways you'd want to reach them */
 export async function audiences(): Promise<Audience[]> {
-  const [clients, leads, waitlist, events] = await Promise.all([listClients(), listLeads(), listWaitlist(), eventSummaries()]);
+  const [clients, leads, waitlist, events, readers] = await Promise.all([listClients(), listLeads(), listWaitlist(), eventSummaries(), listReaders()]);
   const live = clients.filter((c) => c.status !== "archived");
   const full = live.filter((c) => c.kind !== "guest" && (c.status === "active" || c.status === "completed"));
   const guests = live.filter((c) => c.kind === "guest");
@@ -37,10 +38,11 @@ export async function audiences(): Promise<Audience[]> {
     { id: "clients", label: "Active clients", hint: "Clients with a full portal who are active or completed.", people: dedupe(full.map((c) => person(c.name, c.email, "Client", c.contactName ? firstName(c.contactName) : undefined))) },
     { id: "guests", label: "All event guests", hint: "Everyone with a guest pass.", people: dedupe(guests.map((c) => person(c.name, c.email, "Guest"))) },
     { id: "leads", label: "Leads: new and contacted", hint: "Inquiries, guidebook requests, and event guests who aren't clients yet.", people: dedupe(openLeads.map((l) => person(l.name, l.email, "Lead"))) },
+    { id: "bloomagain", label: "Bloom Again readers", hint: "Everyone who joined the journal's 30-day follow-along.", people: dedupe(readers.map((r) => person(r.name, r.email, "Reader"))) },
     { id: "waitlist", label: "Wellness Library waitlist", hint: "Everyone still waiting or invited.", people: dedupe(waitlist.filter((w) => w.status !== "joined").map((w) => person(w.name, w.email, "Waitlist"))) },
   );
-  const everyone = dedupe([...full.map((c) => person(c.name, c.email, "Client", c.contactName ? firstName(c.contactName) : undefined)), ...guests.map((c) => person(c.name, c.email, "Guest")), ...leads.filter((l) => l.status !== "closed").map((l) => person(l.name, l.email, "Lead")), ...waitlist.map((w) => person(w.name, w.email, "Waitlist"))]);
-  out.push({ id: "everyone", label: "Everyone", hint: "All clients, guests, leads (except closed), and the waitlist, each address once.", people: everyone });
+  const everyone = dedupe([...full.map((c) => person(c.name, c.email, "Client", c.contactName ? firstName(c.contactName) : undefined)), ...guests.map((c) => person(c.name, c.email, "Guest")), ...leads.filter((l) => l.status !== "closed").map((l) => person(l.name, l.email, "Lead")), ...waitlist.map((w) => person(w.name, w.email, "Waitlist")), ...readers.map((r) => person(r.name, r.email, "Reader"))]);
+  out.push({ id: "everyone", label: "Everyone", hint: "All clients, guests, leads (except closed), the waitlist, and Bloom Again readers, each address once.", people: everyone });
   return out;
 }
 

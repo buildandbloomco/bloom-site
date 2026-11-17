@@ -4,6 +4,7 @@ import { getPlan, savePlan } from "@/lib/workspace";
 import { emailReady, sendEmail, sessionMinutes, whenText } from "@/lib/invite";
 import { renderEmail } from "@/lib/email-template";
 import { emailBrand } from "@/lib/email";
+import { sendFollowAlong } from "@/lib/bloom-again";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,10 @@ export async function GET(req: Request) {
   const secret = process.env.CRON_SECRET;
   if (!secret || req.headers.get("authorization") !== `Bearer ${secret}`) return new Response("Unauthorized", { status: 401 });
   if (!emailReady()) return Response.json({ ok: true, sent: 0, note: "Email is not set up, so no reminders went out." });
+
+  const origin0 = (process.env.SITE_URL || new URL(req.url).origin).replace(/\/$/, "");
+  // Bloom Again readers get their next daily note
+  const bloomAgain = await sendFollowAlong(origin0).catch(() => ({ sent: 0, failed: -1 }));
 
   const today = nowET().date;
   const t = new Date(`${today}T12:00:00Z`);
@@ -48,5 +53,5 @@ export async function GET(req: Request) {
     }
     if (changed) await savePlan(plan);
   }
-  return Response.json({ ok: true, date: tomorrow, sent, failed });
+  return Response.json({ ok: true, date: tomorrow, sent, failed, bloomAgain });
 }
