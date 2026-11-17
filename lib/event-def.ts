@@ -254,7 +254,7 @@ export const RESET_CIRCLE: EventOffer = {
   headline: "The Reset Circle: a first quarter reset",
   details: "Saturday, January 16, 2027 · 10:00 AM to 4:00 PM · Peace on the Pond",
   endsAt: "2027-01-15T18:00:00-05:00",
-  intro: "Start the new year slowly, on purpose. A quiet day at Peace on the Pond to rest, reconnect with yourself and other women, let go of what last year asked of you, and leave rooted in your one priority for the first quarter. Built around the Collective Connection Experience, with a sound bath, a mirror affirmation practice, and take-home gifts for every guest. Low pressure, no experience needed. Full itinerary coming soon.",
+  intro: "Start the new year slowly, on purpose. A quiet day on the 10-acre Peace on the Pond estate to rest, reconnect with yourself and other women, let go of what last year asked of you, and leave rooted in your one priority for the first quarter. Built around the Collective Connection Experience, with a sound bath, a mirror affirmation practice, and take-home gifts for every guest. Low pressure, no experience needed. Full itinerary coming soon.",
   open: true,
   active: true,
   tiers: [{
@@ -269,6 +269,7 @@ export const RESET_CIRCLE: EventOffer = {
       "The Right Yes Circle: hear it, clear it, say it. Name the yes you're carrying into 2027, and the no that makes room for it",
       "Your Bloom Check and a One Priority plan for the first 90 days of 2027, built around your right yes",
       "Lunch, warm drinks, and time to rest",
+      "Free time to enjoy the 10-acre Peace on the Pond estate and its amenities",
       "A take-home gift: Mindful Bloom Reset, an herbal tea blend made by Jadon, plus The Right Yes, a 21-day guide from trying to doing, to keep going at home",
       "Free access to the Wellness Library for 90 days after the event: guided audio, journaling, and readings",
       "A free 20-minute one-on-one follow-up call after the event",
