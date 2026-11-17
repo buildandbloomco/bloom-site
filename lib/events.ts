@@ -112,6 +112,13 @@ export async function listEvents(): Promise<StoredEvent[]> {
       await kv().set("bb:events:mig:workshop1", true);
       return next;
     }
+    // One time: Reset Circle gets the sound bath and mirror affirmation wording
+    if (!(await kv().get("bb:events:mig:mirror1"))) {
+      const next = saved.map((e) => (e.slug === "reset-circle" ? { ...e, intro: RESET_CIRCLE.intro, tiers: e.tiers.map((t) => (t.id === "seat" ? { ...t, includes: RESET_CIRCLE.tiers[0].includes } : t)) } : e));
+      await kv().set(KEY, next); saved.splice(0, saved.length, ...next);
+      await kv().set("bb:events:mig:mirror1", true);
+      await kv().set("bb:events:mig:soundbowl1", true);
+    }
     // One time: add the sound bowl meditation and the take-home gift to the Reset Circle
     if (!(await kv().get("bb:events:mig:soundbowl1"))) {
       const next = saved.map((e) => (e.slug === "reset-circle" ? { ...e, intro: RESET_CIRCLE.intro, tiers: e.tiers.map((t) => (t.id === "seat" ? { ...t, includes: RESET_CIRCLE.tiers[0].includes } : t)) } : e));
