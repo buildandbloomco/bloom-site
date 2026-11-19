@@ -21,7 +21,7 @@ export default async function Home() {
             <span className="rule" aria-hidden="true" />
             <p className="lede">
               Build &amp; Bloom Collective redesigns the systems, schedules, and structures that quietly burn people out, so
-              mental health practices, helping organizations, Black entrepreneurs, and community organizations can do their best work and last.
+              mental health practices, helping organizations, entrepreneurs, small businesses, and community organizations can do their best work and last.
             </p>
             <div className="row cta" style={{ marginTop: 32 }}>
               <a className="btn btn-primary" {...bookProps(s)}>Book a free consult</a>
@@ -66,8 +66,8 @@ export default async function Home() {
             </article>
             <article className="card lane">
               <span className="tag rust" style={{ alignSelf: "flex-start" }}>Community</span>
-              <h3>Black entrepreneurs, community organizations &amp; events</h3>
-              <p className="muted">Founders, collectives, and community-rooted organizations building sustainable, culturally grounded work.</p>
+              <h3>Entrepreneurs, small businesses, community organizations &amp; events</h3>
+              <p className="muted">Founders, small businesses, collectives, and community-rooted organizations building sustainable, culturally grounded work.</p>
               <ul>
                 <li>Strategy &amp; capacity consulting</li>
                 <li>Operations, admin systems &amp; documentation</li>

@@ -6,7 +6,7 @@ import type { Service } from "@/lib/types";
 
 export const metadata = {
   title: "Services",
-  description: "Organizational wellness services for mental health practices and helping organizations, and strategy, operations, and event support for Black entrepreneurs and community organizations.",
+  description: "Organizational wellness services for mental health practices and helping organizations, and strategy, operations, and event support for entrepreneurs, small businesses, and community organizations.",
 };
 
 /** Core services are priced at the consult. A la carte prices show for both kinds of client. */
@@ -92,7 +92,7 @@ export default async function Services() {
         <section className="section alt" id="business">
           <div className="wrap">
             <div className="section-head">
-              <p className="eyebrow">For Black entrepreneurs, community organizations &amp; events</p>
+              <p className="eyebrow">For entrepreneurs, small businesses, community organizations &amp; events</p>
               <h2>Strategy, community &amp; events</h2>
             </div>
             <div className="grid-2">{business.map((x) => <ServiceCard key={x.id} s={x} lane="business" />)}</div>

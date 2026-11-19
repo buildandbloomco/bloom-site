@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     template: "%s · Build & Bloom Collective",
   },
   description:
-    "Organizational wellness and strategy rooted in the Psychology of Care. We help mental health practices, helping organizations, Black entrepreneurs, and community organizations build systems, programs, and gatherings that sustain people.",
+    "Organizational wellness and strategy rooted in the Psychology of Care. We help mental health practices, helping organizations, entrepreneurs, small businesses, and community organizations build systems, programs, and gatherings that sustain people.",
   icons: { icon: "/logo.png" },
   openGraph: {
     title: "Build & Bloom Collective",

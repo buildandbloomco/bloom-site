@@ -57,9 +57,12 @@ export default async function About() {
           </p>
           <p>
             Through Build &amp; Bloom Collective, Jadon partners with mental health practices and helping organizations to
-            reduce burnout at the source, and with Black entrepreneurs, community organizations, and event hosts to build
+            reduce burnout at the source, and with entrepreneurs, small businesses, community organizations, and event hosts to build
             sustainable, culturally grounded work and gatherings. The signature lens is the Psychology of Care: treating
             infrastructure (schedules, workflows, supervision, documentation) as an act of care for the people inside it.
+          </p>
+          <p>
+            Build &amp; Bloom Collective is a Black-owned, woman-owned business based in Atlanta, Georgia.
           </p>
         </div>
       </section>

@@ -40,7 +40,7 @@ export default function SiteFooter({ s }: { s: Settings }) {
           </div>
         </div>
         <p className="tiny" style={{ color: "var(--on-dark-3)" }}>
-          © {new Date().getFullYear()} {s.brandName}. Rooted in Justice. Built for Care.
+          © {new Date().getFullYear()} {s.brandName} · Black-owned and woman-owned. Rooted in Justice. Built for Care.
         </p>
       </div>
     </footer>
