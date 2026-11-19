@@ -42,7 +42,7 @@ async function sendDay(r: Reader, n: number, origin: string): Promise<boolean> {
   const last = n === DAYS.length;
   const { html, text } = renderEmail(brand, {
     preheader: d.preheader,
-    eyebrow: `Bloom Again · Day ${n} of ${DAYS.length}`,
+    eyebrow: `Set It Down · Day ${n} of ${DAYS.length}`,
     heading: d.heading,
     body: `Hi ${firstName(r.name) || "friend"},\n\n${d.body}`,
     list: [`Today in your journal: ${d.today}`],

@@ -22,6 +22,13 @@ export async function listProducts(): Promise<Product[]> {
     await kv().set(PK, list);
     await kv().set("bb:shop:mig:bloomagain1", 1);
   }
+  // One-time: the journal was renamed from Bloom Again to Set It Down. Keeps any edits made in admin.
+  if (!(await kv().get("bb:shop:mig:setitdown1"))) {
+    const rn = (t?: string) => t?.replace(/Bloom Again/g, "Set It Down");
+    list = list.map((p) => (p.id === BLOOM_AGAIN.id ? { ...p, slug: BLOOM_AGAIN.slug, title: BLOOM_AGAIN.title, subtitle: rn(p.subtitle) ?? p.subtitle, description: rn(p.description) ?? p.description } : p));
+    await kv().set(PK, list);
+    await kv().set("bb:shop:mig:setitdown1", 1);
+  }
   return list;
 }
 export async function saveProducts(p: Product[]) { await kv().set(PK, p); }

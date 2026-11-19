@@ -38,11 +38,11 @@ export async function audiences(): Promise<Audience[]> {
     { id: "clients", label: "Active clients", hint: "Clients with a full portal who are active or completed.", people: dedupe(full.map((c) => person(c.name, c.email, "Client", c.contactName ? firstName(c.contactName) : undefined))) },
     { id: "guests", label: "All event guests", hint: "Everyone with a guest pass.", people: dedupe(guests.map((c) => person(c.name, c.email, "Guest"))) },
     { id: "leads", label: "Leads: new and contacted", hint: "Inquiries, guidebook requests, and event guests who aren't clients yet.", people: dedupe(openLeads.map((l) => person(l.name, l.email, "Lead"))) },
-    { id: "bloomagain", label: "Bloom Again readers", hint: "Everyone who joined the journal's 30-day follow-along.", people: dedupe(readers.map((r) => person(r.name, r.email, "Reader"))) },
+    { id: "bloomagain", label: "Set It Down readers", hint: "Everyone who joined the journal's 30-day follow-along.", people: dedupe(readers.map((r) => person(r.name, r.email, "Reader"))) },
     { id: "waitlist", label: "Wellness Library waitlist", hint: "Everyone still waiting or invited.", people: dedupe(waitlist.filter((w) => w.status !== "joined").map((w) => person(w.name, w.email, "Waitlist"))) },
   );
   const everyone = dedupe([...full.map((c) => person(c.name, c.email, "Client", c.contactName ? firstName(c.contactName) : undefined)), ...guests.map((c) => person(c.name, c.email, "Guest")), ...leads.filter((l) => l.status !== "closed").map((l) => person(l.name, l.email, "Lead")), ...waitlist.map((w) => person(w.name, w.email, "Waitlist")), ...readers.map((r) => person(r.name, r.email, "Reader"))]);
-  out.push({ id: "everyone", label: "Everyone", hint: "All clients, guests, leads (except closed), the waitlist, and Bloom Again readers, each address once.", people: everyone });
+  out.push({ id: "everyone", label: "Everyone", hint: "All clients, guests, leads (except closed), the waitlist, and Set It Down readers, each address once.", people: everyone });
   return out;
 }
 

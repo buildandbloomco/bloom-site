@@ -4,8 +4,8 @@ import "@/components/site/wellness.css";
 import "@/components/site/bloom-again.css";
 
 export const metadata = {
-  title: "Bloom Again: Journal Companion",
-  description: "The free companion to Bloom Again, the guided journal by Jadon Thomas: a 30-day email follow-along, the practices step by step, and printable pages.",
+  title: "Set It Down: Journal Companion",
+  description: "The free companion to Set It Down, the guided journal by Jadon Thomas: a 30-day email follow-along, the practices step by step, and printable pages.",
 };
 
 const PARTS = ["Rest", "Reconnect", "Release", "Root"] as const;
@@ -22,7 +22,7 @@ export default function BloomAgain() {
       <section className="page-hero wl-hero">
         <div className="wrap ba-hero">
           <div>
-            <p className="eyebrow">The Bloom Again companion</p>
+            <p className="eyebrow">The Set It Down companion</p>
             <h1 style={{ marginTop: 16 }}>
               <span className="ink">You don&rsquo;t have to</span> do this alone.
             </h1>
@@ -35,7 +35,7 @@ export default function BloomAgain() {
               <a className="btn btn-ghost" href="#practices">The practices</a>
             </div>
           </div>
-          <img className="ba-cover" src="/bloom-again/cover.jpg" alt="Bloom Again, a guided journal by Jadon Thomas" width={600} height={900} />
+          <img className="ba-cover" src="/bloom-again/cover.jpg" alt="Set It Down, a guided journal by Jadon Thomas" width={600} height={900} />
         </div>
       </section>
 
@@ -129,7 +129,7 @@ export default function BloomAgain() {
       <section className="section">
         <div className="wrap narrow">
           <p className="small muted" style={{ textAlign: "center", margin: 0 }}>
-            Bloom Again is a tool for reflection and self-care, not a substitute for therapy or medical care. If you&rsquo;re in crisis, call or text 988 in the United States, any time.
+            Set It Down is a tool for reflection and self-care, not a substitute for therapy or medical care. If you&rsquo;re in crisis, call or text 988 in the United States, any time.
           </p>
         </div>
       </section>

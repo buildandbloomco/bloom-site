@@ -79,8 +79,8 @@ export const DEFAULT_PRODUCTS: Product[] = [
 ];
 
 export const BLOOM_AGAIN: Product = {
-  id: "bloom-again", slug: "bloom-again", title: "Bloom Again", subtitle: "A guided journal to rest, reconnect, release, and root, for the woman ready to come back to herself.",
-  description: "You have been carrying so much, for so long. This is where you set it down.\n\nBloom Again is a guided journal for women who pour into their families, their work, and their communities, and are ready to come back to themselves. It walks you gently through four seasons of renewal: Rest, Reconnect, Release, and Root.\n\nEvery copy comes with a free companion online: a 30-day follow-along by email, every practice step by step, and printable pages.\n\nGo at your own pace. There is no falling behind here. Just you, coming home.",
+  id: "bloom-again", slug: "set-it-down", title: "Set It Down", subtitle: "A guided journal to rest, reconnect, release, and root, for the woman ready to come back to herself.",
+  description: "You have been carrying so much, for so long. This is where you set it down.\n\nSet It Down is a guided journal for women who pour into their families, their work, and their communities, and are ready to come back to themselves. It walks you gently through four seasons of renewal: Rest, Reconnect, Release, and Root.\n\nEvery copy comes with a free companion online: a 30-day follow-along by email, every practice step by step, and printable pages.\n\nGo at your own pace. There is no falling behind here. Just you, coming home.",
   price: 14.99, kind: "Journal", cover: "/bloom-again/cover.jpg", file: "",
   includes: ["48 guided prompts across four seasons", "8 simple practices for calm and clarity", "The Bloom Check self-assessment and a burnout warning signs checklist", "30 daily check-ins and 8 weekly reflections", "A monthly mood tracker and affirmations for every season", "Free 30-day email follow-along and printables"],
   pages: "144-page paperback", status: "soon", featured: true, extrasUrl: "/bloom-again",

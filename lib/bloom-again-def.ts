@@ -1,4 +1,4 @@
-/** Bloom Again, the guided journal: the companion page's practices and the 30-day follow-along emails.
+/** Set It Down (first published as Bloom Again), the guided journal: the companion page's practices and the 30-day follow-along emails.
  *  Shared by the page, the signup route, and the daily cron. */
 
 export interface Practice {
@@ -27,7 +27,7 @@ export interface DayEmail { subject: string; preheader: string; heading: string;
 /** One short note a day, matched to the journal. Day 1 goes out the moment someone signs up. */
 export const DAYS: DayEmail[] = [
   // Week 1: Rest
-  { subject: "Day 1: You made it to the first page", preheader: "Start with the Bloom Check. No wrong answers.", heading: "Welcome to Bloom Again",
+  { subject: "Day 1: You made it to the first page", preheader: "Start with the Bloom Check. No wrong answers.", heading: "Welcome to Set It Down",
     body: "I'm so glad you're here. For the next 30 days, I'll send you one short note each morning to walk beside you as you journal.\n\nToday, start at the very beginning: **the Bloom Check**. Circle a number for each area of your life. Be honest, not hard on yourself. This is a starting point, not a grade.\n\nThen fill in your first daily check-in. Five minutes is plenty.",
     today: "The Bloom Check and Day 01" },
   { subject: "Day 2: What are you carrying?", preheader: "Get it out of your head and onto the page.", heading: "Name what you're carrying",
